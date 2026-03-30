@@ -1,0 +1,21 @@
+# Pliki systemowe
+.DS_Store
+Thumbs.db
+
+*.exe
+*.o
+*.obj
+*.class
+*.out
+build/
+bin/
+
+.vscode/
+.idea/
+*.swp
+
+__pycache__/
+*.pyc
+venv/
+
+.env
