@@ -1,0 +1,17 @@
+go/server/GameSession.class
+go/logic/GameMechanics.class
+go/Main.class
+go/client/TranslateCoordinate.class
+go/client/NetworkConnection.class
+go/ui/ConsoleView.class
+go/ui/fx/MainFx.class
+go/ui/fx/GUIView.class
+go/client/GoClient.class
+go/logic/Board.class
+go/ui/fx/BoardCanvas.class
+go/logic/Protocol.class
+go/ui/fx/SidePanel.class
+go/logic/Direction.class
+go/ui/GameView.class
+go/logic/Stone.class
+go/server/GoServer.class

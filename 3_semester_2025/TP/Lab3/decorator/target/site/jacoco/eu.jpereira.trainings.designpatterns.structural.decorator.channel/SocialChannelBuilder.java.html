@@ -1,0 +1,166 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="pl"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>SocialChannelBuilder.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">decorator</a> &gt; <a href="index.source.html" class="el_package">eu.jpereira.trainings.designpatterns.structural.decorator.channel</a> &gt; <span class="el_source">SocialChannelBuilder.java</span></div><h1>SocialChannelBuilder.java</h1><pre class="source lang-java linenums">/**
+ * Copyright 2011 Joao Miguel Pereira
+ *
+ *  Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
+ *  you may not use this file except in compliance with the License.
+ *  You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *  Unless required by applicable law or agreed to in writing, software
+ *  distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+ *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  See the License for the specific language governing permissions and
+ *  limitations under the License.
+ */
+package eu.jpereira.trainings.designpatterns.structural.decorator.channel;
+
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Stack;
+
+import eu.jpereira.trainings.designpatterns.structural.decorator.channel.decorator.MessageTruncator;
+import eu.jpereira.trainings.designpatterns.structural.decorator.channel.decorator.SocialChannelDecorator;
+
+/**
+ * @author jpereira
+ * 
+ */
+public abstract class SocialChannelBuilder {
+
+	private Map&lt;String, SocialChannel&gt; cachedChannels;
+	
+	// Map &lt;name
+	private Map&lt;String, Class&lt;? extends SocialChannel&gt;&gt; pluggedChannels;
+
+	private Stack&lt;SocialChannelDecorator&gt; decorators;
+	
+	//private List&lt;SocialChannelDecorator&gt; decorators;
+	
+	
+<span class="fc" id="L41">	public SocialChannelBuilder() {</span>
+<span class="fc" id="L42">		this.pluggedChannels = createChannelsList();</span>
+<span class="fc" id="L43">		this.cachedChannels = createChachedChannedlList();</span>
+<span class="fc" id="L44">		this.decorators = createDecoratorStack();</span>
+<span class="fc" id="L45">		this.addDefaultChannels();</span>
+<span class="fc" id="L46">	}</span>
+
+	/**
+	 * Build a default list off channels. Others can be plugged either by
+	 * extending this class and calling the method plugChannel() in constructor,
+	 * for example;
+	 */
+	protected abstract void addDefaultChannels();
+
+	/**
+	 * @return
+	 */
+	protected Map&lt;String, Class&lt;? extends SocialChannel&gt;&gt; createChannelsList() {
+<span class="fc" id="L59">		return new HashMap&lt;String, Class&lt;? extends SocialChannel&gt;&gt;();</span>
+	}
+
+	/**
+	 * Factory method
+	 */
+	protected Map&lt;String, SocialChannel&gt; createChachedChannedlList() {
+<span class="fc" id="L66">		return new HashMap&lt;String, SocialChannel&gt;();</span>
+
+	}
+
+	/**
+	 * Find an appropriate channel according to the properties
+	 * 
+	 * @param channelProperties
+	 * @return
+	 */
+	public SocialChannel buildChannel(SocialChannelProperties channelProperties) {
+
+		// lookup channel by name
+<span class="fc" id="L79">		SocialChannel instance = null;</span>
+
+<span class="fc" id="L81">		String channelName = channelProperties.getProperty(SocialChannelPropertyKey.NAME);</span>
+<span class="pc bpc" id="L82" title="1 of 4 branches missed.">		if (channelName != null &amp;&amp; this.pluggedChannels.containsKey(channelName)) {</span>
+
+			// Try the cache
+<span class="fc" id="L85">			instance = this.cachedChannels.get(channelName);</span>
+<span class="fc bfc" id="L86" title="All 2 branches covered.">			if (instance == null) {</span>
+<span class="fc" id="L87">				instance = instantiateChannel(this.pluggedChannels.get(channelName));</span>
+<span class="fc" id="L88">				this.cachedChannels.put(channelName, instance);</span>
+			}
+
+		}
+
+<span class="fc" id="L93">		return instance;</span>
+	}
+
+	/**
+	 * @param claszz
+	 * @return
+	 */
+	private SocialChannel instantiateChannel(Class&lt;? extends SocialChannel&gt; claszz) {
+<span class="fc" id="L101">		SocialChannel instance = null;</span>
+		try {
+<span class="fc" id="L103">			instance = claszz.newInstance();</span>
+<span class="pc" id="L104">		} catch (InstantiationException e) {</span>
+			// Just log it
+<span class="nc" id="L106">			e.printStackTrace();</span>
+<span class="nc" id="L107">		} catch (IllegalAccessException e) {</span>
+			// just log it
+<span class="nc" id="L109">			e.printStackTrace();</span>
+		}
+<span class="fc" id="L111">		return instance;</span>
+	}
+
+	/**
+	 * @param put
+	 * @param clazz
+	 */
+	protected void plugChannel(SocialChannelProperties put, Class&lt;? extends SocialChannel&gt; clazz) {
+<span class="fc" id="L119">		this.pluggedChannels.put(put.getProperty(SocialChannelPropertyKey.NAME), clazz);</span>
+
+<span class="fc" id="L121">	}</span>
+
+
+	/**
+	 * @return
+	 */
+	protected Stack&lt;SocialChannelDecorator&gt; createDecoratorStack() {
+<span class="fc" id="L128">		return new Stack&lt;SocialChannelDecorator&gt;();</span>
+	}
+
+	
+	/**
+	 * @param messageTruncator
+	 * @return
+	 */
+	public SocialChannelBuilder with(SocialChannelDecorator decorator) {
+<span class="fc" id="L137">		this.decorators.push(decorator);</span>
+<span class="fc" id="L138">		return this;</span>
+	}
+
+	/**
+	 * @param props 
+	 * @return
+	 */
+	public SocialChannel getDecoratedChannel(SocialChannelProperties props) {
+
+<span class="fc" id="L147">		SocialChannel aSocialChannel = buildChannel(props);</span>
+		
+<span class="fc bfc" id="L149" title="All 2 branches covered.">		while ( !this.decorators.isEmpty() ) {</span>
+<span class="fc" id="L150">			SocialChannelDecorator aDecorator = this.decorators.pop();</span>
+<span class="fc" id="L151">			aDecorator.setDecoratedSocialChannel(aSocialChannel);</span>
+<span class="fc" id="L152">			aSocialChannel = aDecorator;</span>
+		}
+<span class="fc" id="L154">		return aSocialChannel;</span>
+	}
+
+	/**
+	 * @param channel
+	 * @return
+	 */
+	public SocialChannelBuilder andWith(MessageTruncator channel) {
+<span class="fc" id="L162">		return with(channel);</span>
+	}
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

@@ -1,0 +1,168 @@
+@startuml
+
+skinparam classAttributeIconSize 0
+skinparam monochrome true
+
+package "go" {
+    class Main {
+        + {static} main(args: String[]): void
+        - {static} isPortAvailable(): boolean
+    }
+}
+
+package "go.client" {
+    class GoClient {
+        - board: Board
+        - gameView: GameView
+        - blackCaptures: int
+        - whiteCaptures: int
+        - network: NetworkConnection
+        - myColor: Stone
+        + {static} main(args: String[]): void
+        - connect(): void
+        - playGame(playerId: int): void
+    }
+
+    class NetworkConnection {
+        - socket: Socket
+        - fromServer: DataInputStream
+        - toServer: DataOutputStream
+        + connect(): void
+        + getPlayerId(): int
+        + waitForSecondPlayer(): void
+        + sendPassMessage(): void
+        + sendSurrenderMessage(): void
+        + sendQuitMessage(): void
+        + sendSpaceInformation(coordinates: int[]): void
+        + readMessage(): int
+        + receiveBoardFromServer(board: Board): void
+        + getCaptures(): int[]
+        + getCoordinates(): int[]
+    }
+
+    class TranslateCoordinate {
+        + {static} translate(input: String): int[]
+        + {static} invertTranslate(number: int): char
+    }
+}
+
+package "go.server" {
+    class GoServer {
+        + {static} main(args: String[]): void
+        + GoServer()
+    }
+
+    class GameSession implements Runnable {
+        - p1Socket: Socket
+        - p2Socket: Socket
+        - board: Board
+        - mechanics: GameMechanics
+        + GameSession(p1: Socket, p2: Socket)
+        + run(): void
+    }
+}
+
+package "go.logic" {
+    class Board {
+        - size: int
+        + fields: Stone[][]
+        + Board(size: int)
+        + getSize(): int
+        + setField(wspX: int, wspY: int, stone: Stone): void
+        + getField(wspX: int, wspY: int): Stone
+        + isFieldOnBoard(x: int, y: int): boolean
+    }
+
+    class GameMechanics {
+        + blackCaptures: int
+        + whiteCaptures: int
+        + IsMovePossible(board: Board, x: int, y: int, color: Stone): boolean
+        - AreNeighboursFieldsFree(board: Board, x: int, y: int): boolean
+        - CheckCaptures(board: Board, x: int, y: int, color: Stone): void
+    }
+
+    class Protocol {
+        + {static} Port: int = 8000
+        + {static} Player1: int = 1
+        + {static} Player2: int = 2
+        + {static} MOVE: int = 10
+        + {static} PASS: int = 11
+        + {static} SURRENDER: int = 12
+        + {static} QUIT: int = 13
+        + {static} GAME_OVER: int = 14
+        + {static} INVALID_MOVE: int = 15
+        + {static} BOARD_STATE: int = 16
+        + {static} CAPTURES: int = 17
+        + {static} sendBoard(board: Board, out: DataOutputStream): void
+        + {static} receiveBoard(board: Board, in: DataInputStream): void
+    }
+
+    enum Stone {
+        BLACK
+        WHITE
+        EMPTY
+        + opponent(): Stone
+    }
+
+    enum Direction {
+        UP(0, -1)
+        LEFT(-1, 0)
+        RIGHT(1, 0)
+        DOWN(0, 1)
+        - dx: int
+        - dy: int
+        + getDx(): int
+        + getDy(): int
+    }
+}
+
+package "go.ui" {
+    interface GameView {
+        + showBoard(board: Board): void
+        + showMessage(message: String): void
+        + getInput(): String
+    }
+
+    class ConsoleView implements GameView {
+        - scanner: Scanner
+        + ConsoleView()
+        + showBoard(board: Board): void
+        + showMessage(message: String): void
+        + getInput(): String
+    }
+}
+
+' Relacje
+Main ..> GoServer : uruchamia
+Main ..> GoClient : uruchamia
+Main ..> Protocol : używa
+
+GoClient --> Board : ma
+GoClient --> GameView : używa
+GoClient --> NetworkConnection : ma
+GoClient --> Stone : używa
+GoClient ..> TranslateCoordinate : używa
+GoClient ..> Protocol : używa
+
+NetworkConnection ..> Protocol : używa
+NetworkConnection ..> Board : wysyła/odbiera
+
+GoServer ..> GameSession : tworzy
+GoServer ..> Protocol : używa
+
+GameSession --> Board : ma
+GameSession --> GameMechanics : ma
+GameSession ..> Protocol : używa
+GameSession ..> Stone : używa
+
+GameMechanics ..> Board : modyfikuje
+GameMechanics ..> Stone : używa
+GameMechanics ..> Direction : używa
+
+Board --> Stone : zawiera
+
+ConsoleView ..|> GameView : implementuje
+ConsoleView ..> Board : wyświetla
+ConsoleView ..> Stone : używa
+
+@enduml

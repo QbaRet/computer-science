@@ -1,0 +1,13 @@
+GROUP,PACKAGE,CLASS,INSTRUCTION_MISSED,INSTRUCTION_COVERED,BRANCH_MISSED,BRANCH_COVERED,LINE_MISSED,LINE_COVERED,COMPLEXITY_MISSED,COMPLEXITY_COVERED,METHOD_MISSED,METHOD_COVERED
+decorator,eu.jpereira.trainings.designpatterns.structural.decorator,SocialPublisher,0,53,1,3,0,15,1,7,0,6
+decorator,eu.jpereira.trainings.designpatterns.structural.decorator.channel,FacebookChannel,0,13,0,0,0,3,0,2,0,2
+decorator,eu.jpereira.trainings.designpatterns.structural.decorator.channel,SocialChannelPropertyKey,0,14,0,0,0,2,0,1,0,1
+decorator,eu.jpereira.trainings.designpatterns.structural.decorator.channel,SocialChannelProperties,0,22,0,0,0,6,0,3,0,3
+decorator,eu.jpereira.trainings.designpatterns.structural.decorator.channel,TwitterChannel,0,13,0,0,0,3,0,2,0,2
+decorator,eu.jpereira.trainings.designpatterns.structural.decorator.channel,DefaultSocialChannelBuilder,0,31,0,0,0,5,0,2,0,2
+decorator,eu.jpereira.trainings.designpatterns.structural.decorator.channel,SocialChannelBuilder,7,116,1,7,3,32,1,13,0,10
+decorator,eu.jpereira.trainings.designpatterns.structural.decorator.channel,LinkedinChannel,0,13,0,0,0,3,0,2,0,2
+decorator,eu.jpereira.trainings.designpatterns.structural.decorator.channel.decorator,SocialChannelDecorator,0,7,0,0,0,3,0,2,0,2
+decorator,eu.jpereira.trainings.designpatterns.structural.decorator.channel.decorator,MessageTruncator,0,52,1,1,0,15,1,3,0,3
+decorator,eu.jpereira.trainings.designpatterns.structural.decorator.channel.decorator,URLAppender,0,41,1,1,0,14,1,3,0,3
+decorator,eu.jpereira.trainings.designpatterns.structural.decorator.channel.decorator,WordCensor,9,41,0,2,4,11,1,4,1,3
