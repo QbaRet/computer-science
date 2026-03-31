@@ -1,0 +1,289 @@
+zad2
+use library
+db.authors.insertOne({
+  "name": { "first": "J.R.R", "last": "Tolkien" },
+  "country": "UK",
+  "birth": new Date('Jan 3, 1892'),
+  "death": new Date('Sep 2, 1973')
+}) 
+db.authors.insertOne({
+"name":{"first": "Adam", "last" : "Mickiewicz"},
+"country":"Poland",
+"birth": new Date('Sep 24, 1798'),
+"death": new Date('Nov 26, 1855'),
+})
+db.authors.insertOne(
+{
+  "name": { "first": "Olga", "last": "Tokarczuk" },
+  "country": "Poland",
+  "birth": new Date('Jan 29, 1962'),
+ "death": null,
+})
+Na tym przykladzie widac, ze mozna wstawic osobe z data smierci null.
+db.authors.insertOne(
+{
+"name":{"first": "John", "last" : "Smith"},
+"country":"England",
+"birth": new Date('Oct 25, 1555'),
+"death": new Date('Feb 1, 1622'),
+})
+db.authors.find() - poznajemy id autorow
+db.books.insertOne({
+  "title": "Pan Tadeusz",
+  "isbn": "978-83-04-00445-0",
+  "publication_year": 1834,
+  "language": "Polish",
+  "author": ObjectId('695e17090ab75530b08de667'),
+  "publisher": {
+    "name": "Aleksander Jełowicki",
+    "country": "France"
+  }
+})
+db.books.insertMany([
+  {
+    "title": "Dziady cz. III",
+    "isbn": "978-83-73-27189-0",
+    "publication_year": 1832,
+    "language": "Polish",
+    "author": ObjectId('695e17090ab75530b08de667'),
+    "publisher": { "name": "Wydawnictwo Literackie", "country": "Poland" }
+  },
+  {
+    "title": "Konrad Wallenrod",
+    "isbn": "978-83-04-00123-0",
+    "publication_year": 1828,
+    "language": "Polish",
+    "author": ObjectId('695e17090ab75530b08de667'),
+    "publisher": { "name": "Wydawnictwo Ossolineum", "country": "Poland" }
+  }
+])
+db.books.insertMany([
+  {
+    "title": "The Hobbit",
+    "isbn": "978-0-261-10295-6",
+    "publication_year": 1937,
+    "language": "English",
+    "author": ObjectId('695e15cf0ab75530b08de666'),
+    "publisher": { "name": "George Allen & Unwin", "country": "UK" }
+  },
+  {
+    "title": "The Fellowship of the Ring",
+    "isbn": "978-0-261-10357-1",
+    "publication_year": 1954,
+    "language": "English",
+    "author": ObjectId('695e15cf0ab75530b08de666'),
+    "publisher": { "name": "George Allen & Unwin", "country": "UK" }
+  },
+  {
+    "title": "Bieguni",
+    "isbn": "978-83-08-03972-4",
+    "publication_year": 2007,
+    "language": "Polish",
+    "author": ObjectId('695e17760ab75530b08de668'),
+    "publisher": { "name": "Wydawnictwo Literackie", "country": "Poland" }
+  },
+  {
+    "title": "Księgi Jakubowe",
+    "isbn": "978-83-08-05448-2",
+    "publication_year": 2014,
+    "language": "Polish",
+    "author": ObjectId('695e17760ab75530b08de668'),
+    "publisher": { "name": "Wydawnictwo Literackie", "country": "Poland" }
+  },
+  {
+    "title": "A General History of Virginia",
+    "isbn": "0-123-45678-9",
+    "publication_year": 1624,
+    "language": "English",
+    "author": ObjectId('695e196a0ab75530b08de669'),
+    "publisher": { "name": "Michael Sparkes", "country": "England" }
+  },
+  {
+     "title": "The Two Towers",
+     "isbn": "978-0-261-10358-8",
+     "publication_year": 1954,
+     "language": "English",
+     "author": ObjectId('695e15cf0ab75530b08de666'),
+     "publisher": { "name": "George Allen & Unwin", "country": "UK" }
+   },
+   {
+     "title": "Prawiek i inne czasy",
+     "isbn": "978-83-08-04879-5",
+     "publication_year": 1996,
+     "language": "Polish",
+     "author": ObjectId('695e17760ab75530b08de668'),
+     "publisher": { "name": "Wydawnictwo Literackie", "country": "Poland" }
+   },
+   {
+     "title": "A Map of Virginia",
+     "isbn": "0-123-11111-1",
+     "publication_year": 1612,
+     "language": "English",
+     "author": ObjectId('695e196a0ab75530b08de669'),
+     "publisher": { "name": "Joseph Barnes", "country": "England" }
+   },
+   {
+     "title": "The True Travels",
+     "isbn": "0-123-22222-2",
+     "publication_year": 1630,
+     "language": "English",
+     "author": ObjectId('695e196a0ab75530b08de669'),
+     "publisher": { "name": "Thomas Slater", "country": "England" }
+   }
+])
+___________________________
+DODAWANIE RECENZJI
+db.reviews.insertMany([
+{
+"book" : ObjectId("695e1c2a0ab75530b08de66d"),
+"reviewer" : "Jan",
+"rating" : 5,
+"opinion" : "Najlepsza ksiazka w moim zyciu!"
+},
+{
+"book" : ObjectId("695e1c2a0ab75530b08de66d"),
+"reviewer" : "Michal",
+"rating" : 2,
+"opinion" : "Niestety zle mi sie czytalo"
+},
+{
+"book" : ObjectId("695e1c2a0ab75530b08de66d"),
+"reviewer" : "Andrzej",
+"rating" : 4,
+"opinion" : "Dobra produkcja"
+},
+])
+Dodatkowe dwie opinie jednego recenzenta:
+db.reviews.insertMany([
+  {
+    "book": ObjectId("695e1a000ab75530b08de66a"),
+    "reviewer": "Jan",
+    "rating": 5,
+    "opinion": "Klasyka, którą każdy powinien znać."
+  },
+  {
+    "book": ObjectId("695e1c2a0ab75530b08de66f"), 
+    "reviewer": "Jan",
+    "rating": 5,
+    "opinion": "Niesamowita konstrukcja powieści."
+  }
+])
+_________________________________
+Dodawanie nowego pola "awards"
+db.books.updateMany(
+ {}, 
+ { $set: { "genres": [] } } 
+)
+db.authors.updateMany(
+{},
+{$set: {"awards":[] } }
+)
+
+Dodawanie wartosci:
+db.authors.updateOne(
+{ _id: ObjectId("695e17760ab75530b08de668") }, 
+{ $push: { awards: { name: "Nagroda Nobla", year: 2018 } } }
+)
+
+db.books.updateOne(
+{_id: ObjectId("695e1c2a0ab75530b08de66d")},
+{ $push:{genres:"Fantasy"}}
+)
+
+PODSUMOWANIE:
+Jeśli za datę śmierci przyjmiemy null to system przyjmie to jako wartość, nie wyrzuci błędu i założy, że pole istnieje, ale nie ma przypisanej daty. 
+W przypadku pomyłki w nazwie pola system i tak zapisze dokument, ponieważ MongoDB jest bazą bezschematową. To znaczy, że pomyłka jest tylko z naszej perspektywy, ponieważ w bazie nigdzie nie narzucamy schematu.
+Wynika z tego także, że w jednej kolekcji mogą być dokumenty o różnych schematach.
+Możliwością, aby narzucić schemat dokumentu, jest użycie JSON Schema Validation, który pozwoli określić, które pola są wymagane i jakich typów potrzebują.
+W kolekcji reviews użyłem imienia recenzenta. Wyszukiwanie go jest bardzo szybkie, ponieważ nie ma potrzeby łączenia tabel, a wszystkie informacje znajdują się w jednym miejscu.
+Z drugiej strony, w sytuacji potrzeby zmiany imienia, musimy je poprawić w każdej recenzji wystawionej przez użytkownika, co wiąże się z ryzykiem większej ilości zmian i niespójności.
+Zadanie 3
+a) db.books.find({"language":"Polish","genres":"Fantasy"})
+
+b) db.books.aggregate([
+{$lookup: {from:"reviews", localField: "_id", foreignField :"book", as: "opinie_ksiazek"}},
+{$addFields:{srednia :{$avg: "$opinie_ksiazek.rating"}} },
+{$match: {srednia: {$gte: 4}}}
+])
+
+c) db.books.aggregate([
+{$lookup:{from:"authors",localField:"author",foreignField:"_id",as:"autorzy_ksiazek"}},
+{$match: {"autorzy_ksiazek.name.first" : "J.R.R", "autorzy_ksiazek.name.last":"Tolkien"}}
+])
+
+d) db.books.aggregate([
+{$lookup: { from: "authors", localField: "author", foreignField: "_id", as: "autorzy_ksiazek" } },
+{$match: { "autorzy_ksiazek.country": "Poland" }},
+{$unwind: "$autorzy_ksiazek" },
+{$lookup: { from: "reviews", localField: "_id", foreignField: "book", as: "recenzje_ksiazki"}}, 
+{$addFields: { srednia_ocena: { $avg: "$recenzje_ksiazki.rating"}}}, 
+{$project: { _id: 0, tytul: "$title", nazwisko_autora: "$autorzy_ksiazek.name.last", srednia_ocena: 1}} 
+])
+
+e)
+db.authors.aggregate([
+{$lookup: { from: "books", localField: "_id", foreignField: "author", as: "lista_ksiazek" } },
+{$addFields: { liczba_ksiazek: {$size: "$lista_ksiazek"}}},
+{$project: {_id: 0, nazwisko: "$name.last", liczba_ksiazek:1} }
+])
+
+f)
+db.authors.aggregate([
+{$lookup: { from: "books", localField: "_id", foreignField: "author", as: "ksiazki" }},
+{$unwind: "$ksiazki"},
+{$lookup: { from: "reviews", localField: "ksiazki._id", foreignField: "book", as: "recenzje" }},
+{$unwind: "$recenzje"},
+{$group: { _id: "$name.last", srednia_ocena: { $avg: "$recenzje.rating" }}}
+])
+
+g)
+db.authors.aggregate([
+{$match: { awards: { $size: 0}}},
+{$project: {_id: 0, imie:"$name.first", nazwisko:"$name.last"}}
+])
+
+h)
+db.books.aggregate([
+{$unwind: "$genres"},
+{$group: {_id: "$genres", liczba_ksiazek: {$sum:1}}}
+])
+
+i)
+db.reviews.aggregate([
+{$group: { _id: "$reviewer_name",liczba_recenzji:{$sum: 1 }}},
+{$sort:{liczba_recenzji: -1}},
+{$limit: 1}
+])
+
+j)
+db.books.aggregate([
+{$lookup: { from: "reviews", localField: "_id", foreignField: "book", as: "oceny" } },
+{$unwind: "$oceny" },
+{$group: { _id: "$language",srednia_ocena: {$avg:"$oceny.rating" }}}
+])
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
