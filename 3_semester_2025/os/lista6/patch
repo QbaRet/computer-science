@@ -1,0 +1,522 @@
+
+---
+ Makefile   | 10 +++++-
+ defs.h     |  5 ++-
+ exec.c     |  3 +-
+ expr.c     | 33 ++++++++++++++++++
+ proc.c     |  5 +--
+ shmtest.c  | 23 +++++++++++++
+ syscall.c  | 13 ++++++-
+ syscall.h  |  6 ++++
+ sysproc.c  | 63 ++++++++++++++++++++++++++++++++++
+ test_mem.c | 18 ++++++++++
+ testsem.c  | 46 +++++++++++++++++++++++++
+ testvm.c   | 10 ++++++
+ user.h     |  7 +++-
+ usys.S     |  6 ++++
+ vm.c       | 99 ++++++++++++++++++++++++++++++++++++++++++++++++++++--
+ xv6.patch  | 29 ++++++++++++++++
+ zad36.c    | 40 ++++++++++++++++++++++
+ 17 files changed, 407 insertions(+), 9 deletions(-)
+ create mode 100644 expr.c
+ create mode 100644 shmtest.c
+ create mode 100644 test_mem.c
+ create mode 100644 testsem.c
+ create mode 100644 testvm.c
+ create mode 100644 xv6.patch
+ create mode 100644 zad36.c
+
+ UPROGS=\
+ 	_cat\
+ 	_echo\
++	_expr\
+ 	_forktest\
+ 	_grep\
+ 	_init\
+@@ -180,7 +183,12 @@ UPROGS=\
+ 	_stressfs\
+ 	_usertests\
+ 	_wc\
++	_zad36\
+ 	_zombie\
++	_testvm\
++	_test_mem\
++	_shmtest\
++	_testsem\
+ 
+ fs.img: mkfs README $(UPROGS)
+ 	./mkfs fs.img README $(UPROGS)
+diff --git a/defs.h b/defs.h
+index 82fb982..42aa36a 100644
+--- a/defs.h
++++ b/defs.h
+@@ -185,6 +185,9 @@ void            switchuvm(struct proc*);
+ void            switchkvm(void);
+ int             copyout(pde_t*, uint, void*, uint);
+ void            clearpteu(pde_t *pgdir, char *uva);
+-
++void            vmprintf(pde_t*);
++int             count_virtual_pages(uint);
++int             count_physical_pages(pde_t*, uint);
++void            shm_release(pde_t*);
+ // number of elements in fixed-size array
+ #define NELEM(x) (sizeof(x)/sizeof((x)[0]))
+diff --git a/exec.c b/exec.c
+index b40134f..2e63ef4 100644
+--- a/exec.c
++++ b/exec.c
+@@ -92,7 +92,8 @@ exec(char *path, char **argv)
+     if(*s == '/')
+       last = s+1;
+   safestrcpy(curproc->name, last, sizeof(curproc->name));
+-
++  cprintf("exec-");
++  vmprint(curproc->pgdir);
+   // Commit to the user image.
+   oldpgdir = curproc->pgdir;
+   curproc->pgdir = pgdir;
+diff --git a/expr.c b/expr.c
+new file mode 100644
+index 0000000..5b61ec5
+--- /dev/null
++++ b/expr.c
+
+diff --git a/proc.c b/proc.c
+index 806b1b1..6a3b91c 100644
+--- a/proc.c
++++ b/proc.c
+@@ -230,7 +230,9 @@ exit(void)
+   struct proc *curproc = myproc();
+   struct proc *p;
+   int fd;
+-
++  cprintf("exit - ");
++  vmprint(curproc->pgdir);
++  shm_release(curproc->pgdir);
+   if(curproc == initproc)
+     panic("init exiting");
+ 
+@@ -260,7 +262,6 @@ exit(void)
+         wakeup1(initproc);
+     }
+   }
+-
+   curproc->state = ZOMBIE;
+   sched();
+diff --git a/shmtest.c b/shmtest.c
+new file mode 100644
+index 0000000..7a49e83
+--- /dev/null
++++ b/shmtest.c
+@@ -0,0 +1,23 @@
++#include "types.h"
++#include "stat.h"
++#include "user.h"
++#define SHM_VA 0x40000000
++
++int
++main(void)
++{
++  shmget();
++
++  int *x = (int*)SHM_VA;
++
++  if (fork() == 0) {
++    shmget();
++    sleep(100);
++    printf(1,"child: %d\n", *x);
++  } else {
++    *x = 1234;
++    wait();
++  }
++
++  exit();
++}
+\ No newline at end of file
+diff --git a/syscall.c b/syscall.c
+index ee85261..87ba066 100644
+--- a/syscall.c
++++ b/syscall.c
+@@ -103,7 +103,12 @@ extern int sys_unlink(void);
+ extern int sys_wait(void);
+ extern int sys_write(void);
+ extern int sys_uptime(void);
+-
++extern int sys_usedpp(void);
++extern int sys_usedvp(void);
++extern int sys_shmget(void);
++extern int sys_sem_init(void);
++extern int sys_sem_up(void);
++extern int sys_sem_down(void);
+ static int (*syscalls[])(void) = {
+ [SYS_fork]    sys_fork,
+ [SYS_exit]    sys_exit,
+@@ -126,6 +131,12 @@ static int (*syscalls[])(void) = {
+ [SYS_link]    sys_link,
+ [SYS_mkdir]   sys_mkdir,
+ [SYS_close]   sys_close,
++[SYS_usedvp]  sys_usedvp,
++[SYS_usedpp]  sys_usedpp,
++[SYS_shmget] sys_shmget,
++[SYS_sem_init] sys_sem_init,
++[SYS_sem_up]   sys_sem_up,
++[SYS_sem_down] sys_sem_down,
+ };
+ 
+ void
+diff --git a/syscall.h b/syscall.h
+index bc5f356..d5479fc 100644
+--- a/syscall.h
++++ b/syscall.h
+@@ -20,3 +20,9 @@
+ #define SYS_link   19
+ #define SYS_mkdir  20
+ #define SYS_close  21
++#define SYS_usedvp 22
++#define SYS_usedpp 23
++#define SYS_shmget 24
++#define SYS_sem_init 25
++#define SYS_sem_up   26
++#define SYS_sem_down 27
+\ No newline at end of file
+diff --git a/sysproc.c b/sysproc.c
+index 0686d29..58cc759 100644
+--- a/sysproc.c
++++ b/sysproc.c
+@@ -4,9 +4,56 @@
+ #include "date.h"
+ #include "param.h"
+ #include "memlayout.h"
++#include "spinlock.h"
+ #include "mmu.h"
+ #include "proc.h"
++struct semaphore {
++  struct spinlock lock;
++  int count;
++  int active;
++};
++struct semaphore semtab[10];
++int
++sys_sem_init(void)
++{
++  int i,v;
++  if(argint(0, &i) < 0 || argint(1, &v) < 0 || i < 0 || i >= 10){
++    return -1;}
++  initlock(&semtab[i].lock, "semaphore");
++  acquire(&semtab[i].lock);
++  semtab[i].count = v;
++  semtab[i].active = 1;
++  release(&semtab[i].lock);
++  return 0;  
++}
++sys_sem_up(void)
++{
++  int i;
++  if(argint(0, &i) < 0 || i < 0 || i >= 10 || !semtab[i].active)
++    return -1;
++
++  acquire(&semtab[i].lock);
++  semtab[i].count++;
++  wakeup(&semtab[i]); 
++  release(&semtab[i].lock);
++  return 0;
++}
+ 
++int
++sys_sem_down(void)
++{
++  int i;
++  if(argint(0, &i) < 0 || i < 0 || i >= 10 || !semtab[i].active)
++    return -1;
++
++  acquire(&semtab[i].lock);
++  while(semtab[i].count <= 0){
++    sleep(&semtab[i], &semtab[i].lock);
++  }
++  semtab[i].count--;
++  release(&semtab[i].lock);
++  return 0;
++}
+ int
+ sys_fork(void)
+ {
+@@ -89,3 +136,19 @@ sys_uptime(void)
+   release(&tickslock);
+   return xticks;
+ }
++
++int
++sys_usedvp(void)
++{
++  return count_virtual_pages(myproc()->sz);
++}
++
++int
++sys_usedpp(void)
++{
++  struct proc *p=myproc();
++  return count_physical_pages(p->pgdir, p->sz);
++}
++int sys_shmget(void) {
++  return shmget_logic(myproc()->pgdir);
++}
+\ No newline at end of file
+diff --git a/test_mem.c b/test_mem.c
+new file mode 100644
+index 0000000..0a6618a
+--- /dev/null
++++ b/test_mem.c
+@@ -0,0 +1,18 @@
++int main() {
++  int used_virtual = usedvp();
++  int used_physical = usedpp();
++
++  printf(1, "Number of used virtual pages: %d\n", used_virtual);
++  printf(1, "Number of used physical pages: %d\n", used_physical);
++
++  // Allocate memory
++  sbrk(4096);
++  used_virtual = usedvp();
++  used_physical = usedpp();
++
++  printf(1, "After allocating one page:\n");
++  printf(1, "Number of used virtual pages: %d\n", used_virtual);
++  printf(1, "Number of used physical pages: %d\n", used_physical);
++
++  exit();
++}
+\ No newline at end of file
+diff --git a/testsem.c b/testsem.c
+new file mode 100644
+index 0000000..422b111
+--- /dev/null
++++ b/testsem.c
+@@ -0,0 +1,46 @@
++#include "types.h"
++#include "stat.h"
++#include "user.h"
++
++int main()
++{
++  int ret1, ret2;
++  int CHILDSEM=0;
++  int PARENTSEM=1;
++  
++  sem_init(CHILDSEM, 0);
++  sem_init(PARENTSEM, 0); 
++  
++  ret1 = fork();
++  if(ret1 == 0)
++    {
++      sem_down(CHILDSEM);
++      printf(1, "I am child 1\n");
++      sem_up(PARENTSEM);
++      exit();
++    }
++  else
++    {
++      ret2 = fork();
++      if(ret2 == 0)
++        {
++          sem_down(CHILDSEM);
++          printf(1, "I am child 2\n");
++          sem_up(PARENTSEM);
++          exit();
++        }
++      else {
++        sleep(2);
++        printf(1, "I am parent and I should print first\n");
++        sem_up(CHILDSEM);
++        sem_down(PARENTSEM);
++        printf(1, "Only one child has printed by now\n");
++        sem_up(CHILDSEM);
++        sem_down(PARENTSEM);
++        printf(1, "Both children have printed by now\n");
++        wait();
++        wait();
++        exit();
++      }
++    }
++}
+diff --git a/testvm.c b/testvm.c
+new file mode 100644
+index 0000000..70f8e84
+--- /dev/null
++++ b/testvm.c
+@@ -0,0 +1,10 @@
++#include "types.h"
++#include "stat.h"
++#include "user.h"
++
++int
++main(void)
++{
++sbrk(5*4096);
++exit();
++}
+diff --git a/user.h b/user.h
+index 4f99c52..e7f1b47 100644
+--- a/user.h
++++ b/user.h
+@@ -23,7 +23,12 @@ int getpid(void);
+ char* sbrk(int);
+ int sleep(int);
+ int uptime(void);
+-
++int usedvp(void);
++int usedpp(void);
++int shmget(void);
++int sem_init(int, int);
++int sem_up(int);
++int sem_down(int);
+ // ulib.c
+ int stat(const char*, struct stat*);
+ char* strcpy(char*, const char*);
+diff --git a/usys.S b/usys.S
+index 8bfd8a1..93c343d 100644
+--- a/usys.S
++++ b/usys.S
+@@ -29,3 +29,9 @@ SYSCALL(getpid)
+ SYSCALL(sbrk)
+ SYSCALL(sleep)
+ SYSCALL(uptime)
++SYSCALL(usedvp)
++SYSCALL(usedpp)
++SYSCALL(shmget)
++SYSCALL(sem_init)
++SYSCALL(sem_up)
++SYSCALL(sem_down)
+\ No newline at end of file
+diff --git a/vm.c b/vm.c
+index 7134cff..21b5d30 100644
+--- a/vm.c
++++ b/vm.c
+@@ -5,8 +5,14 @@
+ #include "memlayout.h"
+ #include "mmu.h"
+ #include "proc.h"
++#include "spinlock.h"
+ #include "elf.h"
+-
++#define SHM_VA 0x40000000
++struct {
++  struct spinlock lock;
++  void *pa;
++  int refcount;
++} shm;
+ extern char data[];  // defined by kernel.ld
+ pde_t *kpgdir;  // for use in scheduler()
+ 
+@@ -134,7 +140,11 @@ setupkvm(void)
+     }
+   return pgdir;
+ }
+-
++void
++shminit(void)
++{
++  initlock(&shm.lock, "shm");
++}
+ // Allocate one page table for the machine for the kernel address
+ // space for scheduler processes.
+ void
+@@ -142,6 +152,8 @@ kvmalloc(void)
+ {
+   kpgdir = setupkvm();
+   switchkvm();
++  initlock(&shm.lock,"shm");
++  shminit();
+ }
+ 
+ // Switch h/w page table register to the kernel-only page table,
+@@ -385,6 +397,89 @@ copyout(pde_t *pgdir, uint va, void *p, uint len)
+   return 0;
+ }
+ 
++void 
++vmprint(pde_t *pgdir)
++{
++  cprintf("pgdir pa %p\n",V2P(pgdir));
++  for(int i=0;i<512;i++)
++  {
++    pde_t pde =pgdir[i];
++    if(pde & PTE_P)
++    {
++      cprintf(".. %d: pde pa %p flags %p\n",i, PTE_ADDR(pde), (uint)PTE_FLAGS(pde));
++      pte_t *pt = (pte_t*)P2V(PTE_ADDR(pde));
++      for(int j=0;j<1024;j++)
++        {
++          pte_t pte =pt[j];
++          if(pte & PTE_P)
++              {
++            uint va = (i * 1024 * 4096) + (j * 4096);
++            cprintf(".. .. %d: pte pa %p va %p flags %p\n", j, PTE_ADDR(pte), va, (uint)PTE_FLAGS(pte));
++          }
++        }
++    }
++    
++  }
++}
++
++int
++count_virtual_pages(uint sz)
++{
++  return (sz+PGSIZE-1)/PGSIZE;
++}
++
++int
++count_physical_pages(pde_t *pgdir, uint sz)
++{
++  int count =0;
++  pde_t *pte;
++  for(uint i=0; i<sz; i+=PGSIZE)
++  {
++    pte = walkpgdir(pgdir, (void*)i,0);
++    if(pte!=0 && (*pte & PTE_P)){ 
++      count ++;
++    }
++  }
++  return count;
++}
++
++int 
++shmget_logic(pde_t *pgdir)
++{
++  acquire(&shm.lock);
++  if(shm.pa==0){
++    if((shm.pa=kalloc())==0){
++      release(&shm.lock);
++      return -1;
++    }
++    memset(shm.pa,0,PGSIZE);
++  }
++  pte_t *pte=walkpgdir(pgdir,(void*)SHM_VA,0);
++  if(pte == 0 || !(*pte & PTE_P)) {
++    if(mappages(pgdir, (void*)SHM_VA, PGSIZE, V2P(shm.pa), PTE_W|PTE_U) < 0) {
++      release(&shm.lock);
++      return -1;
++    }
++    shm.refcount++;
++  }
++  release(&shm.lock);
++  return 0;
++}
++
++void shm_release(pde_t *pgdir) {
++  acquire(&shm.lock);
++  if(shm.pa != 0) {
++    pte_t *pte = walkpgdir(pgdir, (void*)SHM_VA, 0);
++    if(pte != 0 && (*pte & PTE_P)) {
++      shm.refcount--;
++      if(shm.refcount == 0) {
++        kfree(shm.pa);
++        shm.pa = 0;
++      }
++    }
++  }
++  release(&shm.lock);
++}
+ //PAGEBREAK!
+ // Blank page.
+ //PAGEBREAK!
+
