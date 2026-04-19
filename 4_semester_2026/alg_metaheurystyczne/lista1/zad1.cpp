@@ -101,19 +101,20 @@ LSResult localSearch_Zadanie1(int n, const vector<int>& distMatrix) {
     return {current_path, current_cost, improvement_steps};
 }
 
+// Funkcja zapisująca JEDNĄ ostateczną trasę w wymaganym formacie
 void zapiszTrasy(ofstream& plik, const string& nazwa, const vector<int>& trasa, const vector<pair<double, double>>& coords) {
     plik << "DATASET: " << nazwa << "\n";
     for (int idx : trasa) {
         plik << coords[idx].first << " " << coords[idx].second << "\n";
     }
+    // Zapis powrotu do pierwszego punktu
     plik << coords[trasa[0]].first << " " << coords[trasa[0]].second << "\n";
-    plik << "END\n";
 }
 
 int main(){
-    vector<string> pliki = {"ca4663.tsp", "eg7146.tsp", "ei8246.tsp", "mu1979.tsp", "tz6117.tsp", "dj38.tsp", "qa194.tsp", "uy734.tsp", "wi29.tsp", "zi929.tsp"};
+    vector<string> pliki = {"mu1979.tsp", "tz6117.tsp", "dj38.tsp", "qa194.tsp", "uy734.tsp", "wi29.tsp", "zi929.tsp","ei8246.tsp"};
     ofstream plik_wynikow("wyniki_zbiorcze_z1.txt");
-    ofstream plik_tras("trasy_z1.txt");
+    ofstream plik_tras("trasy_z11.txt");
     
     for (const string& plik_nazwa : pliki) {
         cout << "[Z1] Plik: " << plik_nazwa << flush;
@@ -132,11 +133,12 @@ int main(){
         double najlepszy_koszt = numeric_limits<double>::infinity();
         vector<int> najlepsza_trasa;
         
-        cout << " -> liczenie (" << liczba_prob << " prob)...\n";
         for (int i = 0; i < liczba_prob; ++i) {
             LSResult wynik = localSearch_Zadanie1(n, matrix);
+            
             suma_kosztow += wynik.cost;
             suma_krokow += wynik.steps;
+            
             if (wynik.cost < najlepszy_koszt) {
                 najlepszy_koszt = wynik.cost;
                 najlepsza_trasa = wynik.path;
@@ -144,8 +146,9 @@ int main(){
         }
         
         plik_wynikow << plik_nazwa << " Srednia: " << suma_kosztow/liczba_prob << " Kroki: " << (double)suma_krokow/liczba_prob << " Best: " << najlepszy_koszt << "\n";
+        
+
         zapiszTrasy(plik_tras, plik_nazwa, najlepsza_trasa, coords);
     }
-    cout << "Zadanie 1 zakonczone.\n";
     return 0;
 }

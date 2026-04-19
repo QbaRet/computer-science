@@ -1,4 +1,7 @@
 #include <bits/stdc++.h>
+#include <sched.h>
+#include <unistd.h>
+
 using namespace std;
 
 struct LSResult {
@@ -36,7 +39,7 @@ vector<int> buildDistanceMatrix(const vector<pair<double, double>>& coords) {
             if (i != j) {
                 double dx = coords[i].first - coords[j].first;
                 double dy = coords[i].second - coords[j].second;
-                distMatrix[i * n + j] = round(sqrt(dx * dx + dy * dy)); 
+                distMatrix[i * n + j] = (int)round(sqrt(dx * dx + dy * dy)); 
             }
         }
     }
@@ -45,7 +48,7 @@ vector<int> buildDistanceMatrix(const vector<pair<double, double>>& coords) {
 
 double calculateCost(const vector<int>& path, const vector<int>& distMatrix) {
     double total_cost = 0.0;
-    int n = path.size();
+    int n = (int)path.size();
     for (int i = 0; i < n - 1; ++i) {
         total_cost += distMatrix[path[i] * n + path[i+1]];
     }
@@ -77,12 +80,9 @@ inline int calculateDeltaTranspose(const vector<int>& path, const vector<int>& d
     return dodane - usuniete;
 }
 
-LSResult localSearch_Zadanie3(int n, const vector<int>& distMatrix) {
+LSResult localSearch_Zadanie3(int n, const vector<int>& distMatrix, mt19937& g) {
     vector<int> current_path(n);
     iota(current_path.begin(), current_path.end(), 0);
-    
-    random_device rd;
-    mt19937 g(rd());
     shuffle(current_path.begin(), current_path.end(), g);
     
     double current_cost = calculateCost(current_path, distMatrix);
@@ -121,44 +121,96 @@ void zapiszTrasy(ofstream& plik, const string& nazwa, const vector<int>& trasa, 
     }
     plik << coords[trasa[0]].first << " " << coords[trasa[0]].second << "\n";
     plik << "END\n";
+    plik.flush();
 }
 
-int main(){
-    vector<string> pliki = {"ca4663.tsp", "eg7146.tsp", "ei8246.tsp", "mu1979.tsp", "tz6117.tsp", "dj38.tsp", "qa194.tsp", "uy734.tsp", "wi29.tsp", "zi929.tsp"};
-    ofstream plik_wynikow("wyniki_zbiorcze_z3.txt");
-    ofstream plik_tras("trasy_z3.txt");
-    
-    for (const string& plik_nazwa : pliki) {
-        cout << "[Z3] Plik: " << plik_nazwa << flush;
-        vector<pair<double, double>> coords = readFiles(plik_nazwa);
-        if(coords.empty()) {
-            cout << " - pominiecie\n";
-            continue;
-        }
-        
-        vector<int> matrix = buildDistanceMatrix(coords);
-        int n = coords.size();
-        int liczba_prob = (n < 1000) ? n : 100;
-        
-        double suma_kosztow = 0;
-        long long suma_krokow = 0;
-        double najlepszy_koszt = numeric_limits<double>::infinity();
-        vector<int> najlepsza_trasa;
-        
-        cout << " -> liczenie (" << liczba_prob << " prob)...\n";
-        for (int i = 0; i < liczba_prob; ++i) {
-            LSResult wynik = localSearch_Zadanie3(n, matrix);
-            suma_kosztow += wynik.cost;
-            suma_krokow += wynik.steps;
-            if (wynik.cost < najlepszy_koszt) {
-                najlepszy_koszt = wynik.cost;
-                najlepsza_trasa = wynik.path;
-            }
-        }
-        
-        plik_wynikow << plik_nazwa << " Srednia: " << suma_kosztow/liczba_prob << " Kroki: " << (double)suma_krokow/liczba_prob << " Best: " << najlepszy_koszt << "\n";
-        zapiszTrasy(plik_tras, plik_nazwa, najlepsza_trasa, coords);
+string makeRunStamp() {
+    time_t now = time(nullptr);
+    tm local_time{};
+    localtime_r(&now, &local_time);
+
+    ostringstream stamp;
+    stamp << put_time(&local_time, "%Y%m%d_%H%M%S") << "_pid" << getpid();
+    return stamp.str();
+}
+
+void limitProcessToNCores(int cores) {
+    cpu_set_t set;
+    CPU_ZERO(&set);
+    for (int i = 0; i < cores; ++i) CPU_SET(i, &set);
+
+    if (sched_setaffinity(0, sizeof(set), &set) != 0) {
+        cerr << "Ostrzezenie: nie udalo sie ustawic affinity na " << cores << " rdzeni.\n";
     }
-    cout << "Zadanie 3 zakonczone.\n";
+}
+
+int main() {
+    const vector<string> pliki_nazwy = {
+        "ca4663.tsp", "dj38.tsp", "eg7146.tsp", "ei8246.tsp", "mu1979.tsp",
+        "qa194.tsp", "tz6117.tsp", "uy734.tsp", "wi29.tsp", "zi929.tsp"
+    };
+    const int liczba_prob = 1;
+    const int max_threads = 8;
+
+    limitProcessToNCores(max_threads);
+
+    const string run_stamp = makeRunStamp();
+    const string nazwa_wynikow = "wyniki_zbiorcze_z3_" + run_stamp + ".txt";
+    const string nazwa_tras = "trasy_z3_" + run_stamp + ".txt";
+
+    ofstream plik_wynikow(nazwa_wynikow);
+    ofstream plik_tras(nazwa_tras);
+
+    if (!plik_wynikow.is_open() || !plik_tras.is_open()) {
+        cerr << "Blad: nie mozna otworzyc plikow wyjsciowych.\n";
+        return 1;
+    }
+
+    atomic<int> licznik_datasetu(0);
+    mutex mtx;
+
+    time_t now = time(nullptr);
+    plik_wynikow << "datasety: " << pliki_nazwy[0];
+    for (size_t i = 1; i < pliki_nazwy.size(); ++i) {
+        plik_wynikow << ", " << pliki_nazwy[i];    plik_wynikow << "--- nowa sesja: " << ctime(&now);
+    }
+    plik_wynikow << "\n";
+
+    auto worker = [&](int thread_id) {
+        random_device rd;
+        mt19937 g(rd() ^ (unsigned)thread_id ^ (unsigned)time(nullptr));
+        
+        while (true) {
+            int idx = licznik_datasetu.fetch_add(1);
+            if (idx >= (int)pliki_nazwy.size()) break;
+
+            const string& plik_nazwa = pliki_nazwy[idx];
+            vector<pair<double, double>> coords = readFiles(plik_nazwa);
+            if (coords.empty()) {
+                lock_guard<mutex> lock(mtx);
+                plik_wynikow << plik_nazwa << "; blad: nie udalo sie wczytac danych\n";
+                plik_wynikow.flush();
+                continue;
+            }
+
+            vector<int> matrix = buildDistanceMatrix(coords);
+            int n = (int)coords.size();
+            LSResult res = localSearch_Zadanie3(n, matrix, g);
+
+            lock_guard<mutex> lock(mtx);
+            plik_wynikow << plik_nazwa << "; proba 1; koszt: " << res.cost
+                         << "; kroki: " << res.steps << "\n";
+            plik_wynikow.flush();
+
+            zapiszTrasy(plik_tras, plik_nazwa, res.path, coords);
+        }
+    };
+
+    vector<thread> threads;
+    for (int i = 0; i < max_threads; ++i) {
+        threads.emplace_back(worker, i);
+    }
+    for (auto& t : threads) t.join();
+
     return 0;
 }

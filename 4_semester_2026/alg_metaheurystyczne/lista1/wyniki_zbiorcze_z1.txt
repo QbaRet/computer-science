@@ -1,0 +1,10 @@
+ca4663.tsp | Srednia: 1.4341e+06 | Kroki: 6768 | Best: 1336531
+dj38.tsp | Srednia: 7295 | Kroki: 34 | Best: 6711
+eg7146.tsp | Srednia: 188700 | Kroki: 10356 | Best: 156432
+ei8246.tsp | Srednia: 229742 | Kroki: 12058 | Best: 205356
+mu1979.tsp | Srednia: 92940 | Kroki: 2800 | Best: 80342
+qa194.tsp | Srednia: 10319 | Kroki: 205 | Best: 8966
+tz6117.tsp | Srednia: 439449 | Kroki: 8840 | Best: 403265
+uy734.tsp | Srednia: 86132 | Kroki: 926 | Best: 67511
+wi29.tsp | Srednia: 28308 | Kroki: 23.9655 | Best: 27603
+zi929.tsp | Srednia: 105833 | Kroki: 1169 | Best: 97616

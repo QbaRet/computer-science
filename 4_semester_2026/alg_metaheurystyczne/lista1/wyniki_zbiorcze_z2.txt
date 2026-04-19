@@ -1,10 +1,10 @@
-ca4663.tsp Srednia: 2.6825e+06 Kroki: 6649.81 Best: 2.3868e+06
-eg7146.tsp Srednia: 362768 Kroki: 9840.5 Best: 321401
-ei8246.tsp Srednia: 524792 Kroki: 10930.2 Best: 449262
-mu1979.tsp Srednia: 178619 Kroki: 2600.56 Best: 156272
-tz6117.tsp Srednia: 865754 Kroki: 8698.85 Best: 770253
-dj38.tsp Srednia: 10992.9 Kroki: 26.7105 Best: 8341
-qa194.tsp Srednia: 16047 Kroki: 197.149 Best: 13613
-uy734.tsp Srednia: 165903 Kroki: 831.497 Best: 137048
-wi29.tsp Srednia: 42302 Kroki: 19.2759 Best: 35391
-zi929.tsp Srednia: 151353 Kroki: 1254.87 Best: 135521
+ca4663.tsp | Srednia: 2.6825e+06 | Kroki: 6649.81 | Best: 2.3868e+06
+dj38.tsp | Srednia: 10992.9 | Kroki: 26.7105 | Best: 8341
+eg7146.tsp | Srednia: 362768 | Kroki: 9840.5 | Best: 321401
+ei8246.tsp | Srednia: 524792 | Kroki: 10930.2 | Best: 449262
+mu1979.tsp | Srednia: 178619 | Kroki: 2600.56 | Best: 156272
+qa194.tsp | Srednia: 16047 | Kroki: 197.149 | Best: 13613
+tz6117.tsp | Srednia: 865754 | Kroki: 8698.85 | Best: 770253
+uy734.tsp | Srednia: 165903 | Kroki: 831.497 | Best: 137048
+wi29.tsp | Srednia: 42302 | Kroki: 19.2759 | Best: 35391
+zi929.tsp | Srednia: 151353 | Kroki: 1254.87 | Best: 135521
