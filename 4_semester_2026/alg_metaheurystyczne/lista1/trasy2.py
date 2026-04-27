@@ -59,7 +59,7 @@ def wczytaj_i_narysuj_trasy(nazwa_pliku):
         
         plt.plot(x[0], y[0], marker='o', markersize=6, color='green', label='Start/Koniec')
 
-        plt.title(f"Trasa Komiwojażera: {nazwa}", fontsize=14, fontweight='bold')
+        plt.title(f"{nazwa}", fontsize=14, fontweight='bold')
         plt.xlabel("Oś X")
         plt.ylabel("Oś Y")
         plt.grid(True, linestyle='--', alpha=0.6)

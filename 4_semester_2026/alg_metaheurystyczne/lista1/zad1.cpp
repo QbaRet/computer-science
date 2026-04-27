@@ -100,14 +100,11 @@ LSResult localSearch_Zadanie1(int n, const vector<int>& distMatrix) {
     
     return {current_path, current_cost, improvement_steps};
 }
-
-// Funkcja zapisująca JEDNĄ ostateczną trasę w wymaganym formacie
 void zapiszTrasy(ofstream& plik, const string& nazwa, const vector<int>& trasa, const vector<pair<double, double>>& coords) {
     plik << "DATASET: " << nazwa << "\n";
     for (int idx : trasa) {
         plik << coords[idx].first << " " << coords[idx].second << "\n";
     }
-    // Zapis powrotu do pierwszego punktu
     plik << coords[trasa[0]].first << " " << coords[trasa[0]].second << "\n";
 }
 

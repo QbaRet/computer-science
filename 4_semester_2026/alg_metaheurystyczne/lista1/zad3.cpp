@@ -139,9 +139,7 @@ void limitProcessToNCores(int cores) {
     CPU_ZERO(&set);
     for (int i = 0; i < cores; ++i) CPU_SET(i, &set);
 
-    if (sched_setaffinity(0, sizeof(set), &set) != 0) {
-        cerr << "Ostrzezenie: nie udalo sie ustawic affinity na " << cores << " rdzeni.\n";
-    }
+
 }
 
 int main() {

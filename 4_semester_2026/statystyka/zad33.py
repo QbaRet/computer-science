@@ -27,7 +27,7 @@ def moc_teoretyczna(mi, n):
 mi_values = [200, 202, 205, 210, 220]
 for i in mi_values:
     odp, procent_odrzucenia = moc_empiryczna(i)
-    print(f"mi={i}: Odrzuceń={odp}, Procent odrzuceń={procent_odrzucenia:.2f}%")
+    print(f"mi={i} procent odrzucen={procent_odrzucenia:.2f}%")
 
 mi_zakres = np.linspace(185, 215, 100)
 moc_teoretyczna_values = [moc_teoretyczna(mi, 36) for mi in mi_zakres]

@@ -40,7 +40,6 @@ def wczytaj_i_narysuj_trasy(nazwa_pliku):
                 datasets[aktualny_dataset] = wspolrzedne
 
     except FileNotFoundError:
-        print(f"Błąd: Nie znaleziono pliku '{nazwa_pliku}'. Upewnij się, że jest w tym samym folderze co skrypt.")
         return
 
     for nazwa, coords in datasets.items():
@@ -59,7 +58,7 @@ def wczytaj_i_narysuj_trasy(nazwa_pliku):
         
         plt.plot(x[0], y[0], marker='o', markersize=6, color='green', label='Start/Koniec')
 
-        plt.title(f"Trasa Komiwojażera: {nazwa}", fontsize=14, fontweight='bold')
+        plt.title(f"{nazwa}", fontsize=14, fontweight='bold')
         plt.xlabel("Oś X")
         plt.ylabel("Oś Y")
         plt.grid(True, linestyle='--', alpha=0.6)
