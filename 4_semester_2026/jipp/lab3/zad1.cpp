@@ -190,7 +190,6 @@ int main() {
     srand(time(NULL)); 
 
     try {
-        /
         constexpr unsigned int p = 10007;
         constexpr unsigned int q = 10009;
         constexpr unsigned int N = p * q; 
@@ -200,8 +199,7 @@ int main() {
         cout << "--- Parametry RSA ---" << endl;
         cout << "Modulo (n): " << rsa.getModulo() << endl;
         cout << "Klucz publiczny (e): " << rsa.getPublicKey() << endl;
-        
-        // Przykładowa wiadomość (zapakowana w pierścień)
+
         Ring<N> m(1234567); 
         cout << "\n--- Szyfrowanie ---" << endl;
         cout << "Oryginalna wiadomosc (m): " << m << endl;
@@ -212,9 +210,6 @@ int main() {
         Ring<N> zdekodowana = rsa.decrypt(c);
         cout << "Zdekodowana wiadomosc: " << zdekodowana << endl;
 
-        // Prosty test weryfikacyjny
-        cout << "\nCzy zdekodowana == oryginalna? " 
-             << (m == zdekodowana ? "TAK :)" : "NIE :(") << endl;
 
     } catch (const exception& e) {
         cerr << "Wyjatek: " << e.what() << endl;

@@ -1,87 +1,96 @@
 import sys
+from functools import lru_cache
 
-class Ring:
-    def __init__(self, n: int, a: int = 0):
-        self.n = n
-        self.a = a % n
+@lru_cache(maxsize=None)
+def _ring_class(n: int):
+    class RingN:
+        __slots__ = ("a",)
 
-    def _sprawdz_zgodnosc(self, other):
-        if self.n != other.n:
-            raise ValueError("Rozne podstawy")
+        def __init__(self, val: int = 0):
+            self.a = val % n
+        def __add__(self, other: "RingN") -> "RingN":
+            return RingN((self.a + other.a) % n)
 
-    def __add__(self, other):
-        self._sprawdz_zgodnosc(other)
-        return Ring(self.n, self.a + other.a)
+        def __sub__(self, other: "RingN") -> "RingN":
+            return RingN((n + self.a - other.a) % n)
 
-    def __sub__(self, other):
-        self._sprawdz_zgodnosc(other)
-        return Ring(self.n, self.a - other.a)
+        def __mul__(self, other: "RingN") -> "RingN":
+            return RingN((self.a * other.a) % n)
 
-    def __mul__(self, other):
-        self._sprawdz_zgodnosc(other)
-        return Ring(self.n, self.a * other.a)
+        def __truediv__(self, other: "RingN") -> "RingN":
+            for i in range(1, n):
+                if (other.a * i) % n == 1:
+                    return RingN((self.a * i) % n)
+            raise ValueError("Brak rozwiazan")
 
-    def __truediv__(self, other):
-        self._sprawdz_zgodnosc(other)
-        for i in range(1, self.n):
-            if (other.a * i) % self.n == 1:
-                return Ring(self.n, self.a * i)
-        raise ValueError("Brak rozwiazan")
-    
-    def __iadd__(self, other):
-        self._sprawdz_zgodnosc(other)
-        self.a = (self.a + other.a) % self.n
-        return self
+        def __iadd__(self, other: "RingN") -> "RingN":
+            self.a = (self.a + other.a) % n
+            return self
 
-    def __isub__(self, other):
-        self._sprawdz_zgodnosc(other)
-        self.a = (self.a - other.a) % self.n
-        return self
+        def __isub__(self, other: "RingN") -> "RingN":
+            self.a = (n + self.a - other.a) % n
+            return self
 
-    def __imul__(self, other):
-        self._sprawdz_zgodnosc(other)
-        self.a = (self.a * other.a) % self.n
-        return self
+        def __imul__(self, other: "RingN") -> "RingN":
+            self.a = (self.a * other.a) % n
+            return self
 
-    def __itruediv__(self, other):
-        self._sprawdz_zgodnosc(other)
-        for i in range(1, self.n):
-            if (other.a * i) % self.n == 1:
-                self.a = (self.a * i) % self.n
-                return self
-        raise ValueError("Brak rozwiazan")
-    
-    def __eq__(self, other):
-        if not isinstance(other, Ring): return False
-        return self.n == other.n and self.a == other.a
+        def __itruediv__(self, other: "RingN") -> "RingN":
+            for i in range(1, n):
+                if (other.a * i) % n == 1:
+                    self.a = (self.a * i) % n
+                    return self
+            raise ValueError("Brak rozwiazan")
 
-    def __ne__(self, other):
-        return not self.__eq__(other)
+        # -------------------- porównania --------------------
+        def __eq__(self, other: object) -> bool:
+            return isinstance(other, RingN) and self.a == other.a
 
-    def __lt__(self, other):
-        self._sprawdz_zgodnosc(other)
-        return self.a < other.a
+        def __ne__(self, other: object) -> bool:
+            return not self.__eq__(other)
 
-    def __le__(self, other):
-        self._sprawdz_zgodnosc(other)
-        return self.a <= other.a
+        def __lt__(self, other: "RingN") -> bool:
+            return self.a < other.a
 
-    def __gt__(self, other):
-        self._sprawdz_zgodnosc(other)
-        return self.a > other.a
+        def __le__(self, other: "RingN") -> bool:
+            return self.a <= other.a
 
-    def __ge__(self, other):
-        self._sprawdz_zgodnosc(other)
-        return self.a >= other.a
+        def __gt__(self, other: "RingN") -> bool:
+            return self.a > other.a
 
-    def __str__(self):
-        return str(self.a)
+        def __ge__(self, other: "RingN") -> bool:
+            return self.a >= other.a
+
+        def __str__(self) -> str:
+            return str(self.a)
+
+        def __repr__(self) -> str:
+            return f"Ring[{n}]({self.a})"
+
+    RingN.__name__ = f"Ring[{n}]"
+    RingN.__qualname__ = f"Ring[{n}]"
+    return RingN
+
+
+class RingMeta(type):
+
+    def __getitem__(cls, n: int):
+        if not isinstance(n, int) or n <= 0:
+            raise TypeError("n musi byc dodatnia liczba calkowita")
+        return _ring_class(n)
+
+
+class Ring(metaclass=RingMeta):
+    pass
+
 
 if __name__ == "__main__":
     try:
-        a = Ring(7, 10)
-        b = Ring(7, 5)
-        c = Ring(7)
+        Ring7 = Ring[7] 
+
+        a = Ring7(10)
+        b = Ring7(5)
+        c = Ring7()
 
         print(f"a: {a}")
         print(f"b: {b}")
@@ -92,11 +101,11 @@ if __name__ == "__main__":
 
         print(f"a == b: {str(a == b).lower()}")
         print(f"a != b: {str(a != b).lower()}")
-        print(f"a < b:  {str(a < b).lower()} ")
+        print(f"a < b:  {str(a < b).lower()}")
         print(f"a > b:  {str(a > b).lower()}")
-        print(f"a <= 3: {str(a <= Ring(7, 3)).lower()}")
+        print(f"a <= 3: {str(a <= Ring7(3)).lower()}")
 
-        c = a
+        c = Ring7(a.a)  
         print(f"c = a:     {c}")
         c += b
         print(f"c += b:    {c}")
@@ -109,13 +118,13 @@ if __name__ == "__main__":
 
         print("Podaj liczbe: ")
         inp = sys.stdin.readline()
-        if inp:
-            c = Ring(7, int(inp))
+        if inp.strip():
+            c = Ring7(int(inp))
             print(f"Wprowadzono {c}")
 
-        zero = Ring(7, 0)
+        zero = Ring7(0)
         print("Proba dzielenia przez zero: ", end="")
         print(a / zero)
 
     except Exception as e:
-        print(f"wyjatek:{str(e)}", file=sys.stderr)
+        print(f"wyjatek:{e}", file=sys.stderr)
