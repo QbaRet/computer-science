@@ -1,0 +1,280 @@
+V "GNAT Lib v13"
+M P W=b
+P SS ZX
+
+RN
+RV NO_DIRECT_BOOLEAN_OPERATORS
+RV NO_DISPATCH
+RV NO_DISPATCHING_CALLS
+RV NO_EXCEPTION_HANDLERS
+RV NO_EXCEPTION_PROPAGATION
+RV NO_EXCEPTIONS
+RV NO_IO
+RV NO_IMPLICIT_CONDITIONALS
+RV NO_LOCAL_TAGGED_TYPES
+RV NO_LOCAL_ALLOCATORS
+RV NO_LONG_LONG_INTEGERS
+RV NO_SECONDARY_STACK
+RV NO_STANDARD_STORAGE_POOLS
+RV NO_DEFAULT_INITIALIZATION
+RV NO_DYNAMIC_SIZED_OBJECTS
+RV NO_IMPLEMENTATION_ASPECT_SPECIFICATIONS
+RV NO_IMPLEMENTATION_PRAGMAS
+RV STATIC_DISPATCH_TABLES
+
+U zad5%b		zad5.adb		9199e528 NE OO SU IL
+W ada%s			ada.ads			ada.ali
+W ada.exceptions%s	a-except.adb		a-except.ali
+W ada.numerics%s	a-numeri.ads		a-numeri.ali
+W ada.numerics.discrete_random%s
+Z ada.streams%s		a-stream.adb		a-stream.ali
+Z ada.strings.text_buffers%s  a-sttebu.adb	a-sttebu.ali
+Z ada.tags%s		a-tags.adb		a-tags.ali
+W ada.text_io%s		a-textio.adb		a-textio.ali
+Z ada.text_io.generic_aux%s  a-tigeau.adb	a-tigeau.ali
+Z ada.text_io.integer_aux%s
+Z ada.text_io.integer_io%s
+W system%s		system.ads		system.ali
+Z system.address_image%s  s-addima.adb		s-addima.ali
+Z system.atomic_operations.test_and_set%s  s-aotase.adb  s-aotase.ali
+Z system.concat_2%s	s-conca2.adb		s-conca2.ali
+Z system.exception_table%s  s-exctab.adb	s-exctab.ali
+Z system.img_biu%s	s-imgbiu.ads		s-imgbiu.ali
+Z system.img_int%s	s-imgint.ads		s-imgint.ali
+Z system.img_llb%s	s-imgllb.ads		s-imgllb.ali
+Z system.img_lli%s	s-imglli.ads		s-imglli.ali
+Z system.img_lllb%s	s-imglllb.ads		s-imglllb.ali
+Z system.img_llli%s	s-imgllli.ads		s-imgllli.ali
+Z system.img_lllw%s	s-imglllw.ads		s-imglllw.ali
+Z system.img_llw%s	s-imgllw.ads		s-imgllw.ali
+Z system.img_wiu%s	s-imgwiu.ads		s-imgwiu.ali
+Z system.put_images%s	s-putima.adb		s-putima.ali
+Z system.random_numbers%s  s-rannum.adb		s-rannum.ali
+Z system.return_stack%s	s-retsta.ads		s-retsta.ali
+Z system.secondary_stack%s  s-secsta.adb	s-secsta.ali
+Z system.standard_library%s  s-stalib.adb	s-stalib.ali
+Z system.stream_attributes%s  s-stratt.adb	s-stratt.ali
+Z system.val_int%s	s-valint.ads		s-valint.ali
+Z system.val_lli%s	s-vallli.ads		s-vallli.ali
+Z system.val_llli%s	s-valllli.ads		s-valllli.ali
+
+D ada.ads		20240521074738 76789da1 ada%s
+D a-assert.ads		20240521074737 ba465f5c ada.assertions%s
+D a-except.ads		20240521074738 2a7d8d70 ada.exceptions%s
+D a-ioexce.ads		20240521074738 40018c65 ada.io_exceptions%s
+D a-numeri.ads		20240521074738 84bea7a3 ada.numerics%s
+D a-nubinu.ads		20240521074738 93f1f3d1 ada.numerics.big_numbers%s
+D a-nbnbig.ads		20240521074738 711e0174 ada.numerics.big_numbers.big_integers_ghost%s
+D a-nudira.ads		20240521074738 5984dff3 ada.numerics.discrete_random%s
+D a-nudira.adb		20240521074738 0bfd6ec4 ada.numerics.discrete_random%b
+D a-stream.ads		20240521074738 119b8fb3 ada.streams%s
+D a-string.ads		20240521074738 90ac6797 ada.strings%s
+D a-sttebu.ads		20240521074738 f1ad67a2 ada.strings.text_buffers%s
+D a-stuten.ads		20240521074738 c6ced0ae ada.strings.utf_encoding%s
+D a-tags.ads		20240521074738 9eaa38c6 ada.tags%s
+D a-textio.ads		20240521074738 5c2c6153 ada.text_io%s
+D a-tigeau.ads		20240521074738 e643cdf3 ada.text_io.generic_aux%s
+D a-tiinau.ads		20240521074738 3ca4fcff ada.text_io.integer_aux%s
+D a-tiinau.adb		20240521074738 199a0c7a ada.text_io.integer_aux%b
+D a-tiinio.ads		20240521074738 e58fa6fb ada.text_io.integer_io%s
+D a-tiinio.adb		20240521074738 b79731f4 ada.text_io.integer_io%b
+D a-unccon.ads		20240521074738 0e9b276f ada.unchecked_conversion%s
+D interfac.ads		20240521074738 15f799c2 interfaces%s
+D i-c.ads		20240521074738 5c5a6c17 interfaces.c%s
+D i-cstrea.ads		20240521074738 e53d8b8e interfaces.c_streams%s
+D system.ads		20240521074738 426dafb8 system%s
+D s-addima.ads		20240521074738 a1ec9d3a system.address_image%s
+D s-assert.ads		20240521074738 9c4520c7 system.assertions%s
+D s-atoope.ads		20240521074738 c7637a25 system.atomic_operations%s
+D s-aotase.ads		20240521074738 90cf94ab system.atomic_operations.test_and_set%s
+D s-aotase.adb		20240521074738 e581b407 system.atomic_operations.test_and_set%b
+D s-atopri.ads		20240521074738 1b132436 system.atomic_primitives%s
+D s-casuti.ads		20240521074738 cf13d755 system.case_util%s
+D s-conca2.ads		20240521074738 b5fb73f7 system.concat_2%s
+D s-crtl.ads		20240521074738 8a0692f8 system.crtl%s
+D s-exctab.ads		20240521074738 91bef6ef system.exception_table%s
+D s-ficobl.ads		20240521074738 dc5161d4 system.file_control_block%s
+D s-imageb.ads		20240521074738 3953e0e6 system.image_b%s
+D s-imagei.ads		20240521074738 c707dfd0 system.image_i%s
+D s-imageu.ads		20240521074738 631c6ed0 system.image_u%s
+D s-imagew.ads		20240521074738 9d2dd267 system.image_w%s
+D s-imgbiu.ads		20240521074738 0a8e1c41 system.img_biu%s
+D s-imgint.ads		20240521074738 d4a52a9b system.img_int%s
+D s-imgllb.ads		20240521074738 47d0db9f system.img_llb%s
+D s-imglli.ads		20240521074738 0dc8acc3 system.img_lli%s
+D s-imglllb.ads		20240521074738 30212eed system.img_lllb%s
+D s-imgllli.ads		20240521074738 8322d24d system.img_llli%s
+D s-imglllw.ads		20240521074738 9e2b0560 system.img_lllw%s
+D s-imgllw.ads		20240521074738 bf9c9c15 system.img_llw%s
+D s-imguns.ads		20240521074738 7867236f system.img_uns%s
+D s-imgwiu.ads		20240521074738 912a95f2 system.img_wiu%s
+D s-parame.ads		20251218205951 1f39ba92 system.parameters%s
+D s-putima.ads		20240521074738 17291fe4 system.put_images%s
+D s-rannum.ads		20240521074738 95815eca system.random_numbers%s
+D s-rannum.adb		20240521074738 0f2dcb9a system.random_numbers%b
+D s-ransee.ads		20240521074738 01a57b33 system.random_seed%s
+D s-retsta.ads		20240521074738 0f6b06cb system.return_stack%s
+D s-secsta.ads		20240521074738 578279f5 system.secondary_stack%s
+D s-soflin.ads		20240521074738 df77073e system.soft_links%s
+D s-stache.ads		20240521074738 0b81c1fe system.stack_checking%s
+D s-stalib.ads		20240521074738 1c9580f6 system.standard_library%s
+D s-stoele.ads		20240521074738 ab5468e4 system.storage_elements%s
+D s-stoele.adb		20240521074738 8f5a9db6 system.storage_elements%b
+D s-stratt.ads		20240521074738 f7dfd786 system.stream_attributes%s
+D s-traent.ads		20240521074738 c81cbf8c system.traceback_entries%s
+D s-unstyp.ads		20240521074738 fa2a7f59 system.unsigned_types%s
+D s-valint.ads		20240521074738 1f610d7a system.val_int%s
+D s-vallli.ads		20240521074738 b4c16804 system.val_lli%s
+D s-valllli.ads		20240521074738 bf3121bd system.val_llli%s
+D s-vallllu.ads		20240521074738 fcd04714 system.val_lllu%s
+D s-valllu.ads		20240521074738 ca6e26ce system.val_llu%s
+D s-valuns.ads		20240521074738 e8a1f424 system.val_uns%s
+D s-valuti.ads		20240521074738 fcd603d8 system.val_util%s
+D s-valuei.ads		20240521074738 11081e09 system.value_i%s
+D s-vaispe.ads		20240521074738 44130d39 system.value_i_spec%s
+D s-valueu.ads		20240521074738 18770347 system.value_u%s
+D s-vauspe.ads		20240521074738 a67b2f28 system.value_u_spec%s
+D s-wchcon.ads		20240521074738 d9032363 system.wch_con%s
+D s-widlllu.ads		20240521074738 c5dfde5a system.wid_lllu%s
+D s-widllu.ads		20240521074738 a6620b19 system.wid_llu%s
+D s-widuns.ads		20240521074738 866a5800 system.wid_uns%s
+D s-widthu.ads		20240521074738 b32f15e2 system.width_u%s
+D zad5.adb		20260506085129 be4cd6f8 zad5%b
+G a e
+G c Z b b [zad5 standard 5 11 none]
+X 1 ada.ads
+16K9*Ada 20e8 82|1r6 1r23 2r6 3r6 7r26 107r27 210r49
+X 3 a-except.ads
+44K13*Exceptions 295e19 82|2w10 210r53
+84V13*Exception_Message{string} 82|210s64
+X 5 a-numeri.ads
+16K13*Numerics 35e17 82|3r10 107r31
+X 8 a-nudira.ads
+44k22*Discrete_Random 81e33 82|3w19 107r40
+50R9 Generator<53|65R9> 82|108r18[107]
+52V13 Random{long_long_integer} 82|113s45[107] 137s27[107]
+61U14 Reset<53|103p14> 82|112s15[107]
+X 9 a-nudira.adb
+53V16 Random[53|86]{long_long_integer} 54|402b13[82|107[172]]
+65V16 Random[53|86]{long_long_integer} 54|402b13[82|107[172]]
+X 15 a-textio.ads
+58K13*Text_IO 787e16 82|1w10 1r27 7r30
+88I12*Field{integer}
+282U14*New_Line 82|186s62 194s55 195s55 201s49 204s49 207s56
+519U14*Put 82|186s7 194s7 195s7 201s7 204s7 207s7
+566U14*Put_Line 82|210s26
+X 19 a-tiinio.ads
+46k21*Integer_IO 114e27 82|7r38
+83U14 Put 82|66s20[7]
+85i7 Width{15|88I12} 82|66r32[7]
+X 22 interfac.ads
+80M9*Unsigned_32
+83M9*Unsigned_64
+X 53 s-rannum.ads
+77V13*Random{22|80M9} 54|224i21
+78V13*Random{22|83M9} 54|224i21
+X 82 zad5.adb
+5U11*zad5 5b11 212l5 212t9
+7K12 LLI_IO[19|46] 8r8 66r13
+11i7 n{long_long_integer} 30r32 33r42 36r27 36r46 39r42 43r39 57r22 59r37
+12k12 Ring_Pkg 11z7 23E12 26l8 26e16 28b17 67l8 67t16 169r27
+13R12*Ring 14r54 15r27 15r40 16r27 16r40 17r27 17r40 18r27 18r40 19r27 20r28
+. 23c12 25e17 29r54 32r27 32r40 35r27 35r40 38r27 38r40 41r27 41r40 62r27
+. 65r28 172r46[169] 180r19[169] 181r31[169]
+14V16*To_Ring{13R12} 14>24 29b16 30l40 30t47 173r46[169] 200s18[169]
+14i24 X{long_long_integer} 29b24 30r26
+15V17*"+"{13R12} 15>20 15>23 32b17 33l51 33t53
+15r20 L{13R12} 32b20 33r27
+15r23 R{13R12} 32b23 33r33
+16V17*"-"{13R12} 16>20 16>23 35b17 36l55 36t57
+16r20 L{13R12} 35b20 36r31
+16r23 R{13R12} 35b23 36r37
+17V17*"*"{13R12} 17>20 17>23 38b17 39l51 39t53 174r47[169]
+17r20 L{13R12} 38b20 39r27
+17r23 R{13R12} 38b23 39r33
+18V17*"/"{13R12} 18>20 18>23 41b17 60l12 60t14 175r47[169]
+18r20 L{13R12} 41b20 59r24
+18r23 R{13R12} 41b23 43r72
+19V17*"="{boolean} 19>20 19>23 62b17 63l36 63t38
+19r20 L{13R12} 62b20 63r20
+19r23 R{13R12} 62b23 63r26
+20U17*Put 20>21 65b17 66l49 66t52 186s35[169] 194s43[169] 195s43[169] 201s35[169]
+. 204s36[169] 207s42[169]
+20r21 Item{13R12} 65b21 66r24
+21X7*Brak_Rozwiazan 54r19
+24i10 a{long_long_integer} 30m21 33m21 33r29 33r35 36m21 36r33 36r39 39m21
+. 39r29 39r35 43r74 59m18 59r26 63r22 63r28 66r29
+42i10 T{long_long_integer} 48r23 49m13 56r13 57m13 57r18 59r30
+42i39 New_T{long_long_integer} 48r38 49r18 49m25
+43i10 R_Val{long_long_integer} 47r25 50r23 51m13 53r13
+43i43 New_R{long_long_integer} 46r16 47r33 50r42 51r22 51m29
+44i10 Quotient{long_long_integer} 47m13 48r27 50r31
+44i20 Temp_T{long_long_integer} 48m13 49r34
+44i28 Temp_R{long_long_integer} 50m13 51r38
+71+12 Element 72r62 73r32 73r48 74r32 74r48 79r54 80r46 80r87 85r71 86r80
+. 87r38 87r54 88r38 88r54 94r22 99r19 116r54 119r46 119r87 120r19 121r14
+. 141r71 146r80 152r38 152r54 158r38 158r54 172r32
+72V21 To_Element{71+12} 72>32 113s29 120s30 173r32
+72i32 X{long_long_integer}
+73V22 "*"{71+12} 73>25 73>28 126s33 128s20 155s19 174r33
+73*25 L{71+12}
+73*28 R{71+12}
+74V22 "/"{71+12} 74>25 74>28 161s19 175r33
+74*25 L{71+12}
+74*28 R{71+12}
+75k12 DH_Pkg 71z12 72z21 73z22 74z22 93E12 102l8 102e14 104b17 164l8 164t14
+. 172r25
+77R12*DHSetup 78p17 78r34 79p16 79r38 80p16 80r30 84r49 85r49 86r50 93c12
+. 95e17 110r34 116r38 119r30 135r49 141r49 146r50 178r12[172]
+78U17*Init 78<22 110b17 114l11 114t15 185s7[172]
+78r22 Setup{77R12} 110b22 113m10
+79V16*Get_Generator{71+12} 79>30 116b16 117l41 117t54 143R30 186s39[172]
+79r30 Setup{77R12} 116b30 117r20
+80V16*Power{71+12} 80>22 80>39 80>55 119b16 132l11 132t16 143R17 148R19
+80r22 Setup{77R12} 119b22
+80*39 Base{71+12} 119b39 121r25
+80i55 Exp{long_long_integer} 119b55 122r35
+82R12*User 84p17 84r35 85p16 85r35 86p17 86r36 87p16 87r28 88p16 88r28 97c12
+. 101e17 135r35 141r35 146r36 152r28 158r28 179r11[172]
+84U17*Init_User 84<27 84>41 135b17 139l11 139t20 188s7[172] 189s7[172]
+84r27 U{82R12} 135b27 137m10 138m10
+84c41 Setup<77R12> 135b41
+85V16*Get_Public_Key{71+12} 85>31 85>41 141b16 144l11 144t25 191s16[172]
+. 192s16[172]
+85r31 U{82R12} 141b31 143r52
+85c41 Setup<77R12> 141b41 143r23 143r44
+86U17*Set_Key 86=25 86>42 86>65 146b17 150l11 150t18 197s7[172] 198s7[172]
+86r25 U{82R12} 146b25 148m10 148r46 149m10
+86c42 Setup<77R12> 146b42 148r25
+86*65 Other_Public{71+12} 146b65 148r32
+87V16*Encrypt{71+12} 87>24 87>34 152b16 156l11 156t18 203s17[172]
+87r24 U{82R12} 152b24 154r17 155r21
+87*34 M{71+12} 152b34 155r17
+88V16*Decrypt{71+12} 88>24 88>34 158b16 162l11 162t18 206s18[172]
+88r24 U{82R12} 158b24 160r17 161r21
+88*34 C{71+12} 158b34 161r17
+90X7*Key_Not_Set 154r41 160r41
+94*10 Generator{71+12} 113m16 117r26
+98i10 Secret{long_long_integer} 137m12 143r54 148r48
+99*10 Key{71+12} 148m12 155r23 161r23
+100b10 Is_Key_Set{boolean} 138m12 149m12 154r19 160r19
+106I15 Rand_Range{long_long_integer} 107r56
+107K15 Rand[8|44] 108r13 112r10 113r40 137r22
+108r7 Gen{8|50R9[107]} 112r21 113r52 137r34
+120*10 Result{71+12} 126m16 126r26 131r17
+121*10 B{71+12} 126r35 128m13 128r18 128r22
+122i10 E{long_long_integer} 124r16 125r16 129m13 129r18
+167i4 P{long_long_integer} 169r36
+169K12 My_Ring[12] 170r8 186r27 194r35 195r35 201r27 204r28 207r34
+172K12 My_DH[75] 176r8
+178r4 Setup{77R12[172]} 185m12 186r53 188r20 189r20 191r34 192r34 197r18
+. 198r18
+179r4 A{82R12[172]} 188m17 191r31 197m15 197r15 203r25
+179r7 B{82R12[172]} 189m17 192r31 198m15 198r15 206r26
+180r4 Pub_A{13R12[169]} 191m7 194r47 198r25
+180r11 Pub_B{13R12[169]} 192m7 195r47 197r25
+181r4 Message{13R12[169]} 200m7 201r39 203r28
+181r13 Cipher{13R12[169]} 203m7 204r40 206r29
+181r21 Decoded{13R12[169]} 206m7 207r46
+210r12 E{3|53R9} 210r82
+

@@ -196,19 +196,17 @@ int main() {
         
         RSA< Ring<N> > rsa(p, q);
         
-        cout << "--- Parametry RSA ---" << endl;
-        cout << "Modulo (n): " << rsa.getModulo() << endl;
-        cout << "Klucz publiczny (e): " << rsa.getPublicKey() << endl;
+        cout << "Modulo: " << rsa.getModulo() << endl;
+        cout << "Klucz publiczny: " << rsa.getPublicKey() << endl;
 
         Ring<N> m(1234567); 
-        cout << "\n--- Szyfrowanie ---" << endl;
-        cout << "Oryginalna wiadomosc (m): " << m << endl;
+        cout << "Wiadomosc: " << m << endl;
         
         Ring<N> c = rsa.encrypt(m);
-        cout << "Szyfrogram (c): " << c << endl;
+        cout << "Szyfrogram: " << c << endl;
         
-        Ring<N> zdekodowana = rsa.decrypt(c);
-        cout << "Zdekodowana wiadomosc: " << zdekodowana << endl;
+        Ring<N> decoded = rsa.decrypt(c);
+        cout << "Po deszyfrowaniu: " << decoded << endl;
 
 
     } catch (const exception& e) {

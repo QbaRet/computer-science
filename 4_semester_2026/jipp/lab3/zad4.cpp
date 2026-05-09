@@ -101,14 +101,14 @@ public:
 
     T encrypt(T m) const {
         if (!is_key_set) {
-            throw logic_error("Blad: Proba szyfrowania przed ustawieniem klucza wspolnego!");
+            throw logic_error("Blad: Proba szyfrowania przed ustawieniem klucza wspolnego");
         }
         return m * key;
     }
 
     T decrypt(T c) const {
         if (!is_key_set) {
-            throw logic_error("Blad: Proba deszyfrowania przed ustawieniem klucza wspolnego!");
+            throw logic_error("Blad: Proba deszyfrowania przed ustawieniem klucza wspolnego");
         }
         return c / key;
     }
@@ -121,45 +121,32 @@ int main() {
         constexpr unsigned int p = 1234567891;
         using MyField = Ring<p>;
 
-        cout << "--- Inicjalizacja Diffie-Hellman ---" << endl;
         DHSetup<MyField> dh;
-        cout << "Wylosowany generator ciala: " << dh.getGenerator() << "\n\n";
+        cout << "Generator: " << dh.getGenerator() << endl;
 
-        User<MyField> alice(dh);
-        User<MyField> bob(dh);
+        User<MyField> A(dh);
+        User<MyField> B(dh);
 
-        MyField pub_alice = alice.getPublicKey();
-        MyField pub_bob = bob.getPublicKey();
+        MyField pub_A = A.getPublicKey();
+        MyField pub_B = B.getPublicKey();
 
-        cout << "Klucz publiczny Alice: " << pub_alice << endl;
-        cout << "Klucz publiczny Boba:  " << pub_bob << "\n\n";
+        cout << "Klucz publiczny A: " << pub_A << endl;
+        cout << "Klucz publiczny B:   " << pub_B << endl;
 
-        try {
-            cout << "Proba szyfrowania bez klucza..." << endl;
-            alice.encrypt(MyField(123));
-        } catch (const exception& e) {
-            cout << "Zlapano wyjatek: " << e.what() << "\n\n";
-        }
+        A.setKey(pub_B);
+        B.setKey(pub_A);
 
-        alice.setKey(pub_bob);
-        bob.setKey(pub_alice);
+        MyField message(987654321);
+        cout << "Wiadomosc: " << message << endl;
 
-        MyField oryginalna_wiadomosc(987654321);
-        cout << "--- Komunikacja (Alice -> Bob) ---" << endl;
-        cout << "Wiadomosc Alice: " << oryginalna_wiadomosc << endl;
+        MyField cipher = A.encrypt(message);
+        cout << "Szyfrogram: " << cipher << endl;
 
-        MyField szyfrogram = alice.encrypt(oryginalna_wiadomosc);
-        cout << "Zaszyfrowana wiadomosc (wyslana w swiat): " << szyfrogram << endl;
-
-        MyField odebrana_wiadomosc = bob.decrypt(szyfrogram);
-        cout << "Wiadomosc odkodowana przez Boba: " << odebrana_wiadomosc << endl;
-
-        if (oryginalna_wiadomosc == odebrana_wiadomosc) {
-            cout << "\nSukces! Wymiana i deszyfrowanie dzialaja bezblednie." << endl;
-        }
+        MyField decoded = B.decrypt(cipher);
+        cout << "Po deszyfrowaniu: " << decoded << endl;
 
     } catch (const exception& e) {
-        cerr << "Krytyczny wyjatek: " << e.what() << endl;
+        cerr << "Wyjatek: " << e.what() << endl;
     }
 
     return 0;

@@ -2,15 +2,11 @@ with Ada.Text_IO; use Ada.Text_IO;
 with Ada.Exceptions;
 with Ada.Numerics.Discrete_Random;
 
-procedure zad4_dh is
-   
-   -- Wejscie/Wyjscie dla 64-bitowych intow
+procedure zad5 is
+
    package LLI_IO is new Ada.Text_IO.Integer_IO(Long_Long_Integer);
    use LLI_IO;
 
-   -- ==========================================
-   -- PAKIET PIERSCIENIA (Zoptymalizowany)
-   -- ==========================================
    generic
       n : Long_Long_Integer;
    package Ring_Pkg is
@@ -42,7 +38,6 @@ procedure zad4_dh is
       function "*"(L, R : Ring) return Ring is
       begin return (a => (L.a * R.a) mod n); end "*";
 
-      -- Szybkie dzielenie przy uzyciu Rozszerzonego Algorytmu Euklidesa
       function "/"(L, R : Ring) return Ring is
          T : Long_Long_Integer := 0;  New_T : Long_Long_Integer := 1;
          R_Val : Long_Long_Integer := n;  New_R : Long_Long_Integer := R.a;
@@ -71,9 +66,7 @@ procedure zad4_dh is
       begin LLI_IO.Put(Item.a, Width => 0); end Put;
    end Ring_Pkg;
 
-   -- ==========================================
-   -- PROTOKOL DIFFIE-HELLMAN
-   -- ==========================================
+
    generic
       type Element is private;
       with function To_Element(X : Long_Long_Integer) return Element;
@@ -81,17 +74,15 @@ procedure zad4_dh is
       with function "/"(L, R : Element) return Element;
    package DH_Pkg is
       
-      -- Setup
       type DHSetup is tagged private;
       procedure Init(Setup : out DHSetup);
       function Get_Generator(Setup : DHSetup) return Element;
       function Power(Setup : DHSetup; Base : Element; Exp : Long_Long_Integer) return Element;
 
-      -- User
       type User is tagged private;
-      procedure Init_User(U : out User; Setup : DHSetup);
-      function Get_Public_Key(U : User; Setup : DHSetup) return Element;
-      procedure Set_Key(U : in out User; Setup : DHSetup; Other_Public : Element);
+      procedure Init_User(U : out User; Setup : DHSetup'Class);
+      function Get_Public_Key(U : User; Setup : DHSetup'Class) return Element;
+      procedure Set_Key(U : in out User; Setup : DHSetup'Class; Other_Public : Element);
       function Encrypt(U : User; M : Element) return Element;
       function Decrypt(U : User; C : Element) return Element;
       
@@ -111,7 +102,6 @@ procedure zad4_dh is
 
    package body DH_Pkg is
       
-      -- Generator losowy
       subtype Rand_Range is Long_Long_Integer range 2 .. 1000000000;
       package Rand is new Ada.Numerics.Discrete_Random(Rand_Range);
       Gen : Rand.Generator;
@@ -140,18 +130,18 @@ procedure zad4_dh is
          return Result;
       end Power;
 
-      procedure Init_User(U : out User; Setup : DHSetup) is
+      procedure Init_User(U : out User; Setup : DHSetup'Class) is
       begin
          U.Secret := Rand.Random(Gen);
          U.Is_Key_Set := False;
       end Init_User;
 
-      function Get_Public_Key(U : User; Setup : DHSetup) return Element is
+      function Get_Public_Key(U : User; Setup : DHSetup'Class) return Element is
       begin
          return Power(Setup, Get_Generator(Setup), U.Secret);
       end Get_Public_Key;
 
-      procedure Set_Key(U : in out User; Setup : DHSetup; Other_Public : Element) is
+      procedure Set_Key(U : in out User; Setup : DHSetup'Class; Other_Public : Element) is
       begin
          U.Key := Power(Setup, Other_Public, U.Secret);
          U.Is_Key_Set := True;
@@ -172,9 +162,6 @@ procedure zad4_dh is
    end DH_Pkg;
 
 
-   -- ==========================================
-   -- KONFIGURACJA TESTU
-   -- ==========================================
    P : constant Long_Long_Integer := 1234567891;
    
    package My_Ring is new Ring_Pkg(P);
@@ -186,60 +173,38 @@ procedure zad4_dh is
                                "/"        => "/");
    use My_DH;
 
-   -- Zmienne
    Setup : DHSetup;
-   Alice, Bob : User;
-   Pub_Alice, Pub_Bob : Ring;
-   Wiadomosc, Szyfrogram, Zdekodowana : Ring;
+   A, B : User;
+   Pub_A, Pub_B : Ring;
+   Message, Cipher, Decoded : Ring;
 
 begin
    begin
-      Put_Line("--- Inicjalizacja Diffie-Hellman ---");
       Init(Setup);
-      Put("Wylosowany generator ciala: "); My_Ring.Put(Get_Generator(Setup)); New_Line;
-      New_Line;
+      Put("Generator: "); My_Ring.Put(Get_Generator(Setup)); New_Line;
 
-      Init_User(Alice, Setup);
-      Init_User(Bob, Setup);
+      Init_User(A, Setup);
+      Init_User(B, Setup);
 
-      Pub_Alice := Get_Public_Key(Alice, Setup);
-      Pub_Bob   := Get_Public_Key(Bob, Setup);
+      Pub_A := Get_Public_Key(A, Setup);
+      Pub_B := Get_Public_Key(B, Setup);
 
-      Put("Klucz publiczny Alice: "); My_Ring.Put(Pub_Alice); New_Line;
-      Put("Klucz publiczny Boba:  "); My_Ring.Put(Pub_Bob); New_Line;
-      New_Line;
+      Put("Klucz publiczny A: "); My_Ring.Put(Pub_A); New_Line;
+      Put("Klucz publiczny B: "); My_Ring.Put(Pub_B); New_Line;
 
-      -- Test wyjatku
-      Put_Line("Proba szyfrowania bez klucza (Alice)...");
-      begin
-         Szyfrogram := Encrypt(Alice, To_Ring(123));
-      exception
-         when E : others => Put_Line("   Zlapano wyjatek: " & Ada.Exceptions.Exception_Message(E));
-      end;
-      New_Line;
+      Set_Key(A, Setup, Pub_B);
+      Set_Key(B, Setup, Pub_A);
 
-      -- Wymiana kluczy
-      Set_Key(Alice, Setup, Pub_Bob);
-      Set_Key(Bob, Setup, Pub_Alice);
+      Message := To_Ring(987654321);
+      Put("Wiadomosc: "); My_Ring.Put(Message); New_Line;
 
-      Wiadomosc := To_Ring(987654321);
-      Put_Line("--- Komunikacja (Alice -> Bob) ---");
-      Put("Wiadomosc Alice: "); My_Ring.Put(Wiadomosc); New_Line;
+      Cipher := Encrypt(A, Message);
+      Put("Szyfrogram: "); My_Ring.Put(Cipher); New_Line;
 
-      Szyfrogram := Encrypt(Alice, Wiadomosc);
-      Put("Zaszyfrowana wiadomosc: "); My_Ring.Put(Szyfrogram); New_Line;
-
-      Zdekodowana := Decrypt(Bob, Szyfrogram);
-      Put("Zdekodowana wiadomosc: "); My_Ring.Put(Zdekodowana); New_Line;
-      New_Line;
-
-      if Wiadomosc = Zdekodowana then
-         Put_Line("Sukces! Wymiana powiodla sie.");
-      else
-         Put_Line("Blad!");
-      end if;
+      Decoded := Decrypt(B, Cipher);
+      Put("Po deszyfrowaniu: "); My_Ring.Put(Decoded); New_Line;
 
    exception
-      when E : others => Put_Line("Wyjatek globalny: " & Ada.Exceptions.Exception_Message(E));
+      when E : others => Put_Line("Wyjatek: " & Ada.Exceptions.Exception_Message(E));
    end;
-end zad4_dh;
+end zad5;

@@ -1,97 +1,101 @@
-import sys
+from __future__ import annotations
+from typing import Optional, TypeVar, Generic, Type
 import random
 import math
-from functools import lru_cache
-from typing import TypeVar, Generic, Type, Any
 
-@lru_cache(maxsize=None)
-def _ring_class(n: int):
-    class RingN:
-        __slots__ = ("a",)
+import sys
 
-        def __init__(self, val: int = 0):
-            self.a = val % n
-            
-        def __add__(self, other: "RingN") -> "RingN":
-            return RingN((self.a + other.a) % n)
+class Ring:
+    MODULUS: Optional[int] = None
 
-        def __sub__(self, other: "RingN") -> "RingN":
-            return RingN((n + self.a - other.a) % n)
+    def __class_getitem__(cls, item: int) -> type:
+        if not isinstance(item, int):
+            raise TypeError("Modulus musi byc int")
+        if item <= 0:
+            raise ValueError("modulus musi byc > 0")
+        cache = getattr(cls, "_param_cache", None)
+        if cache is None:
+            cache = {}
+            setattr(cls, "_param_cache", cache)
+        if item in cache:
+            return cache[item]
+        name = f"Ring_{item}"
+        sub = type(name, (cls,), {"MODULUS": item})
+        cache[item] = sub
+        return sub
 
-        def __mul__(self, other: "RingN") -> "RingN":
-            return RingN((self.a * other.a) % n)
+    def __init__(self, value: int) -> None:
+        modulus = self.__class__.MODULUS
+        if modulus is None:
+            raise TypeError("Nalezy uzyc parametryzacji Ring[n]")
+        self.modulus = modulus
+        self.value = self._scale(value, self.modulus)
 
-        def __truediv__(self, other: "RingN") -> "RingN":
-            try:
-                inv = pow(other.a, -1, n)
-                return RingN((self.a * inv) % n)
-            except ValueError:
-                raise ValueError("Brak rozwiazan")
+    @staticmethod
+    def _scale(x: int, n: int) -> int:
+        return ((x % n) + n) % n
 
-        def __iadd__(self, other: "RingN") -> "RingN":
-            self.a = (self.a + other.a) % n
-            return self
+    @staticmethod
+    def _ext_euclid(a: int, b: int) -> tuple[int, int, int]:
+        if a == 0:
+            return b, 0, 1
+        g, x1, y1 = Ring._ext_euclid(b % a, a)
+        x = y1 - (b // a) * x1
+        y = x1
+        return g, x, y
 
-        def __isub__(self, other: "RingN") -> "RingN":
-            self.a = (n + self.a - other.a) % n
-            return self
+    def _inverse(self, a: int) -> int:
+        g, x, _ = Ring._ext_euclid(a, self.modulus)
+        if g != 1:
+            raise ValueError("Brak odwrotnosci")
+        return self._scale(x, self.modulus)
 
-        def __imul__(self, other: "RingN") -> "RingN":
-            self.a = (self.a * other.a) % n
-            return self
+    def _coerce_other(self, other: object) -> "Ring":
+        if isinstance(other, Ring):
+            if type(other) is not type(self):
+                raise ValueError("Rozne typy Ring")
+            return other
+        if isinstance(other, int):
+            return self.__class__(other)
+        raise TypeError("Dozwolone: Ring o tym samym modulus albo int")
 
-        def __itruediv__(self, other: "RingN") -> "RingN":
-            try:
-                inv = pow(other.a, -1, n)
-                self.a = (self.a * inv) % n
-                return self
-            except ValueError:
-                raise ValueError("Brak rozwiazan")
-        def __eq__(self, other: object) -> bool:
-            return isinstance(other, RingN) and self.a == other.a
+    def __add__(self, other: object) -> "Ring": return self.__class__(self.value + self._coerce_other(other).value)
+    def __sub__(self, other: object) -> "Ring": return self.__class__(self.value - self._coerce_other(other).value)
+    def __mul__(self, other: object) -> "Ring": return self.__class__(self.value * self._coerce_other(other).value)
+    def __truediv__(self, other: object) -> "Ring":
+        i = self._inverse(self._coerce_other(other).value)
+        return self * i
 
-        def __ne__(self, other: object) -> bool:
-            return not self.__eq__(other)
+    def __iadd__(self, other: object) -> "Ring":
+        self.value = self._scale(self.value + self._coerce_other(other).value, self.modulus)
+        return self
+    def __isub__(self, other: object) -> "Ring":
+        self.value = self._scale(self.value - self._coerce_other(other).value, self.modulus)
+        return self
+    def __imul__(self, other: object) -> "Ring":
+        self.value = self._scale(self.value * self._coerce_other(other).value, self.modulus)
+        return self
+    def __itruediv__(self, other: object) -> "Ring":
+        inv = self._inverse(self._coerce_other(other).value)
+        self.value = self._scale(self.value * inv, self.modulus)
+        return self
 
-        def __lt__(self, other: "RingN") -> bool:
-            return self.a < other.a
-
-        def __le__(self, other: "RingN") -> bool:
-            return self.a <= other.a
-
-        def __gt__(self, other: "RingN") -> bool:
-            return self.a > other.a
-
-        def __ge__(self, other: "RingN") -> bool:
-            return self.a >= other.a
-
-        def __str__(self) -> str:
-            return str(self.a)
-
-        def __repr__(self) -> str:
-            return f"Ring[{n}]({self.a})"
-
-    RingN.__name__ = f"Ring[{n}]"
-    RingN.__qualname__ = f"Ring[{n}]"
-    return RingN
-
-
-class RingMeta(type):
-    def __getitem__(cls, n: int):
-        if not isinstance(n, int) or n <= 0:
-            raise TypeError("n musi byc dodatnia liczba calkowita")
-        return _ring_class(n)
+    def __eq__(self, other: object) -> bool: return self.value == self._coerce_other(other).value
+    def __lt__(self, other: object) -> bool: return self.value < self._coerce_other(other).value
+    def __le__(self, other: object) -> bool: return self.value <= self._coerce_other(other).value
+    def __gt__(self, other: object) -> bool: return self.value > self._coerce_other(other).value
+    def __ge__(self, other: object) -> bool: return self.value >= self._coerce_other(other).value
+    def __int__(self) -> int: return int(self.value)
+    def __str__(self) -> str: return str(self.value)
 
 
-class Ring(metaclass=RingMeta):
-    pass
-
-T = TypeVar('T') 
+T = TypeVar('T', bound=Ring)
 
 class RSA(Generic[T]):
     def __init__(self, p: int, q: int):
         self._n = p * q
         self._fi = (p - 1) * (q - 1)
+
         while True:
             self._e = random.randint(2, self._fi - 1)
             if math.gcd(self._e, self._fi) == 1:
@@ -103,7 +107,6 @@ class RSA(Generic[T]):
         return self._n
 
     def getPublicKey(self, ring_class: Type[T]) -> T:
-        """Zwraca klucz publiczny opakowany w podaną klasę pierścienia."""
         return ring_class(self._e)
 
     def encrypt(self, m: T) -> T:
@@ -113,8 +116,8 @@ class RSA(Generic[T]):
 
         while exp > 0:
             if exp % 2 == 1:
-                result = result * base 
-            base = base * base      
+                result = result * base  
+            base = base * base          
             exp //= 2
 
         return result
@@ -132,33 +135,22 @@ class RSA(Generic[T]):
 
         return result
 
-
 if __name__ == "__main__":
-    try:
-        p = 10007
-        q = 10009
-        n = p * q
-
-        RingN = Ring[n]
+    p, q = 10007, 10009
+    n = p * q
     
-        rsa = RSA[RingN](p, q)
-        
-        print("--- Parametry RSA ---")
-        print(f"Modulo (n): {rsa.getModulo()}")
-        print(f"Klucz publiczny (e): {rsa.getPublicKey(RingN)}")
-
-        m = RingN(1234567) 
-        print("\n--- Szyfrowanie ---")
-        print(f"Oryginalna wiadomosc (m): {m}")
-        
-        c = rsa.encrypt(m)
-        print(f"Szyfrogram (c): {c}")
-        
-        zdekodowana = rsa.decrypt(c)
-        print(f"Zdekodowana wiadomosc: {zdekodowana}")
-
-        print("\nCzy zdekodowana == oryginalna? ", end="")
-        print("TAK :)" if m == zdekodowana else "NIE :(")
-
-    except Exception as e:
-        print(f"wyjatek: {e}", file=sys.stderr)
+    RingN = Ring[n]
+    rsa = RSA[RingN](p, q)
+    
+    print(f"Modulo: {rsa.getModulo()}")
+    print(f"Klucz publiczny: {rsa.getPublicKey(RingN)}")
+    
+    m = RingN(1234567) 
+    print(f"Wiadomosc: {m}")
+    
+    c = rsa.encrypt(m)
+    print(f"Szyfrogram: {c}")
+    
+    decoded = rsa.decrypt(c)
+    print(f"Po deszyfrowaniu: {decoded}")
+    

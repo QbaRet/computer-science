@@ -158,35 +158,24 @@ procedure zad2_rsa is
    use My_RSA;
 
    RSA_Engine : RSA_Ctx;
-   Wiadomosc  : Ring;
-   Szyfrogram : Ring;
-   Zdekodowana : Ring;
+   Message  : Ring;
+   Cipher : Ring;
+   Decoded : Ring;
 
 begin
    begin
       RSA_Engine := Create(P, Q);
 
-      Put_Line("--- Parametry RSA ---");
-      Put("Modulo (n): "); LLI_IO.Put(Get_Modulo(RSA_Engine), Width => 0); New_Line;
-      Put("Klucz publiczny (e): "); My_Ring.Put(Get_Public_Key(RSA_Engine)); New_Line;
-      New_Line;
+      Message := To_Ring(1234567);
+      Put("Modulo: "); LLI_IO.Put(Get_Modulo(RSA_Engine), Width => 0); New_Line;
+      Put("Klucz publiczny: "); My_Ring.Put(Get_Public_Key(RSA_Engine)); New_Line;
+      Put("Wiadomosc: "); My_Ring.Put(Message); New_Line;
 
-      Wiadomosc := To_Ring(1234567);
-      Put_Line("--- Szyfrowanie ---");
-      Put("Oryginalna wiadomosc: "); My_Ring.Put(Wiadomosc); New_Line;
+      Cipher := Encrypt(RSA_Engine, Message);
+      Put("Szyfrogram: "); My_Ring.Put(Cipher); New_Line;
 
-      Szyfrogram := Encrypt(RSA_Engine, Wiadomosc);
-      Put("Szyfrogram: "); My_Ring.Put(Szyfrogram); New_Line;
-
-      Zdekodowana := Decrypt(RSA_Engine, Szyfrogram);
-      Put("Zdekodowana wiadomosc: "); My_Ring.Put(Zdekodowana); New_Line;
-      New_Line;
-
-      if Wiadomosc = Zdekodowana then
-         Put_Line("Sukces! Wiadomosci sie zgadzaja.");
-      else
-         Put_Line("Blad! Wiadomosci sa rozne.");
-      end if;
+      Decoded := Decrypt(RSA_Engine, Cipher);
+      Put("Po deszyfrowaniu: "); My_Ring.Put(Decoded); New_Line;
 
    exception
       when E : others =>
