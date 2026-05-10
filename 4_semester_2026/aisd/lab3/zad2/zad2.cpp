@@ -11,7 +11,6 @@ using namespace std;
 long long porownania = 0;
 long long przestawienia = 0;
 
-// Funkcje pomocnicze
 bool compare_val(int a, int b) {
     porownania++;
     return a > b; 
@@ -34,7 +33,6 @@ void custom_swap(int &a, int &b) {
     przestawienia += 2;
 }
 
-// ----------------- ALGORYTM SELECT -----------------
 int partition_select(vector<int>& arr, int left, int right, int x){
     int index=-1;
     for(int j=left; j<= right ; j++){
@@ -100,7 +98,7 @@ int select_algo(vector<int>& arr, int left, int right, int i){
     else return select_algo(arr, index_x + 1, right, i - k); 
 }
 
-// ------------- ALGORYTM RANDOMIZED SELECT -------------
+
 int randomPartition(vector<int>& arr, int left, int right){
     int random_index = left + rand() % (right - left + 1);
     custom_swap(arr[random_index], arr[right]);
@@ -125,7 +123,7 @@ int randomSelect(vector<int>& arr, int left, int right, int i){
     else return randomSelect(arr, q + 1, right, i - k);
 }
 
-// ---------------------- MAIN ----------------------
+
 int main() {
     srand(time(NULL));
     ofstream file("wyniki.csv");
@@ -133,14 +131,12 @@ int main() {
 
     int max_n = 50000;
     int step = 100;
-    int m = 50; // liczba powtorzen dla kazdego n
+    int m = 50; 
 
-    cout << "Rozpoczynam testy. Zostanie wykonanych " << (max_n/step) << " krokow n." << endl;
 
     for (int n = 100; n <= max_n; n += step) {
-        if (n % 5000 == 0) cout << "Przetwarzam n = " << n << "..." << endl;
+        if (n % 5000 == 0) cout << " n = " << n << endl;
 
-        // Typy k: 1 = min, 2 = 0.25n, 3 = 0.5n, 4 = 0.75n, 5 = max
         for (int k_typ = 1; k_typ <= 5; k_typ++) {
             int k_val;
             if (k_typ == 1) k_val = 1;
@@ -153,20 +149,17 @@ int main() {
             long long total_cmp_rand = 0, total_swp_rand = 0;
 
             for (int rep = 0; rep < m; rep++) {
-                // Generowanie losowej tablicy (klucze [0, 2n-1])
                 vector<int> original(n);
                 for (int i = 0; i < n; i++) {
                     original[i] = rand() % (2 * n);
                 }
 
-                // --- Test SELECT ---
                 vector<int> arr_sel = original;
                 porownania = 0; przestawienia = 0;
                 select_algo(arr_sel, 0, n - 1, k_val);
                 total_cmp_sel += porownania;
                 total_swp_sel += przestawienia;
 
-                // --- Test RANDOMIZED SELECT ---
                 vector<int> arr_rand = original;
                 porownania = 0; przestawienia = 0;
                 randomSelect(arr_rand, 0, n - 1, k_val);
@@ -174,13 +167,11 @@ int main() {
                 total_swp_rand += przestawienia;
             }
 
-            // Zapis srednich wynikow do CSV
             file << n << "," << k_typ << ",SELECT," << (total_cmp_sel / m) << "," << (total_swp_sel / m) << "\n";
             file << n << "," << k_typ << ",RAND_SELECT," << (total_cmp_rand / m) << "," << (total_swp_rand / m) << "\n";
         }
     }
 
     file.close();
-    cout << "Zakonczono testy! Wyniki zapisano do 'wyniki.csv'." << endl;
     return 0;
 }
