@@ -23,4 +23,5 @@ plt.legend(title='Algorytm', fontsize=10)
 plt.grid(True, linestyle='--', alpha=0.6)
 plt.tight_layout()
 
+plt.savefig('wykresy_zad4b.png', dpi=300, bbox_inches='tight')
 plt.show()

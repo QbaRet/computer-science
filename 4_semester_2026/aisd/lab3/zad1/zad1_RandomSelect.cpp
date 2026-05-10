@@ -94,11 +94,11 @@ int main(){
 
     vector<int> arr_rand = original;
     vector<int> arr_sorted = original;
-    sort(arr_sorted.begin(), arr_sorted.end()); // Posortowana kopia do pokazania wyniku
+    sort(arr_sorted.begin(), arr_sorted.end()); 
 
     if (n <= 30) {
         cout << "Poczatkowy stan tablicy:         "; printArray(original);    }
-
+    cout<<endl;
     int result = randomSelect(arr_rand, 0, n - 1, k);
     
     if (n <= 30) {
@@ -107,8 +107,8 @@ int main(){
         cout << "Posortowany ciag kluczy:         "; printArray(arr_sorted);
     }
 
-    cout << "\nSTATYSTYKI (RANDOMIZED SELECT):" << endl;
     cout << "Rozmiar danych (n): " << n << endl;
+    cout << "Szukana statystyka pozycyjna (k): " << k << endl;
     cout << "Liczba porownan:    " << porownania << endl;
     cout << "Liczba przestawien: " << przestawienia << endl;
 

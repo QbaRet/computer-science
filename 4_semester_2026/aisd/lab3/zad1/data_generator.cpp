@@ -21,7 +21,6 @@ int main(int argc, char* argv[]) {
     if (argc >= 3) {
         k = stoi(argv[2]);
         if (k < 1 || k > n) {
-            cerr << "Blad generatora: k musi byc w przedziale [1, " << n << "]." << endl;
             return 1;
         }
     } else {

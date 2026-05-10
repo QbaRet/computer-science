@@ -4,7 +4,7 @@
 #include <cstdlib>
 #include <ctime>
 #include <fstream>
-#include <chrono> // Do pomiaru czasu
+#include <chrono> 
 
 using namespace std;
 using namespace std::chrono;
@@ -58,7 +58,6 @@ void insertionSort(vector<int>& arr, int l, int r){
     }
 }
 
-// Zmodyfikowany algorytm - dodano parametr 'group_size'
 int select_algo(vector<int>& arr, int left, int right, int i, int group_size){ 
     if(left >= right) return arr[left];
     int n = right - left + 1;
@@ -79,7 +78,6 @@ int select_algo(vector<int>& arr, int left, int right, int i, int group_size){
         x = M[0]; 
     } else {
         int median_index = floor(number_of_groups / 2) + 1;
-        // Rekurencyjne wywolanie z tym samym rozmiarem grupy
         x = select_algo(M, 0, number_of_groups - 1, median_index, group_size);
     }
     
@@ -97,16 +95,14 @@ int main() {
     file << "n,group_size,avg_porownania,avg_przestawienia,avg_czas_us\n";
 
     int max_n = 100000;
-    int step = 1000; // Zwiekszamy krok do 1000, zeby wykresy byly plynne, a testy szybsze
-    int m = 50; 
+    int step = 1000; 
+    int m=50;
     vector<int> group_sizes = {3, 5, 7, 9, 19, 21};
 
-    cout << "Rozpoczynam testy do Zadania 3..." << endl;
 
     for (int n = 1000; n <= max_n; n += step) {
-        if (n % 5000 == 0) cout << "Przetwarzam n = " << n << "..." << endl;
 
-        int k_statystyka = n / 2; // Zawsze szukamy mediany (najlepszy test dla SELECT)
+        int k_statystyka = n / 2;
 
         for (int group_size : group_sizes) {
             long long total_cmp = 0, total_swp = 0;
@@ -120,7 +116,6 @@ int main() {
 
                 porownania = 0; przestawienia = 0;
                 
-                // Mierzymy czas dla konkretnego wywolania
                 auto start_time = high_resolution_clock::now();
                 select_algo(arr, 0, n - 1, k_statystyka, group_size);
                 auto end_time = high_resolution_clock::now();
@@ -140,6 +135,5 @@ int main() {
     }
 
     file.close();
-    cout << "Zakonczono! Wyniki zapisano do 'wyniki_zad3.csv'." << endl;
     return 0;
 }

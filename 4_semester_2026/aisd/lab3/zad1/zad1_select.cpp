@@ -145,6 +145,7 @@ int main() {
     }
     
     cout << "Rozmiar danych (n): " << n << endl;
+    cout << "Szukana statystyka pozycyjna (k): " << k << endl;
     cout << "Liczba porownan:    " << porownania << endl;
     cout << "Liczba przestawien: " << przestawienia << endl;
 
