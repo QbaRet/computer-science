@@ -5,14 +5,13 @@
 
 using namespace std;
 
-struct SAResult {
+struct TSResult {
     vector<int> path;
     double cost; 
-    int steps;
 };
 
 // =========================================================================
-// FUNKCJE POMOCNICZE
+// FUNKCJE POMOCNICZE Wczytywanie i Macierz 
 // =========================================================================
 
 vector<pair<double, double>> readFiles(const string& nazwaPliku) {
@@ -96,48 +95,73 @@ string makeRunStamp() {
 }
 
 // =========================================================================
-// ALGORYTM SA
+// GŁÓWNY ALGORYTM: TABU SEARCH
 // =========================================================================
 
-SAResult simulatedAnnealing(int n, const vector<int>& distMatrix, double T_start, double T_end, double alpha, int inner_loops, mt19937& g) {
+TSResult tabuSearch(int n, const vector<int>& distMatrix, int tabu_tenure, int max_iterations, int neighbors_sample_size, mt19937& g) {
     vector<int> current_path(n);
     iota(current_path.begin(), current_path.end(), 0);
     shuffle(current_path.begin(), current_path.end(), g);
     
     double current_cost = calculateCost(current_path, distMatrix);
-    
     vector<int> best_path = current_path;
     double best_cost = current_cost;
-    int accepted_steps = 0;
     
-    double T = T_start;
+    // Lista tabu reprezentowana jako płaska macierz dla lepszego cache'owania (NxN)
+    vector<int> tabu_list(n * n, 0);
+    
     uniform_int_distribution<int> dist_node(0, n - 1);
-    uniform_real_distribution<double> dist_prob(0.0, 1.0);
     
-    while (T > T_end) {
-        for (int k = 0; k < inner_loops; ++k) {
+    for (int iter = 1; iter <= max_iterations; ++iter) {
+        int best_delta = numeric_limits<int>::max();
+        int best_i = -1, best_j = -1;
+        int best_city1 = -1, best_city2 = -1;
+        
+        // Przeszukiwanie próbki sąsiadów
+        for (int k = 0; k < neighbors_sample_size; ++k) {
             int i = dist_node(g);
             int j = dist_node(g);
             if (i > j) swap(i, j);
             if (i == j || (i == 0 && j == n - 1)) continue;
             
             int delta = calculateDelta(current_path, distMatrix, n, i, j);
+            int city1 = current_path[i];
+            int city2 = current_path[j];
             
-            if (delta < 0 || dist_prob(g) < exp(-delta / T)) {
-                reverse(current_path.begin() + i, current_path.begin() + j + 1);
-                current_cost += delta;
-                accepted_steps++;
-                
-                if (current_cost < best_cost) {
-                    best_cost = current_cost;
-                    best_path = current_path;
+            // Weryfikacja na liście Tabu
+            bool is_tabu = (tabu_list[city1 * n + city2] >= iter || tabu_list[city2 * n + city1] >= iter);
+            // Kryterium aspiracji (pobicie globalnego rekordu ignoruje tabu)
+            bool aspiration = (current_cost + delta < best_cost);
+            
+            if (!is_tabu || aspiration) {
+                if (delta < best_delta) {
+                    best_delta = delta;
+                    best_i = i;
+                    best_j = j;
+                    best_city1 = city1;
+                    best_city2 = city2;
                 }
             }
         }
-        T *= alpha;
+        
+        // Aplikujemy najlepszy znaleziony, dozwolony ruch
+        if (best_i != -1) {
+            reverse(current_path.begin() + best_i, current_path.begin() + best_j + 1);
+            current_cost += best_delta;
+            
+            // Blokujemy ruch (wstawiamy na listę Tabu)
+            tabu_list[best_city1 * n + best_city2] = iter + tabu_tenure;
+            tabu_list[best_city2 * n + best_city1] = iter + tabu_tenure;
+            
+            // Aktualizacja globalnego optimum
+            if (current_cost < best_cost) {
+                best_cost = current_cost;
+                best_path = current_path;
+            }
+        }
     }
     
-    return {best_path, best_cost, accepted_steps};
+    return {best_path, best_cost};
 }
 
 // =========================================================================
@@ -145,20 +169,21 @@ SAResult simulatedAnnealing(int n, const vector<int>& distMatrix, double T_start
 // =========================================================================
 
 int main() {
-    const vector<string> pliki = {
-        "dj38.tsp", "qa194.tsp", "wi29.tsp", "uy734.tsp", "zi929.tsp", 
+    const vector<string> pliki = { 
         "ca4663.tsp", "eg7146.tsp", "ei8246.tsp", "mu1979.tsp", "tz6117.tsp"
     };
     
-    const int num_threads = 8; 
+    const int num_threads = 8; // Ustawienie wielowątkowości
     
-    const double T_start = 1000.0;
-    const double T_end = 0.001;
-    const double alpha = 0.99;
+    // --- PARAMETRY TABU SEARCH (WYBRANE NA PODSTAWIE ANALIZY) ---
+    const int TABU_TENURE = 30;
+    const int MULT_ITERATIONS = 50;
+    const int MULT_NEIGHBORS = 2;
+    // ------------------------------------------------------------
 
     const string run_stamp = makeRunStamp();
-    const string nazwa_wynikow = "wyniki_zbiorcze_SA_MT_" + run_stamp + ".txt";
-    const string nazwa_tras = "trasy_SA_MT_" + run_stamp + ".txt";
+    const string nazwa_wynikow = "wyniki_zbiorcze_TS_MT_" + run_stamp + ".txt";
+    const string nazwa_tras = "trasy_TS_MT_" + run_stamp + ".txt";
     
     // Inicjacja plików z nagłówkami
     {
@@ -169,12 +194,12 @@ int main() {
             return 1;
         }
         time_t now = time(nullptr);
-        plik_wynikow << "--- Sesja SA (Wielowatkowa): " << ctime(&now) << "\n";
+        plik_wynikow << "--- Sesja Tabu Search (Wielowatkowa): " << ctime(&now) << "\n";
     }
 
     for (const string& plik_nazwa : pliki) {
         cout << "\n========================================\n";
-        cout << "[SA] Wczytywanie: " << plik_nazwa << "...\n";
+        cout << "[TS] Wczytywanie: " << plik_nazwa << "...\n";
         
         vector<pair<double, double>> coords = readFiles(plik_nazwa);
         if(coords.empty()) {
@@ -186,16 +211,19 @@ int main() {
         
         vector<int> matrix = buildDistanceMatrix(coords);
         int n = coords.size();
-        int inner_loops = n * 2;
+        
+        // Definicja dynamicznych parametrów zależnych od N
+        int max_iterations = n * MULT_ITERATIONS;
+        int neighbors_sample = n * MULT_NEIGHBORS;
         
         // --- LOGIKA WYBORU LICZBY PRÓB ---
         int total_trials;
         if (n < 1000) {
-            total_trials = n; // Dla małych plików: tyle prób co miast
-            cout << "Rozmiar: " << n << " (< 1000). Uruchamiam " << total_trials << " prob (rownie liczbie miast) na " << num_threads << " watkach...\n";
+            total_trials = n; // Mniej prób dla fazy testowej, aby szybko przejść
+            cout << "Rozmiar: " << n << " (< 1000). Uruchamiam " << total_trials << " prob (faza malych plikow)...\n";
         } else {
-            total_trials = 100; // Dla dużych plików: twarde 50 prób
-            cout << "Rozmiar: " << n << " (>= 1000). Uruchamiam zredukowana liczbe " << total_trials << " prob na " << num_threads << " watkach...\n";
+            total_trials = 30; // Zgodnie z zadaniem 2: "dla duzych danych wykonaj po 100 prob"
+            cout << "Rozmiar: " << n << " (>= 1000). Uruchamiam pelne " << total_trials << " prob na " << num_threads << " watkach...\n";
         }
         
         atomic<int> current_trial(0);
@@ -215,9 +243,10 @@ int main() {
                     break; 
                 }
                 
-                SAResult wynik = simulatedAnnealing(n, matrix, T_start, T_end, alpha, inner_loops, g);
+                // Uruchomienie Tabu Search
+                TSResult wynik = tabuSearch(n, matrix, TABU_TENURE, max_iterations, neighbors_sample, g);
                 
-                // Sekcja krytyczna zapisu
+                // Sekcja krytyczna - zbieranie statystyk i natychmiastowy zapis
                 lock_guard<mutex> lock(file_mtx);
                 
                 suma_kosztow += wynik.cost;
@@ -231,12 +260,14 @@ int main() {
                              << "; proba " << trial_idx + 1 << "/" << total_trials
                              << "; koszt: " << wynik.cost << "\n";
                 
+                // Wypisywanie postępu w konsoli
                 if ((trial_idx + 1) % 10 == 0 || trial_idx == total_trials - 1) {
                     cout << " Ukonczono lacznie: " << trial_idx + 1 << "/" << total_trials << "\r" << flush;
                 }
             }
         };
 
+        // Tworzenie wątków
         vector<thread> threads;
         for (int i = 0; i < num_threads; ++i) {
             threads.emplace_back(worker, i);
@@ -247,7 +278,7 @@ int main() {
         
         cout << "\n";
         
-        // Zapis globalnego podsumowania
+        // Zapis podsumowania końcowego pliku (najlepsze i średnie rozwiązanie)
         double srednia = suma_kosztow / total_trials;
         cout << " -> Najlepsze rozwiazanie: " << najlepszy_koszt_ogolem << "\n";
         cout << " -> Srednia wartosc: " << srednia << "\n";
@@ -263,6 +294,6 @@ int main() {
     }
     
     cout << "\n========================================\n";
-    cout << "Zadanie zakonczone pomyslnie.\n";
+    cout << "Zadanie z Tabu Search zakonczone pomyslnie.\n";
     return 0;
 }
