@@ -7,13 +7,9 @@ using namespace std;
 
 struct SAResult {
     vector<int> path;
-    double cost; 
+    double cost;
     int steps;
 };
-
-// =========================================================================
-// FUNKCJE POMOCNICZE
-// =========================================================================
 
 vector<pair<double, double>> readFiles(const string& nazwaPliku) {
     vector<pair<double, double>> coordinates;
@@ -38,7 +34,7 @@ vector<pair<double, double>> readFiles(const string& nazwaPliku) {
 
 vector<int> buildDistanceMatrix(const vector<pair<double, double>>& coords) {
     int n = coords.size();
-    vector<int> distMatrix(n * n, 0); 
+    vector<int> distMatrix(n * n, 0);
     for (int i = 0; i < n; ++i) {
         for (int j = 0; j < n; ++j) {
             if (i != j) {
@@ -68,7 +64,7 @@ inline int calculateDelta(const vector<int>& path, const vector<int>& distMatrix
     
     int usuniete = distMatrix[path[przed_i] * n + path[i]] + distMatrix[path[j] * n + path[za_j]];
     int dodane = distMatrix[path[przed_i] * n + path[j]] + distMatrix[path[i] * n + path[za_j]];
-    
+
     return dodane - usuniete;
 }
 
@@ -95,9 +91,6 @@ string makeRunStamp() {
     return stamp.str();
 }
 
-// =========================================================================
-// ALGORYTM SA
-// =========================================================================
 
 SAResult simulatedAnnealing(int n, const vector<int>& distMatrix, double T_start, double T_end, double alpha, int inner_loops, mt19937& g) {
     vector<int> current_path(n);
@@ -140,18 +133,15 @@ SAResult simulatedAnnealing(int n, const vector<int>& distMatrix, double T_start
     return {best_path, best_cost, accepted_steps};
 }
 
-// =========================================================================
-// MAIN - WIELOWĄTKOWOŚĆ I ZAPIS
-// =========================================================================
 
 int main() {
     const vector<string> pliki = {
-        "dj38.tsp", "qa194.tsp", "wi29.tsp", "uy734.tsp", "zi929.tsp", 
+        "dj38.tsp", "qa194.tsp", "wi29.tsp", "uy734.tsp", "zi929.tsp",
         "ca4663.tsp", "eg7146.tsp", "ei8246.tsp", "mu1979.tsp", "tz6117.tsp"
     };
-    
-    const int num_threads = 8; 
-    
+
+    const int num_threads = 8;
+
     const double T_start = 1000.0;
     const double T_end = 0.001;
     const double alpha = 0.99;
@@ -159,8 +149,7 @@ int main() {
     const string run_stamp = makeRunStamp();
     const string nazwa_wynikow = "wyniki_zbiorcze_SA_MT_" + run_stamp + ".txt";
     const string nazwa_tras = "trasy_SA_MT_" + run_stamp + ".txt";
-    
-    // Inicjacja plików z nagłówkami
+
     {
         ofstream plik_wynikow(nazwa_wynikow);
         ofstream plik_tras(nazwa_tras);
@@ -175,7 +164,7 @@ int main() {
     for (const string& plik_nazwa : pliki) {
         cout << "\n========================================\n";
         cout << "[SA] Wczytywanie: " << plik_nazwa << "...\n";
-        
+
         vector<pair<double, double>> coords = readFiles(plik_nazwa);
         if(coords.empty()) {
             cout << " -> pominiecie (blad odczytu pliku)\n";
@@ -183,24 +172,23 @@ int main() {
             plik_wynikow << plik_nazwa << "; blad wczytywania\n";
             continue;
         }
-        
+
         vector<int> matrix = buildDistanceMatrix(coords);
         int n = coords.size();
         int inner_loops = n * 2;
-        
-        // --- LOGIKA WYBORU LICZBY PRÓB ---
+
         int total_trials;
         if (n < 1000) {
-            total_trials = n; // Dla małych plików: tyle prób co miast
+            total_trials = n;
             cout << "Rozmiar: " << n << " (< 1000). Uruchamiam " << total_trials << " prob (rownie liczbie miast) na " << num_threads << " watkach...\n";
         } else {
-            total_trials = 100; // Dla dużych plików: twarde 50 prób
+            total_trials = 100;
             cout << "Rozmiar: " << n << " (>= 1000). Uruchamiam zredukowana liczbe " << total_trials << " prob na " << num_threads << " watkach...\n";
         }
-        
+
         atomic<int> current_trial(0);
-        mutex file_mtx; 
-        
+        mutex file_mtx;
+
         double najlepszy_koszt_ogolem = numeric_limits<double>::infinity();
         vector<int> najlepsza_trasa_ogolem;
         double suma_kosztow = 0.0;
@@ -208,29 +196,28 @@ int main() {
         auto worker = [&](int thread_id) {
             random_device rd;
             mt19937 g(rd() ^ (thread_id * 1999) ^ time(nullptr));
-            
+
             while (true) {
                 int trial_idx = current_trial.fetch_add(1);
                 if (trial_idx >= total_trials) {
-                    break; 
+                    break;
                 }
-                
+
                 SAResult wynik = simulatedAnnealing(n, matrix, T_start, T_end, alpha, inner_loops, g);
-                
-                // Sekcja krytyczna zapisu
+
                 lock_guard<mutex> lock(file_mtx);
-                
+
                 suma_kosztow += wynik.cost;
                 if (wynik.cost < najlepszy_koszt_ogolem) {
                     najlepszy_koszt_ogolem = wynik.cost;
                     najlepsza_trasa_ogolem = wynik.path;
                 }
-                
+
                 ofstream plik_wynikow(nazwa_wynikow, ios::app);
-                plik_wynikow << plik_nazwa 
+                plik_wynikow << plik_nazwa
                              << "; proba " << trial_idx + 1 << "/" << total_trials
                              << "; koszt: " << wynik.cost << "\n";
-                
+
                 if ((trial_idx + 1) % 10 == 0 || trial_idx == total_trials - 1) {
                     cout << " Ukonczono lacznie: " << trial_idx + 1 << "/" << total_trials << "\r" << flush;
                 }
@@ -244,24 +231,23 @@ int main() {
         for (auto& t : threads) {
             t.join();
         }
-        
+
         cout << "\n";
-        
-        // Zapis globalnego podsumowania
+
         double srednia = suma_kosztow / total_trials;
         cout << " -> Najlepsze rozwiazanie: " << najlepszy_koszt_ogolem << "\n";
         cout << " -> Srednia wartosc: " << srednia << "\n";
-        
+
         {
             ofstream plik_wynikow(nazwa_wynikow, ios::app);
-            plik_wynikow << "-> PODSUMOWANIE " << plik_nazwa 
-                         << " Najlepsze: " << najlepszy_koszt_ogolem 
+            plik_wynikow << "-> PODSUMOWANIE " << plik_nazwa
+                         << " Najlepsze: " << najlepszy_koszt_ogolem
                          << " Srednia: " << srednia << "\n\n";
         }
-        
+
         zapiszTrasy(nazwa_tras, plik_nazwa, najlepsza_trasa_ogolem, coords);
     }
-    
+
     cout << "\n========================================\n";
     cout << "Zadanie zakonczone pomyslnie.\n";
     return 0;

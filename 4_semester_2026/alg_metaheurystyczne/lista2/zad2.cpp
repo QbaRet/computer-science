@@ -7,12 +7,8 @@ using namespace std;
 
 struct TSResult {
     vector<int> path;
-    double cost; 
+    double cost;
 };
-
-// =========================================================================
-// FUNKCJE POMOCNICZE Wczytywanie i Macierz 
-// =========================================================================
 
 vector<pair<double, double>> readFiles(const string& nazwaPliku) {
     vector<pair<double, double>> coordinates;
@@ -37,7 +33,7 @@ vector<pair<double, double>> readFiles(const string& nazwaPliku) {
 
 vector<int> buildDistanceMatrix(const vector<pair<double, double>>& coords) {
     int n = coords.size();
-    vector<int> distMatrix(n * n, 0); 
+    vector<int> distMatrix(n * n, 0);
     for (int i = 0; i < n; ++i) {
         for (int j = 0; j < n; ++j) {
             if (i != j) {
@@ -94,10 +90,6 @@ string makeRunStamp() {
     return stamp.str();
 }
 
-// =========================================================================
-// GŁÓWNY ALGORYTM: TABU SEARCH
-// =========================================================================
-
 TSResult tabuSearch(int n, const vector<int>& distMatrix, int tabu_tenure, int max_iterations, int neighbors_sample_size, mt19937& g) {
     vector<int> current_path(n);
     iota(current_path.begin(), current_path.end(), 0);
@@ -107,9 +99,8 @@ TSResult tabuSearch(int n, const vector<int>& distMatrix, int tabu_tenure, int m
     vector<int> best_path = current_path;
     double best_cost = current_cost;
     
-    // Lista tabu reprezentowana jako płaska macierz dla lepszego cache'owania (NxN)
     vector<int> tabu_list(n * n, 0);
-    
+
     uniform_int_distribution<int> dist_node(0, n - 1);
     
     for (int iter = 1; iter <= max_iterations; ++iter) {
@@ -164,28 +155,21 @@ TSResult tabuSearch(int n, const vector<int>& distMatrix, int tabu_tenure, int m
     return {best_path, best_cost};
 }
 
-// =========================================================================
-// MAIN - WIELOWĄTKOWOŚĆ I ZAPIS
-// =========================================================================
-
 int main() {
-    const vector<string> pliki = { 
+    const vector<string> pliki = {
         "ca4663.tsp", "eg7146.tsp", "ei8246.tsp", "mu1979.tsp", "tz6117.tsp"
     };
-    
-    const int num_threads = 8; // Ustawienie wielowątkowości
-    
-    // --- PARAMETRY TABU SEARCH (WYBRANE NA PODSTAWIE ANALIZY) ---
+
+    const int num_threads = 8;
+
     const int TABU_TENURE = 30;
     const int MULT_ITERATIONS = 50;
     const int MULT_NEIGHBORS = 2;
-    // ------------------------------------------------------------
 
     const string run_stamp = makeRunStamp();
     const string nazwa_wynikow = "wyniki_zbiorcze_TS_MT_" + run_stamp + ".txt";
     const string nazwa_tras = "trasy_TS_MT_" + run_stamp + ".txt";
-    
-    // Inicjacja plików z nagłówkami
+
     {
         ofstream plik_wynikow(nazwa_wynikow);
         ofstream plik_tras(nazwa_tras);
@@ -200,7 +184,7 @@ int main() {
     for (const string& plik_nazwa : pliki) {
         cout << "\n========================================\n";
         cout << "[TS] Wczytywanie: " << plik_nazwa << "...\n";
-        
+
         vector<pair<double, double>> coords = readFiles(plik_nazwa);
         if(coords.empty()) {
             cout << " -> pominiecie (blad odczytu pliku)\n";
@@ -208,27 +192,25 @@ int main() {
             plik_wynikow << plik_nazwa << "; blad wczytywania\n";
             continue;
         }
-        
+
         vector<int> matrix = buildDistanceMatrix(coords);
         int n = coords.size();
-        
-        // Definicja dynamicznych parametrów zależnych od N
+
         int max_iterations = n * MULT_ITERATIONS;
         int neighbors_sample = n * MULT_NEIGHBORS;
-        
-        // --- LOGIKA WYBORU LICZBY PRÓB ---
+
         int total_trials;
         if (n < 1000) {
-            total_trials = n; // Mniej prób dla fazy testowej, aby szybko przejść
+            total_trials = n;
             cout << "Rozmiar: " << n << " (< 1000). Uruchamiam " << total_trials << " prob (faza malych plikow)...\n";
         } else {
-            total_trials = 30; // Zgodnie z zadaniem 2: "dla duzych danych wykonaj po 100 prob"
+            total_trials = 30;
             cout << "Rozmiar: " << n << " (>= 1000). Uruchamiam pelne " << total_trials << " prob na " << num_threads << " watkach...\n";
         }
-        
+
         atomic<int> current_trial(0);
-        mutex file_mtx; 
-        
+        mutex file_mtx;
+
         double najlepszy_koszt_ogolem = numeric_limits<double>::infinity();
         vector<int> najlepsza_trasa_ogolem;
         double suma_kosztow = 0.0;
@@ -236,38 +218,34 @@ int main() {
         auto worker = [&](int thread_id) {
             random_device rd;
             mt19937 g(rd() ^ (thread_id * 1999) ^ time(nullptr));
-            
+
             while (true) {
                 int trial_idx = current_trial.fetch_add(1);
                 if (trial_idx >= total_trials) {
-                    break; 
+                    break;
                 }
-                
-                // Uruchomienie Tabu Search
+
                 TSResult wynik = tabuSearch(n, matrix, TABU_TENURE, max_iterations, neighbors_sample, g);
-                
-                // Sekcja krytyczna - zbieranie statystyk i natychmiastowy zapis
+
                 lock_guard<mutex> lock(file_mtx);
-                
+
                 suma_kosztow += wynik.cost;
                 if (wynik.cost < najlepszy_koszt_ogolem) {
                     najlepszy_koszt_ogolem = wynik.cost;
                     najlepsza_trasa_ogolem = wynik.path;
                 }
-                
+
                 ofstream plik_wynikow(nazwa_wynikow, ios::app);
-                plik_wynikow << plik_nazwa 
+                plik_wynikow << plik_nazwa
                              << "; proba " << trial_idx + 1 << "/" << total_trials
                              << "; koszt: " << wynik.cost << "\n";
-                
-                // Wypisywanie postępu w konsoli
+
                 if ((trial_idx + 1) % 10 == 0 || trial_idx == total_trials - 1) {
                     cout << " Ukonczono lacznie: " << trial_idx + 1 << "/" << total_trials << "\r" << flush;
                 }
             }
         };
 
-        // Tworzenie wątków
         vector<thread> threads;
         for (int i = 0; i < num_threads; ++i) {
             threads.emplace_back(worker, i);
@@ -275,24 +253,23 @@ int main() {
         for (auto& t : threads) {
             t.join();
         }
-        
+
         cout << "\n";
-        
-        // Zapis podsumowania końcowego pliku (najlepsze i średnie rozwiązanie)
+
         double srednia = suma_kosztow / total_trials;
         cout << " -> Najlepsze rozwiazanie: " << najlepszy_koszt_ogolem << "\n";
         cout << " -> Srednia wartosc: " << srednia << "\n";
-        
+
         {
             ofstream plik_wynikow(nazwa_wynikow, ios::app);
-            plik_wynikow << "-> PODSUMOWANIE " << plik_nazwa 
-                         << " Najlepsze: " << najlepszy_koszt_ogolem 
+            plik_wynikow << "-> PODSUMOWANIE " << plik_nazwa
+                         << " Najlepsze: " << najlepszy_koszt_ogolem
                          << " Srednia: " << srednia << "\n\n";
         }
-        
+
         zapiszTrasy(nazwa_tras, plik_nazwa, najlepsza_trasa_ogolem, coords);
     }
-    
+
     cout << "\n========================================\n";
     cout << "Zadanie z Tabu Search zakonczone pomyslnie.\n";
     return 0;
