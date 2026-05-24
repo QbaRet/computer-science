@@ -108,7 +108,6 @@ TSResult tabuSearch(int n, const vector<int>& distMatrix, int tabu_tenure, int m
         int best_i = -1, best_j = -1;
         int best_city1 = -1, best_city2 = -1;
         
-        // Przeszukiwanie próbki sąsiadów
         for (int k = 0; k < neighbors_sample_size; ++k) {
             int i = dist_node(g);
             int j = dist_node(g);
@@ -119,9 +118,7 @@ TSResult tabuSearch(int n, const vector<int>& distMatrix, int tabu_tenure, int m
             int city1 = current_path[i];
             int city2 = current_path[j];
             
-            // Weryfikacja na liście Tabu
             bool is_tabu = (tabu_list[city1 * n + city2] >= iter || tabu_list[city2 * n + city1] >= iter);
-            // Kryterium aspiracji (pobicie globalnego rekordu ignoruje tabu)
             bool aspiration = (current_cost + delta < best_cost);
             
             if (!is_tabu || aspiration) {
@@ -135,16 +132,13 @@ TSResult tabuSearch(int n, const vector<int>& distMatrix, int tabu_tenure, int m
             }
         }
         
-        // Aplikujemy najlepszy znaleziony, dozwolony ruch
         if (best_i != -1) {
             reverse(current_path.begin() + best_i, current_path.begin() + best_j + 1);
             current_cost += best_delta;
             
-            // Blokujemy ruch (wstawiamy na listę Tabu)
             tabu_list[best_city1 * n + best_city2] = iter + tabu_tenure;
             tabu_list[best_city2 * n + best_city1] = iter + tabu_tenure;
             
-            // Aktualizacja globalnego optimum
             if (current_cost < best_cost) {
                 best_cost = current_cost;
                 best_path = current_path;
@@ -174,20 +168,15 @@ int main() {
         ofstream plik_wynikow(nazwa_wynikow);
         ofstream plik_tras(nazwa_tras);
         if (!plik_wynikow.is_open() || !plik_tras.is_open()) {
-            cerr << "Blad: nie mozna otworzyc plikow wyjsciowych.\n";
             return 1;
         }
         time_t now = time(nullptr);
-        plik_wynikow << "--- Sesja Tabu Search (Wielowatkowa): " << ctime(&now) << "\n";
     }
 
     for (const string& plik_nazwa : pliki) {
-        cout << "\n========================================\n";
-        cout << "[TS] Wczytywanie: " << plik_nazwa << "...\n";
 
         vector<pair<double, double>> coords = readFiles(plik_nazwa);
         if(coords.empty()) {
-            cout << " -> pominiecie (blad odczytu pliku)\n";
             ofstream plik_wynikow(nazwa_wynikow, ios::app);
             plik_wynikow << plik_nazwa << "; blad wczytywania\n";
             continue;
@@ -202,10 +191,8 @@ int main() {
         int total_trials;
         if (n < 1000) {
             total_trials = n;
-            cout << "Rozmiar: " << n << " (< 1000). Uruchamiam " << total_trials << " prob (faza malych plikow)...\n";
         } else {
             total_trials = 30;
-            cout << "Rozmiar: " << n << " (>= 1000). Uruchamiam pelne " << total_trials << " prob na " << num_threads << " watkach...\n";
         }
 
         atomic<int> current_trial(0);

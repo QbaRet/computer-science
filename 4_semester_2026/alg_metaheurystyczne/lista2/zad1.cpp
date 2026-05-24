@@ -154,20 +154,15 @@ int main() {
         ofstream plik_wynikow(nazwa_wynikow);
         ofstream plik_tras(nazwa_tras);
         if (!plik_wynikow.is_open() || !plik_tras.is_open()) {
-            cerr << "Blad: nie mozna otworzyc plikow wyjsciowych.\n";
             return 1;
         }
         time_t now = time(nullptr);
-        plik_wynikow << "--- Sesja SA (Wielowatkowa): " << ctime(&now) << "\n";
     }
 
     for (const string& plik_nazwa : pliki) {
-        cout << "\n========================================\n";
-        cout << "[SA] Wczytywanie: " << plik_nazwa << "...\n";
 
         vector<pair<double, double>> coords = readFiles(plik_nazwa);
         if(coords.empty()) {
-            cout << " -> pominiecie (blad odczytu pliku)\n";
             ofstream plik_wynikow(nazwa_wynikow, ios::app);
             plik_wynikow << plik_nazwa << "; blad wczytywania\n";
             continue;
@@ -180,10 +175,8 @@ int main() {
         int total_trials;
         if (n < 1000) {
             total_trials = n;
-            cout << "Rozmiar: " << n << " (< 1000). Uruchamiam " << total_trials << " prob (rownie liczbie miast) na " << num_threads << " watkach...\n";
         } else {
             total_trials = 100;
-            cout << "Rozmiar: " << n << " (>= 1000). Uruchamiam zredukowana liczbe " << total_trials << " prob na " << num_threads << " watkach...\n";
         }
 
         atomic<int> current_trial(0);
@@ -235,12 +228,12 @@ int main() {
         cout << "\n";
 
         double srednia = suma_kosztow / total_trials;
-        cout << " -> Najlepsze rozwiazanie: " << najlepszy_koszt_ogolem << "\n";
-        cout << " -> Srednia wartosc: " << srednia << "\n";
+        cout << " Najlepsze rozwiazanie: " << najlepszy_koszt_ogolem << "\n";
+        cout << " Srednia wartosc: " << srednia << "\n";
 
         {
             ofstream plik_wynikow(nazwa_wynikow, ios::app);
-            plik_wynikow << "-> PODSUMOWANIE " << plik_nazwa
+            plik_wynikow << "PODSUMOWANIE " << plik_nazwa
                          << " Najlepsze: " << najlepszy_koszt_ogolem
                          << " Srednia: " << srednia << "\n\n";
         }
@@ -248,7 +241,5 @@ int main() {
         zapiszTrasy(nazwa_tras, plik_nazwa, najlepsza_trasa_ogolem, coords);
     }
 
-    cout << "\n========================================\n";
-    cout << "Zadanie zakonczone pomyslnie.\n";
     return 0;
 }
