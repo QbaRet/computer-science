@@ -1,0 +1,90 @@
+with Ada.Text_IO; use Ada.Text_IO;
+with Ada.Numerics.Float_Random; use Ada.Numerics.Float_Random;
+
+procedure Dining_Philosophers is
+   Num_Philosophers : constant Integer := 5;
+   Num_Meals        : constant Integer := 3;
+
+   -- Obiekt chroniony reprezentujący widelec
+   protected type Fork is
+      entry Grab;
+      procedure Release;
+   private
+      Is_Free : Boolean := True;
+   end Fork;
+
+   protected body Fork is
+      entry Grab when Is_Free is
+      begin
+         Is_Free := False;
+      end Grab;
+      
+      procedure Release is
+      begin
+         Is_Free := True;
+      end Release;
+   end Fork;
+
+   Forks : array (1 .. Num_Philosophers) of Fork;
+
+   -- Zadanie reprezentujące pojedynczego filozofa
+   task type Philosopher is
+      entry Start (My_ID : Integer; M : Integer);
+   end Philosopher;
+
+   task body Philosopher is
+      ID, Meals_To_Eat, Fails, Meals, Left, Right : Integer;
+      Gen : Generator;
+   begin
+      accept Start (My_ID : Integer; M : Integer) do
+         ID := My_ID;
+         Meals_To_Eat := M;
+      end Start;
+      
+      Reset(Gen);
+      Left  := ID;
+      Right := (ID mod Num_Philosophers) + 1;
+      Meals := 0;
+      Fails := 0;
+
+      while Meals < Meals_To_Eat loop
+         Put_Line("Filozof " & Integer'Image(ID) & " mysli.");
+         delay Duration(Random(Gen) * 0.1);
+
+         -- Próba podniesienia lewego widelca
+         select
+            Forks(Left).Grab;
+            
+            -- Próba podniesienia prawego widelca
+            select
+               Forks(Right).Grab;
+               
+               -- Sukces, filozof je
+               Put_Line("Filozof " & Integer'Image(ID) & " JE.");
+               delay Duration(Random(Gen) * 0.1);
+               Meals := Meals + 1;
+               
+               Forks(Right).Release;
+               Forks(Left).Release;
+            else
+               -- Nie udalo sie podniesc prawego
+               Forks(Left).Release;
+               Fails := Fails + 1;
+            end select;
+            
+         else
+            -- Nie udalo sie podniesc lewego
+            Fails := Fails + 1;
+         end select;
+      end loop;
+      
+      Put_Line("--> Filozof " & Integer'Image(ID) & " zakonczyl. Nieudane proby zjedzenia: " & Integer'Image(Fails));
+   end Philosopher;
+
+   Phils : array (1 .. Num_Philosophers) of Philosopher;
+begin
+   -- Uruchomienie filozofów
+   for I in 1 .. Num_Philosophers loop
+      Phils(I).Start(I, Num_Meals);
+   end loop;
+end Dining_Philosophers;
