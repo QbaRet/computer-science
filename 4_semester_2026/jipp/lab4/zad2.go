@@ -7,52 +7,52 @@ import (
 	"time"
 )
 
-const NumPhilosophers = 5
-const NumMeals = 3
+const (
+	NumPhilosophers = 5
+	NumMeals        = 3
+)
 
-func philosopher(id int, left, right *sync.Mutex, wg *sync.WaitGroup) {
+func philosopher(id int, left, right chan struct{}, sem chan struct{}, wg *sync.WaitGroup) {
 	defer wg.Done()
 	meals := 0
-	fails := 0
+	rnd := rand.New(rand.NewSource(time.Now().UnixNano() + int64(id)))
 
 	for meals < NumMeals {
 		fmt.Printf("Filozof %d myśli.\n", id)
-		time.Sleep(time.Duration(rand.Intn(50)) * time.Millisecond)
+		time.Sleep(time.Duration(rnd.Intn(100)) * time.Millisecond)
 
-		// Próba podniesienia lewego widelca
-		if left.TryLock() {
-			// Próba podniesienia prawego widelca
-			if right.TryLock() {
-				fmt.Printf("Filozof %d JE.\n", id)
-				time.Sleep(time.Duration(rand.Intn(50)) * time.Millisecond)
-				meals++
-				right.Unlock()
-				left.Unlock()
-			} else {
-				// Porażka - prawy zajęty, odkładamy lewy
-				left.Unlock()
-				fails++
-			}
-		} else {
-			// Porażka - lewy zajęty
-			fails++
-		}
+		sem <- struct{}{}
+
+		<-left
+		<-right
+
+		fmt.Printf("Filozof %d JE.\n", id)
+		time.Sleep(time.Duration(rnd.Intn(50)) * time.Millisecond)
+		meals++
+
+		left <- struct{}{}
+		right <- struct{}{}
+
+		<-sem
 	}
-	fmt.Printf("--> Filozof %d zakończył. Nieudane próby zjedzenia: %d\n", id, fails)
+	fmt.Printf("Filozof %d zakończył posiłki.\n", id)
 }
 
 func main() {
-	var forks [NumPhilosophers]sync.Mutex
-	var wg sync.WaitGroup
+	forks := make([]chan struct{}, NumPhilosophers)
+	for i := 0; i < NumPhilosophers; i++ {
+		forks[i] = make(chan struct{}, 1)
+		forks[i] <- struct{}{}
+	}
 
-	rand.Seed(time.Now().UnixNano())
+	sem := make(chan struct{}, NumPhilosophers-1)
+	var wg sync.WaitGroup
 
 	for i := 0; i < NumPhilosophers; i++ {
 		wg.Add(1)
-		// Przekazujemy wskaźniki na widelce. Używamy modulo, aby zamknąć stół w koło.
-		go philosopher(i+1, &forks[i], &forks[(i+1)%NumPhilosophers], &wg)
+		go philosopher(i+1, forks[i], forks[(i+1)%NumPhilosophers], sem, &wg)
 	}
 
 	wg.Wait()
-	fmt.Println("Koniec symulacji.")
+	fmt.Println("Wszyscy filozofowie zjedli obiad")
 }

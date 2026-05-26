@@ -1,100 +1,82 @@
-with Ada.Text_IO; use Ada.Text_IO;
-with Ada.Numerics.Discrete_Random;
+package main
 
-procedure Star_Network is
-   N : constant Integer := 5; -- Liczba uzytkownikow
-   M : constant Integer := 3; -- Komunikaty na uzytkownika
+import (
+	"fmt"
+	"math/rand"
+	"sync"
+	"time"
+)
 
-   -- Definicja Serwera
-   task Server is
-      entry Send_Message(Sender : in Integer; Target : in Integer);
-   end Server;
+const N = 5 
+const M = 3 
 
-   -- Definicja Uzytkownika
-   task type User is
-      entry Start(ID : Integer);
-      entry Receive_Message(Sender : in Integer);
-      entry Shutdown;
-   end User;
+type Message struct {
+	sender int
+	target int
+}
 
-   Users : array (1 .. N) of User;
+func server(serverChan chan Message, userChans []chan int) {
+	for i := 0; i < N*M; i++ {
+		msg := <-serverChan
+		userChans[msg.target] <- msg.sender 
+	}
+	for i := 0; i < N; i++ {
+		close(userChans[i])
+	}
+}
 
-   -- Cialo Serwera
-   task body Server is
-      Current_Sender, Current_Target : Integer;
-   begin
-      -- Serwer przetworzy dokladnie N * M wiadomosci
-      for I in 1 .. N * M loop
-         accept Send_Message(Sender : in Integer; Target : in Integer) do
-            Current_Sender := Sender;
-            Current_Target := Target;
-         end Send_Message;
-         
-         -- Przekazanie bez bufora: Serwer blokuje sie do momentu odebrania przez cel
-         Users(Current_Target).Receive_Message(Current_Sender);
-      end loop;
+func user(id int, serverChan chan Message, myChan chan int, wg *sync.WaitGroup) {
+	defer wg.Done()
+	sent := 0
+	received := 0
+	active := true
 
-      -- Wyslanie sygnalu zamykajacego do wszystkich
-      for I in 1 .. N loop
-         Users(I).Shutdown;
-      end loop;
-   end Server;
+	for active {
+		if sent < M {
+			target := rand.Intn(N)
+			select {
+			case serverChan <- Message{sender: id, target: target}:
+				fmt.Printf("Użytkownik %d -> WYSŁAŁ do %d\n", id, target)
+				sent++
+			case sender, ok := <-myChan:
+				if !ok {
+					active = false
+					continue
+				}
+				fmt.Printf("Użytkownik %d <- OTRZYMAŁ od %d\n", id, sender)
+				received++
+			}
+		} else {
+			sender, ok := <-myChan
+			if !ok {
+				active = false
+				continue
+			}
+			fmt.Printf("Użytkownik %d <- OTRZYMAŁ od %d\n", id, sender)
+			received++
+		}
+	}
+	fmt.Printf("=== Użytkownik %d odebrał łącznie: %d komunikatów ===\n", id, received)
+}
 
-   -- Cialo Uzytkownika
-   task body User is
-      My_ID : Integer;
-      Received_Count : Integer := 0;
-      Sent_Count : Integer := 0;
-      Active : Boolean := True;
+func main() {
+	rand.Seed(time.Now().UnixNano())
 
-      subtype Target_Range is Integer range 1 .. N;
-      package Random_Target is new Ada.Numerics.Discrete_Random(Target_Range);
-      use Random_Target;
-      Gen : Generator;
-      Target : Integer;
-   begin
-      accept Start(ID : Integer) do
-         My_ID := ID;
-      end Start;
-      Reset(Gen);
+	serverChan := make(chan Message) 
+	userChans := make([]chan int, N)
+	for i := range userChans {
+		userChans[i] = make(chan int) 
+	}
 
-      while Active loop
-         select
-            -- Priorytet: bycie gotowym na odbior wiadomosci
-            accept Receive_Message(Sender : in Integer) do
-               Received_Count := Received_Count + 1;
-               Put_Line("Uzytkownik" & Integer'Image(My_ID) & " <- OTRZYMAL od" & Integer'Image(Sender));
-            end Receive_Message;
-         or
-            -- Priorytet: odebranie sygnalu zakonczenia
-            accept Shutdown do
-               Active := False;
-            end Shutdown;
-         else
-            -- Jezeli nikt nam nic nie wysyla, to my probujemy wyslac
-            if Sent_Count < M then
-               Target := Random(Gen);
-               select
-                  -- Warunkowe wyslanie (Try-Send) do serwera
-                  Server.Send_Message(My_ID, Target);
-                  Sent_Count := Sent_Count + 1;
-                  Put_Line("Uzytkownik" & Integer'Image(My_ID) & " -> WYSLAL do" & Integer'Image(Target));
-               else
-                  -- Serwer jest zajety (przetwarza cos innego) - unikamy zakleszczenia
-                  delay 0.005;
-               end select;
-            else
-               -- Skonczylismy wysylac, po prostu odczekujemy cykl
-               delay 0.005;
-            end if;
-         end select;
-      end loop;
+	var wg sync.WaitGroup
 
-      Put_Line("=== Uzytkownik" & Integer'Image(My_ID) & " odebral lacznie: " & Integer'Image(Received_Count) & " komunikatow ===");
-   end User;
+	go server(serverChan, userChans)
 
-begin
-   for I in 1 .. N loop
-      Users(I).Start(I);
-   end loop;
-end Star_Network;
+	for i := 0; i < N; i++ {
+		wg.Add(1)
+		go user(i, serverChan, userChans[i], &wg)
+	}
+
+	wg.Wait()
+	fmt.Println("Symulacja zakończona.")
+}

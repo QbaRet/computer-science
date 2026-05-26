@@ -15,7 +15,6 @@ public class zad6 {
     static final int M = 3;
 
     public static void main(String[] args) throws InterruptedException {
-        // SynchronousQueue działa jak rura - element wejdzie, dopiero gdy ktoś go odbierze (0 bufora)
         SynchronousQueue<Message> serverQueue = new SynchronousQueue<>();
         SynchronousQueue<Integer>[] userQueues = new SynchronousQueue[N];
         
@@ -23,14 +22,12 @@ public class zad6 {
             userQueues[i] = new SynchronousQueue<>();
         }
 
-        // Definicja serwera
         Thread server = new Thread(() -> {
             try {
                 for (int i = 0; i < N * M; i++) {
                     Message msg = serverQueue.take();
                     userQueues[msg.target].put(msg.sender);
                 }
-                // Poison pill - wysyłamy -1, by zakończyć działanie wątków
                 for (int i = 0; i < N; i++) {
                     userQueues[i].put(-1);
                 }
@@ -39,7 +36,6 @@ public class zad6 {
             }
         });
 
-        // Definicja użytkowników
         Thread[] users = new Thread[N];
         for (int i = 0; i < N; i++) {
             final int id = i;
@@ -51,8 +47,7 @@ public class zad6 {
 
                 try {
                     while (active) {
-                        // Krok 1: Sprawdź, czy serwer nie próbuje nam czegoś wcisnąć
-                        Integer incoming = userQueues[id].poll(); // Nie blokuje
+                        Integer incoming = userQueues[id].poll(); 
                         if (incoming != null) {
                             if (incoming == -1) {
                                 active = false;
@@ -60,23 +55,19 @@ public class zad6 {
                             }
                             received++;
                             System.out.println("Użytkownik " + id + " <- OTRZYMAŁ od " + incoming);
-                            continue; // Wymuszamy nowy cykl (priorytetyzujemy odbiór)
+                            continue; 
                         }
 
-                        // Krok 2: Jeśli my chcemy coś wysłać
                         if (sent < M) {
                             int target = rand.nextInt(N);
-                            // offer nie blokuje wątku, zwraca false, jeśli serwer zajęty
                             if (serverQueue.offer(new Message(id, target))) {
                                 sent++;
                                 System.out.println("Użytkownik " + id + " -> WYSŁAŁ do " + target);
                             } else {
-                                // Odciążamy procesor, czekając chwilę przed kolejną próbą
                                 Thread.sleep(1);
                             }
                         } else {
-                            // Skończyliśmy wysyłać, więc możemy zacząć bezpiecznie oczekiwać z blokadą
-                            incoming = userQueues[id].take(); // Blokuje (jest to teraz bezpieczne)
+                            incoming = userQueues[id].take(); 
                             if (incoming == -1) {
                                 active = false;
                                 break;
@@ -95,7 +86,6 @@ public class zad6 {
 
         server.start();
 
-        // Oczekiwanie na zakończenie
         for (int i = 0; i < N; i++) {
             users[i].join();
         }
