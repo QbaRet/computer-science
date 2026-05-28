@@ -1,0 +1,222 @@
+=== RAPORT KALIBRACJI ZAAWANSOWANEJ DLA WIELU ZBIOROW ===
+
+WYNIKI DLA ZBIORU: wi29.tsp (N=29)
+1. Srednia: 27603 (Najlepszy: 27603)
+   - Metoda: OX
+   - Rozmiar wyspy: 50
+   - Mutacja: 0.15
+   - Prawd. Memetyczne: 0.3
+   - Rozmiar turnieju: 3
+   - Interwal migracji: 25
+-----------------------------------------
+2. Srednia: 27603 (Najlepszy: 27603)
+   - Metoda: OX
+   - Rozmiar wyspy: 50
+   - Mutacja: 0.3
+   - Prawd. Memetyczne: 0.3
+   - Rozmiar turnieju: 3
+   - Interwal migracji: 25
+-----------------------------------------
+3. Srednia: 27603 (Najlepszy: 27603)
+   - Metoda: PMX
+   - Rozmiar wyspy: 50
+   - Mutacja: 0.15
+   - Prawd. Memetyczne: 0.3
+   - Rozmiar turnieju: 7
+   - Interwal migracji: 50
+-----------------------------------------
+4. Srednia: 27617.7 (Najlepszy: 27603)
+   - Metoda: OX
+   - Rozmiar wyspy: 20
+   - Mutacja: 0.3
+   - Prawd. Memetyczne: 0.3
+   - Rozmiar turnieju: 7
+   - Interwal migracji: 50
+-----------------------------------------
+5. Srednia: 27617.7 (Najlepszy: 27603)
+   - Metoda: OX
+   - Rozmiar wyspy: 50
+   - Mutacja: 0.15
+   - Prawd. Memetyczne: 0.15
+   - Rozmiar turnieju: 3
+   - Interwal migracji: 50
+-----------------------------------------
+
+==========================================================
+
+WYNIKI DLA ZBIORU: dj38.tsp (N=38)
+1. Srednia: 6656 (Najlepszy: 6656)
+   - Metoda: PMX
+   - Rozmiar wyspy: 50
+   - Mutacja: 0.3
+   - Prawd. Memetyczne: 0.3
+   - Rozmiar turnieju: 7
+   - Interwal migracji: 50
+-----------------------------------------
+2. Srednia: 6656 (Najlepszy: 6656)
+   - Metoda: OX
+   - Rozmiar wyspy: 50
+   - Mutacja: 0.3
+   - Prawd. Memetyczne: 0.3
+   - Rozmiar turnieju: 3
+   - Interwal migracji: 50
+-----------------------------------------
+3. Srednia: 6656 (Najlepszy: 6656)
+   - Metoda: OX
+   - Rozmiar wyspy: 50
+   - Mutacja: 0.3
+   - Prawd. Memetyczne: 0.3
+   - Rozmiar turnieju: 3
+   - Interwal migracji: 25
+-----------------------------------------
+4. Srednia: 6656 (Najlepszy: 6656)
+   - Metoda: PMX
+   - Rozmiar wyspy: 50
+   - Mutacja: 0.15
+   - Prawd. Memetyczne: 0.3
+   - Rozmiar turnieju: 3
+   - Interwal migracji: 50
+-----------------------------------------
+5. Srednia: 6656 (Najlepszy: 6656)
+   - Metoda: OX
+   - Rozmiar wyspy: 20
+   - Mutacja: 0.3
+   - Prawd. Memetyczne: 0.3
+   - Rozmiar turnieju: 3
+   - Interwal migracji: 50
+-----------------------------------------
+
+==========================================================
+
+WYNIKI DLA ZBIORU: qa194.tsp (N=194)
+1. Srednia: 9998.7 (Najlepszy: 9814)
+   - Metoda: PMX
+   - Rozmiar wyspy: 50
+   - Mutacja: 0.3
+   - Prawd. Memetyczne: 0.3
+   - Rozmiar turnieju: 7
+   - Interwal migracji: 25
+-----------------------------------------
+2. Srednia: 10040.3 (Najlepszy: 9815)
+   - Metoda: PMX
+   - Rozmiar wyspy: 50
+   - Mutacja: 0.15
+   - Prawd. Memetyczne: 0.3
+   - Rozmiar turnieju: 7
+   - Interwal migracji: 50
+-----------------------------------------
+3. Srednia: 10048.3 (Najlepszy: 9707)
+   - Metoda: OX
+   - Rozmiar wyspy: 20
+   - Mutacja: 0.15
+   - Prawd. Memetyczne: 0.3
+   - Rozmiar turnieju: 7
+   - Interwal migracji: 50
+-----------------------------------------
+4. Srednia: 10051.8 (Najlepszy: 9828)
+   - Metoda: OX
+   - Rozmiar wyspy: 50
+   - Mutacja: 0.05
+   - Prawd. Memetyczne: 0.15
+   - Rozmiar turnieju: 3
+   - Interwal migracji: 50
+-----------------------------------------
+5. Srednia: 10055.5 (Najlepszy: 9774)
+   - Metoda: OX
+   - Rozmiar wyspy: 50
+   - Mutacja: 0.15
+   - Prawd. Memetyczne: 0.15
+   - Rozmiar turnieju: 7
+   - Interwal migracji: 50
+-----------------------------------------
+
+==========================================================
+
+WYNIKI DLA ZBIORU: uy734.tsp (N=734)
+1. Srednia: 96516.8 (Najlepszy: 94431)
+   - Metoda: OX
+   - Rozmiar wyspy: 50
+   - Mutacja: 0.05
+   - Prawd. Memetyczne: 0.3
+   - Rozmiar turnieju: 7
+   - Interwal migracji: 25
+-----------------------------------------
+2. Srednia: 96736.3 (Najlepszy: 93830)
+   - Metoda: PMX
+   - Rozmiar wyspy: 50
+   - Mutacja: 0.05
+   - Prawd. Memetyczne: 0.3
+   - Rozmiar turnieju: 7
+   - Interwal migracji: 25
+-----------------------------------------
+3. Srednia: 97120.6 (Najlepszy: 95786)
+   - Metoda: PMX
+   - Rozmiar wyspy: 20
+   - Mutacja: 0.05
+   - Prawd. Memetyczne: 0.3
+   - Rozmiar turnieju: 7
+   - Interwal migracji: 25
+-----------------------------------------
+4. Srednia: 97391.6 (Najlepszy: 94833)
+   - Metoda: PMX
+   - Rozmiar wyspy: 50
+   - Mutacja: 0.05
+   - Prawd. Memetyczne: 0.3
+   - Rozmiar turnieju: 7
+   - Interwal migracji: 50
+-----------------------------------------
+5. Srednia: 97898 (Najlepszy: 96146)
+   - Metoda: OX
+   - Rozmiar wyspy: 20
+   - Mutacja: 0.05
+   - Prawd. Memetyczne: 0.3
+   - Rozmiar turnieju: 7
+   - Interwal migracji: 25
+-----------------------------------------
+
+==========================================================
+
+WYNIKI DLA ZBIORU: zi929.tsp (N=929)
+1. Srednia: 124549 (Najlepszy: 120112)
+   - Metoda: OX
+   - Rozmiar wyspy: 20
+   - Mutacja: 0.05
+   - Prawd. Memetyczne: 0.3
+   - Rozmiar turnieju: 7
+   - Interwal migracji: 25
+-----------------------------------------
+2. Srednia: 125204 (Najlepszy: 120120)
+   - Metoda: PMX
+   - Rozmiar wyspy: 20
+   - Mutacja: 0.05
+   - Prawd. Memetyczne: 0.3
+   - Rozmiar turnieju: 7
+   - Interwal migracji: 25
+-----------------------------------------
+3. Srednia: 125766 (Najlepszy: 122514)
+   - Metoda: PMX
+   - Rozmiar wyspy: 20
+   - Mutacja: 0.05
+   - Prawd. Memetyczne: 0.3
+   - Rozmiar turnieju: 7
+   - Interwal migracji: 50
+-----------------------------------------
+4. Srednia: 127053 (Najlepszy: 125040)
+   - Metoda: OX
+   - Rozmiar wyspy: 20
+   - Mutacja: 0.05
+   - Prawd. Memetyczne: 0.3
+   - Rozmiar turnieju: 7
+   - Interwal migracji: 50
+-----------------------------------------
+5. Srednia: 127418 (Najlepszy: 125149)
+   - Metoda: OX
+   - Rozmiar wyspy: 50
+   - Mutacja: 0.05
+   - Prawd. Memetyczne: 0.3
+   - Rozmiar turnieju: 7
+   - Interwal migracji: 25
+-----------------------------------------
+
+==========================================================
+
