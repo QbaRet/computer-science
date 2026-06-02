@@ -22,7 +22,13 @@ func philosopher(id int, left, right chan struct{}, sem chan struct{}, wg *sync.
 		fmt.Printf("Filozof %d myśli\n", id)
 		time.Sleep(time.Duration(rnd.Intn(100)) * time.Millisecond)
 
-		sem <- struct{}{}
+		select {
+		case sem <- struct{}{}:
+			// acquired semaphore (butler)
+		case <-time.After(10 * time.Millisecond):
+			fails++
+			continue
+		}
 
 		select {
 		case <-left:

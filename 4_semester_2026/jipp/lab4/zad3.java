@@ -28,29 +28,35 @@ public class zad3 {
                     System.out.println("Filozof " + id + " myśli.");
                     Thread.sleep(rand.nextInt(10));
                     
-                    sem.acquire();
-                    
-                    if (left.tryLock(10, TimeUnit.MILLISECONDS)) {
-                        try {
-                            if (right.tryLock(10, TimeUnit.MILLISECONDS)) {
-                                try {
-                                    System.out.println("Filozof " + id + " JE.");
-                                    Thread.sleep(rand.nextInt(10));
-                                    meals++;
-                                } finally {
-                                    right.unlock();
-                                }
-                            } else {
-                                fails++; 
-                            }
-                        } finally {
-                            left.unlock();
-                        }
-                    } else {
-                        fails++; 
+                    boolean entered = sem.tryAcquire(10, TimeUnit.MILLISECONDS);
+                    if (!entered) {
+                        fails++;
+                        continue;
                     }
-                    
-                    sem.release();
+
+                    try {
+                        if (left.tryLock(10, TimeUnit.MILLISECONDS)) {
+                            try {
+                                if (right.tryLock(10, TimeUnit.MILLISECONDS)) {
+                                    try {
+                                        System.out.println("Filozof " + id + " JE.");
+                                        Thread.sleep(rand.nextInt(10));
+                                        meals++;
+                                    } finally {
+                                        right.unlock();
+                                    }
+                                } else {
+                                    fails++; 
+                                }
+                            } finally {
+                                left.unlock();
+                            }
+                        } else {
+                            fails++; 
+                        }
+                    } finally {
+                        sem.release();
+                    }
                 }
                 System.out.println("Filozof " + id + " zakończył posiłki. Nieudane próby zjedzenia: " + fails);
             } catch (InterruptedException e) {

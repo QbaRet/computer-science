@@ -69,31 +69,42 @@ procedure Dining_Philosophers is
          Put_Line("Filozof " & Integer'Image(ID) & "mysli");
          delay Duration(Random(Gen) * 0.1);
          
-         Waiter.Enter;
-         
-         select
-            Forks(Left).Grab;
-            
+         declare
+            Entered : Boolean := False;
+         begin
             select
-               Forks(Right).Grab;
-               
-               Put_Line("Filozof " & Integer'Image(ID) & "je");
-               delay Duration(Random(Gen) * 0.1);
-               Meals := Meals + 1;
-               
-               Forks(Right).Release;
-               Forks(Left).Release;
-               
-            or delay 0.01; 
-               Forks(Left).Release;
+               Waiter.Enter;
+               Entered := True;
+            or delay 0.01;
                Fails := Fails + 1;
             end select;
-            
-         or delay 0.01; 
-            Fails := Fails + 1;
-         end select;
-         
-         Waiter.Leave;
+
+            if Entered then
+               select
+                  Forks(Left).Grab;
+                  
+                  select
+                     Forks(Right).Grab;
+                     
+                     Put_Line("Filozof " & Integer'Image(ID) & "je");
+                     delay Duration(Random(Gen) * 0.1);
+                     Meals := Meals + 1;
+                     
+                     Forks(Right).Release;
+                     Forks(Left).Release;
+                     
+                  or delay 0.01; 
+                     Forks(Left).Release;
+                     Fails := Fails + 1;
+                  end select;
+                  
+               or delay 0.01; 
+                  Fails := Fails + 1;
+               end select;
+
+               Waiter.Leave;
+            end if;
+         end;
       end loop;
       
       Put_Line("Filozof " & Integer'Image(ID) & " zakonczyl. Nieudane proby zjedzenia: " & Integer'Image(Fails));
