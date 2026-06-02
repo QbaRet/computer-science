@@ -1,289 +1,384 @@
-#include <iostream>
-#include <vector>
-#include <cmath>
-#include <string>
-#include <algorithm>
-#include <numeric>
-#include <tuple>
-#include <stdexcept>
-
+#include <bits/stdc++.h>
 using namespace std;
 
-// Alias dla wykładników, np. {2, 0, 1} dla x^2 * z
-typedef vector<int> Exponents;
+// ============================================================
+// a) Struktura wielomianu wielu zmiennych
+// ============================================================
 
-struct Term {
-    double coeff;
-    Exponents exp;
-};
+// Monomial: wektor wykładników dla n zmiennych + współczynnik
+struct Monomial {
+    vector<int> exp;   // exp[i] = wykładnik i-tej zmiennej
+    double coef;       // współczynnik rzeczywisty
 
-// =======================================================================
-// b) PORZĄDKI NA JEDNOMIANACH
-// =======================================================================
+    int numVars() const { return (int)exp.size(); }
 
-struct Lex {
-    bool operator()(const Term& t1, const Term& t2) const {
-        for (size_t i = 0; i < t1.exp.size(); ++i) {
-            if (t1.exp[i] != t2.exp[i]) 
-                return t1.exp[i] > t2.exp[i];
+    // Stopień łączny
+    int totalDeg() const {
+        return accumulate(exp.begin(), exp.end(), 0);
+    }
+
+    // Czy jednomian jest zerem?
+    bool isZero() const { return abs(coef) < 1e-12; }
+
+    // Iloczyn jednomianów (mnożenie)
+    Monomial operator*(const Monomial& o) const {
+        Monomial res;
+        res.coef = coef * o.coef;
+        res.exp.resize(exp.size());
+        for (int i = 0; i < (int)exp.size(); i++)
+            res.exp[i] = exp[i] + o.exp[i];
+        return res;
+    }
+
+    // Dzielenie jednomianów (zakłada podzielność)
+    Monomial operator/(const Monomial& o) const {
+        Monomial res;
+        res.coef = coef / o.coef;
+        res.exp.resize(exp.size());
+        for (int i = 0; i < (int)exp.size(); i++)
+            res.exp[i] = exp[i] - o.exp[i];
+        return res;
+    }
+
+    // Czy this jest podzielne przez o (NWW wykładników)?
+    bool divisibleBy(const Monomial& o) const {
+        for (int i = 0; i < (int)exp.size(); i++)
+            if (exp[i] < o.exp[i]) return false;
+        return true;
+    }
+
+    string toString(const vector<string>& vars) const {
+        if (isZero()) return "0";
+        ostringstream oss;
+        oss << fixed << setprecision(4);
+        if (abs(coef - 1.0) > 1e-12 || totalDeg() == 0) oss << coef;
+        for (int i = 0; i < (int)vars.size(); i++) {
+            if (exp[i] == 1) oss << vars[i];
+            else if (exp[i] > 1) oss << vars[i] << "^" << exp[i];
         }
-        return false;
+        return oss.str();
     }
 };
 
-struct PermutedLex {
-    vector<int> perm; // np. {1, 0, 2} oznacza y > x > z
-    PermutedLex(vector<int> p) : perm(p) {}
-    
-    bool operator()(const Term& t1, const Term& t2) const {
-        for (int p : perm) {
-            if (t1.exp[p] != t2.exp[p])
-                return t1.exp[p] > t2.exp[p];
-        }
-        return false;
+// ============================================================
+// b) Porządki na jednomianach
+// ============================================================
+
+// Typ porządku
+enum MonomialOrder { LEX, PERM_LEX, GRADED_LEX };
+
+// Komparator porządku leksykograficznego (standardowy)
+// x1 > x2 > ... > xn
+bool lexLess(const Monomial& a, const Monomial& b) {
+    for (int i = 0; i < (int)a.exp.size(); i++) {
+        if (a.exp[i] != b.exp[i]) return a.exp[i] < b.exp[i];
     }
-};
+    return false; // równe
+}
 
-struct GrLex {
-    bool operator()(const Term& t1, const Term& t2) const {
-        int deg1 = accumulate(t1.exp.begin(), t1.exp.end(), 0);
-        int deg2 = accumulate(t2.exp.begin(), t2.exp.end(), 0);
-        
-        if (deg1 != deg2) return deg1 > deg2;
-        
-        Lex lex;
-        return lex(t1, t2);
+// Permutowany Lex: porównuje według permutacji zmiennych
+// perm[i] = indeks i-tej zmiennej w porządku (malejąco ważnej)
+bool permLexLess(const Monomial& a, const Monomial& b,
+                 const vector<int>& perm) {
+    for (int idx : perm) {
+        if (a.exp[idx] != b.exp[idx])
+            return a.exp[idx] < b.exp[idx];
     }
-};
+    return false;
+}
 
-// =======================================================================
-// a) STRUKTURA OBSŁUGUJĄCA WIELOMIANY WIELU ZMIENNYCH RZECZYWISTYCH
-// =======================================================================
-class MultiPoly {
-public:
-    vector<Term> terms;
-    int num_vars;
+// GradedLex: najpierw stopień łączny, potem Lex
+bool gradedLexLess(const Monomial& a, const Monomial& b) {
+    int da = a.totalDeg(), db = b.totalDeg();
+    if (da != db) return da < db;
+    return lexLess(a, b);
+}
 
-    MultiPoly(int vars = 0) : num_vars(vars) {}
+// Ogólny komparator (zwraca true jeśli a < b w danym porządku)
+bool monomialLess(const Monomial& a, const Monomial& b,
+                  MonomialOrder ord, const vector<int>& perm) {
+    switch (ord) {
+        case LEX:        return lexLess(a, b);
+        case PERM_LEX:   return permLexLess(a, b, perm);
+        case GRADED_LEX: return gradedLexLess(a, b);
+    }
+    return false;
+}
 
-    void add_term(double coeff, Exponents exp) {
-        if (abs(coeff) > 1e-5) terms.push_back({coeff, exp});
+// ============================================================
+// Wielomian = lista jednomianów (posortowana malejąco wg porządku)
+// ============================================================
+
+struct Polynomial {
+    vector<Monomial> terms;  // posortowane malejąco (największy = terms[0])
+    int n;                   // liczba zmiennych
+    vector<string> vars;     // nazwy zmiennych
+
+    Polynomial(int numVars, vector<string> varNames)
+        : n(numVars), vars(varNames) {}
+
+    // Dodanie jednomianu (bez sortowania – call normalize() potem)
+    void addMonomial(Monomial m) {
+        if (!m.isZero()) terms.push_back(m);
     }
 
-    template <typename Comparator>
-    void normalize(Comparator comp) {
-        if (terms.empty()) return;
-        
-        sort(terms.begin(), terms.end(), comp);
-        
-        vector<Term> reduced;
-        reduced.push_back(terms[0]);
-        for (size_t i = 1; i < terms.size(); ++i) {
-            if (terms[i].exp == reduced.back().exp) {
-                reduced.back().coeff += terms[i].coeff;
-            } else {
-                reduced.push_back(terms[i]);
-            }
-        }
-        
+    // Normalizacja: sumowanie like-terms i sortowanie
+    void normalize(MonomialOrder ord, const vector<int>& perm) {
+        // Zgrupuj wykładniki
+        map<vector<int>, double> acc;
+        for (auto& m : terms) acc[m.exp] += m.coef;
         terms.clear();
-        for (const auto& t : reduced) {
-            if (abs(t.coeff) > 1e-5) terms.push_back(t);
-        }
-    }
-
-    bool is_zero() const { return terms.empty(); }
-
-    Term leading_term() const {
-        if (is_zero()) throw runtime_error("Wielomian zerowy nie ma LT");
-        return terms[0];
-    }
-
-    MultiPoly operator-(const MultiPoly& other) const {
-        MultiPoly res(num_vars);
-        res.terms = terms;
-        for (const auto& t : other.terms) res.add_term(-t.coeff, t.exp);
-        return res;
-    }
-
-    MultiPoly multiply_by_term(const Term& t) const {
-        MultiPoly res(num_vars);
-        for (const auto& my_t : terms) {
-            Exponents new_exp(num_vars);
-            for(int i = 0; i < num_vars; ++i) new_exp[i] = my_t.exp[i] + t.exp[i];
-            res.add_term(my_t.coeff * t.coeff, new_exp);
-        }
-        return res;
-    }
-
-    void print(const vector<string>& vars) const {
-        if (is_zero()) { cout << "0"; return; }
-        bool first = true;
-        for (const auto& t : terms) {
-            if (!first && t.coeff > 0) cout << " + ";
-            if (t.coeff < 0) { if (first) cout << "-"; else cout << " - "; }
-            
-            double val = abs(t.coeff);
-            bool all_zeros = true;
-            for(int e : t.exp) if(e != 0) { all_zeros = false; break; }
-            
-            if (val != 1.0 || all_zeros) cout << val;
-            for (size_t i = 0; i < t.exp.size(); ++i) {
-                if (t.exp[i] > 0) {
-                    cout << vars[i];
-                    if (t.exp[i] > 1) cout << "^" << t.exp[i];
-                }
+        for (auto& [e, c] : acc) {
+            if (abs(c) > 1e-12) {
+                Monomial m; m.exp = e; m.coef = c;
+                terms.push_back(m);
             }
-            first = false;
         }
+        // Sortuj malejąco
+        sort(terms.begin(), terms.end(),
+             [&](const Monomial& a, const Monomial& b) {
+                 return monomialLess(b, a, ord, perm); // odwrócone -> malejąco
+             });
+    }
+
+    bool isZero() const { return terms.empty(); }
+
+    // Wiodący jednomian (leading term)
+    const Monomial& LT() const { return terms[0]; }
+
+    // Wiodący współczynnik
+    double LC() const { return terms[0].coef; }
+
+    // Wiodący wykładnik
+    const vector<int>& LM() const { return terms[0].exp; }
+
+    string toString() const {
+        if (terms.empty()) return "0";
+        string s;
+        for (int i = 0; i < (int)terms.size(); i++) {
+            if (i > 0 && terms[i].coef > 0) s += " + ";
+            else if (i > 0) s += " ";
+            s += terms[i].toString(vars);
+        }
+        return s;
+    }
+
+    // Suma wielomianów
+    Polynomial operator+(const Polynomial& o) const {
+        Polynomial res(n, vars);
+        res.terms = terms;
+        for (auto& m : o.terms) res.terms.push_back(m);
+        return res;
+    }
+
+    // Różnica
+    Polynomial operator-(const Polynomial& o) const {
+        Polynomial res(n, vars);
+        res.terms = terms;
+        for (auto m : o.terms) { m.coef = -m.coef; res.terms.push_back(m); }
+        return res;
+    }
+
+    // Mnożenie przez jednomian
+    Polynomial mulMonomial(const Monomial& m) const {
+        Polynomial res(n, vars);
+        for (auto& t : terms) res.terms.push_back(t * m);
+        return res;
     }
 };
 
-// Zmiana nazwy z 'divides' na 'term_divides', aby uniknąć kolizji z std::divides
-bool term_divides(const Term& t1, const Term& t2) {
-    for (size_t i = 0; i < t1.exp.size(); ++i) {
-        if (t2.exp[i] > t1.exp[i]) return false;
-    }
-    return true;
-}
+// ============================================================
+// c) PolynomialReduce
+// Wejście: f, ciąg G = (g1,...,gk), porządek
+// Wyjście: alpha[0..k-1], reszta r
+// Niezmiennik: f = sum(alpha_i * g_i) + r
+// ============================================================
 
-Term divide_terms(const Term& t1, const Term& t2) {
-    Exponents res_exp(t1.exp.size());
-    for (size_t i = 0; i < res_exp.size(); ++i) {
-        res_exp[i] = t1.exp[i] - t2.exp[i];
-    }
-    return {t1.coeff / t2.coeff, res_exp};
-}
+struct ReduceResult {
+    vector<Polynomial> alpha;  // współczynniki
+    Polynomial r;              // reszta
+};
 
-// =======================================================================
-// c) FUNKCJA PolynomialReduce
-// =======================================================================
-template <typename Comparator>
-tuple<vector<MultiPoly>, MultiPoly> PolynomialReduce(MultiPoly f, vector<MultiPoly> G, Comparator comp) {
-    int n = f.num_vars;
-    int s = G.size();
-    
-    vector<MultiPoly> a(s, MultiPoly(n)); 
-    MultiPoly r(n); 
-    MultiPoly p = f;
-    
-    p.normalize(comp);
-    for (auto& g : G) g.normalize(comp);
+ReduceResult PolynomialReduce(
+        Polynomial f,
+        const vector<Polynomial>& G,
+        MonomialOrder ord,
+        const vector<int>& perm)
+{
+    int k = (int)G.size();
+    int nv = f.n;
 
-    while (!p.is_zero()) {
-        bool division_occurred = false;
-        for (int i = 0; i < s; ++i) {
-            if (G[i].is_zero()) continue;
-            
-            Term lt_p = p.leading_term();
-            Term lt_g = G[i].leading_term();
-            
-            if (term_divides(lt_p, lt_g)) {
-                Term q = divide_terms(lt_p, lt_g);
-                
-                a[i].add_term(q.coeff, q.exp);
-                a[i].normalize(comp);
-                
-                MultiPoly subtractor = G[i].multiply_by_term(q);
-                p = p - subtractor;
-                p.normalize(comp);
-                
-                division_occurred = true;
-                break; 
+    // Inicjalizacja: alpha_i = 0-wielomian, r = 0
+    ReduceResult res { vector<Polynomial>(k, Polynomial(nv, f.vars)),
+                       Polynomial(nv, f.vars) };
+
+    auto zero = [&]() { return Polynomial(nv, f.vars); };
+
+    f.normalize(ord, perm);
+
+    while (!f.isZero()) {
+        bool divOccurred = false;
+
+        for (int i = 0; i < k && !f.isZero(); i++) {
+            Polynomial& gi = const_cast<Polynomial&>(G[i]);
+            gi.normalize(ord, perm);
+
+            // Sprawdź czy LT(gi) | LT(f)
+            while (!f.isZero() && f.LT().divisibleBy(gi.LT())) {
+                // q = LT(f) / LT(gi)
+                Monomial q = f.LT() / gi.LT();
+
+                // alpha_i += q (jako wielomian jednowyrazowy)
+                Polynomial qPoly(nv, f.vars);
+                qPoly.addMonomial(q);
+                qPoly.normalize(ord, perm);
+
+                res.alpha[i] = (res.alpha[i] + qPoly);
+                res.alpha[i].normalize(ord, perm);
+
+                // f -= q * gi
+                f = f - gi.mulMonomial(q);
+                f.normalize(ord, perm);
+
+                divOccurred = true;
             }
         }
-        
-        if (!division_occurred) {
-            Term lt_p = p.leading_term();
-            r.add_term(lt_p.coeff, lt_p.exp);
-            r.normalize(comp);
-            
-            MultiPoly lt_poly(n);
-            lt_poly.add_term(lt_p.coeff, lt_p.exp);
-            p = p - lt_poly;
-            p.normalize(comp);
+
+        if (!divOccurred) {
+            // LT(f) nie jest podzielny przez żaden LT(gi)
+            // Przenieś LT(f) do reszty
+            if (!f.isZero()) {
+                Polynomial ltPoly(nv, f.vars);
+                ltPoly.addMonomial(f.LT());
+                res.r = res.r + ltPoly;
+                res.r.normalize(ord, perm);
+
+                // Odejmij LT(f) od f
+                Polynomial ltNeg(nv, f.vars);
+                Monomial neg = f.LT(); neg.coef = -neg.coef;
+                ltNeg.addMonomial(neg);
+                f = f + ltNeg;
+                f.normalize(ord, perm);
+            }
         }
     }
-    
-    return {a, r};
+
+    return res;
 }
 
-// =======================================================================
-// TESTY I WYNIKI (d, e)
-// =======================================================================
-int main() {
-    vector<string> vars = {"x", "y", "z"};
-    
-    cout << "--- d) Cwiczenie 37 ---\n";
-    MultiPoly f(3);
-    f.add_term(1.0, {3, 0, 0});  
-    f.add_term(-1.0, {2, 1, 0}); 
-    f.add_term(-1.0, {2, 0, 1}); 
+// ============================================================
+// Pomocnicze: drukowanie wyniku redukcji
+// ============================================================
 
-    MultiPoly g1(3);
-    g1.add_term(1.0, {2, 1, 0}); 
-    g1.add_term(-1.0, {0, 0, 1});
-    
-    MultiPoly g2(3);
-    g2.add_term(1.0, {1, 1, 0}); 
-    g2.add_term(-1.0, {0, 0, 0});
-    
-    vector<MultiPoly> G1 = {g1, g2};
-    vector<MultiPoly> G2 = {g2, g1}; 
-
-    auto [alpha1, r1] = PolynomialReduce(f, G1, GrLex());
-    cout << "Reszta r1 (g1, g2): "; r1.print(vars); cout << "\n";
-    
-    auto [alpha2, r2] = PolynomialReduce(f, G2, GrLex());
-    cout << "Reszta r2 (g2, g1): "; r2.print(vars); cout << "\n";
-
-    // -------------------------------------------------------------
-    // INTERAKTYWNA CZĘŚĆ (Podpunkt e)
-    // -------------------------------------------------------------
-    cout << "\n--- e) Redukcja z 3 roznymi porzadkami ---\n";
-    
-    string indeks;
-    cout << "Podaj swoj 6-cyfrowy numer indeksu (np. 186021): ";
-    cin >> indeks;
-
-    if(indeks.length() != 6) {
-        cout << "Blad! Numer indeksu musi skladac sie dokladnie z 6 cyfr.\n";
-        return 1;
+void printResult(const string& fname,
+                 const vector<string>& gnames,
+                 const ReduceResult& res,
+                 const vector<string>& vars)
+{
+    cout << fname << " = ";
+    for (int i = 0; i < (int)res.alpha.size(); i++) {
+        string a = res.alpha[i].toString();
+        if (a != "0") {
+            cout << "(" << a << ") * " << gnames[i];
+            cout << " + ";
+        }
     }
+    cout << "r,  gdzie r = " << res.r.toString() << "\n";
+}
 
-    int a = indeks[0] - '0';
-    int b = indeks[1] - '0';
-    int c = indeks[2] - '0';
-    int d = indeks[3] - '0';
-    int e = indeks[4] - '0';
-    int f_val = indeks[5] - '0'; 
+// ============================================================
+// Pomocnicze: konstruktor wielomianu z listy (coef, exp...)
+// ============================================================
 
-    cout << "\nPobrane zmienne: \n";
-    cout << "a=" << a << ", b=" << b << ", c=" << c 
-         << ", d=" << d << ", e=" << e << ", f=" << f_val << "\n\n";
+Polynomial makePoly(int n, const vector<string>& vars,
+                    const vector<pair<double,vector<int>>>& data)
+{
+    Polynomial p(n, vars);
+    for (auto& [c,e] : data) {
+        Monomial m; m.coef = c; m.exp = e;
+        p.addMonomial(m);
+    }
+    return p;
+}
 
-    MultiPoly h(3);
-    h.add_term(1.0, {a, b, 0});
-    h.add_term(-1.0, {0, c, d});
-    h.add_term(1.0, {e, 0, f_val});
+// ============================================================
+// MAIN – demonstracja (odpowiada zadaniu Lab 4)
+// ============================================================
 
-    MultiPoly p1(3); p1.add_term(1.0, {1, 1, 0}); p1.add_term(-1.0, {0, 0, 2}); 
-    MultiPoly p2(3); p2.add_term(1.0, {0, 2, 0}); p2.add_term(-1.0, {1, 0, 0}); 
-    vector<MultiPoly> G_test = {p1, p2};
+int main()
+{
+    cout << fixed << setprecision(4);
 
-    cout << "Twój Wielomian H: "; h.normalize(Lex()); h.print(vars); cout << "\n\n";
+    // ---------------------------------------------------------
+    // Przykład z Ćwiczenia 37 (część d)
+    // Zmienne: x, y  (n=2)
+    // Porządek domyślny: Lex  x > y
+    // f = x^2*y + x*y^2 + y^2
+    // G = (g1, g2) = (x*y - 1,  y^2 - 1)
+    // ---------------------------------------------------------
+    int n = 2;
+    vector<string> vars = {"x","y"};
+    vector<int> permStd = {0,1}; // standardowy Lex: x > y
 
-    // 1. Lex
-    auto [a_lex, res_lex] = PolynomialReduce(h, G_test, Lex());
-    cout << "Reszta (LEX): "; res_lex.print(vars); cout << "\n";
+    // f = x^2*y + x*y^2 + y^2
+    Polynomial f = makePoly(n, vars, {
+        {1.0, {2,1}},
+        {1.0, {1,2}},
+        {1.0, {0,2}}
+    });
 
-    // 2. Permuted Lex (z > y > x)
-    auto [a_plex, res_plex] = PolynomialReduce(h, G_test, PermutedLex({2, 1, 0}));
-    cout << "Reszta (PermutedLEX z>y>x): "; res_plex.print(vars); cout << "\n";
+    // g1 = x*y - 1
+    Polynomial g1 = makePoly(n, vars, {
+        {1.0, {1,1}},
+        {-1.0, {0,0}}
+    });
 
-    // 3. Graded Lex
-    auto [a_grlex, res_grlex] = PolynomialReduce(h, G_test, GrLex());
-    cout << "Reszta (GrLex): "; res_grlex.print(vars); cout << "\n";
+    // g2 = y^2 - 1
+    Polynomial g2 = makePoly(n, vars, {
+        {1.0, {0,2}},
+        {-1.0, {0,0}}
+    });
+
+    cout << "=== Lex, kolejnosc (g1, g2) ===\n";
+    auto res1 = PolynomialReduce(f, {g1, g2}, LEX, permStd);
+    printResult("f", {"g1","g2"}, res1, vars);
+
+    cout << "\n=== Lex, kolejnosc (g2, g1) ===\n";
+    auto res2 = PolynomialReduce(f, {g2, g1}, LEX, permStd);
+    printResult("f", {"g2","g1"}, res2, vars);
+
+
+    cout << "\n=== Czesc e): 3 rozne porzadki ===\n";
+    int n3 = 3;
+    vector<string> vars3 = {"x","y","z"};
+
+    // h = x^2*y - y*z^2 + x*z^3
+    Polynomial h = makePoly(n3, vars3, {
+        {1.0, {2,1,0}},
+        {-1.0,{0,1,2}},
+        {1.0, {1,0,3}}
+    });
+
+    // Prosty ciąg G = (x - 1, y - 1, z - 1)
+    Polynomial G1 = makePoly(n3, vars3, {{1.0,{1,0,0}},{-1.0,{0,0,0}}});
+    Polynomial G2 = makePoly(n3, vars3, {{1.0,{0,1,0}},{-1.0,{0,0,0}}});
+    Polynomial G3 = makePoly(n3, vars3, {{1.0,{0,0,1}},{-1.0,{0,0,0}}});
+    vector<Polynomial> G3list = {G1,G2,G3};
+
+    // 1) Lex: x > y > z
+    vector<int> pLex  = {0,1,2};
+    auto rLex  = PolynomialReduce(h, G3list, LEX, pLex);
+    cout << "Lex (x>y>z):        r = " << rLex.r.toString() << "\n";
+
+    // 2) GradedLex
+    auto rGrLex = PolynomialReduce(h, G3list, GRADED_LEX, pLex);
+    cout << "GradedLex:          r = " << rGrLex.r.toString() << "\n";
+
+    // 3) Permutowany Lex: z > y > x  (perm = {2,1,0})
+    vector<int> pPermZYX = {2,1,0};
+    auto rPermLex = PolynomialReduce(h, G3list, PERM_LEX, pPermZYX);
+    cout << "PermLex (z>y>x):    r = " << rPermLex.r.toString() << "\n";
+>>>>>>> 9d6a37bdcc40a0a3bcf00fa80ee764d370e527e2
 
     return 0;
 }
