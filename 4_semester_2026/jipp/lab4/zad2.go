@@ -15,27 +15,36 @@ const (
 func philosopher(id int, left, right chan struct{}, sem chan struct{}, wg *sync.WaitGroup) {
 	defer wg.Done()
 	meals := 0
+	fails := 0
 	rnd := rand.New(rand.NewSource(time.Now().UnixNano() + int64(id)))
 
 	for meals < NumMeals {
-		fmt.Printf("Filozof %d myśli.\n", id)
+		fmt.Printf("Filozof %d myśli\n", id)
 		time.Sleep(time.Duration(rnd.Intn(100)) * time.Millisecond)
 
 		sem <- struct{}{}
 
-		<-left
-		<-right
+		select {
+		case <-left:
+			select {
+			case <-right:
+				fmt.Printf("Filozof %d je\n", id)
+				time.Sleep(time.Duration(rnd.Intn(50)) * time.Millisecond)
+				meals++
 
-		fmt.Printf("Filozof %d JE.\n", id)
-		time.Sleep(time.Duration(rnd.Intn(50)) * time.Millisecond)
-		meals++
-
-		left <- struct{}{}
-		right <- struct{}{}
+				right <- struct{}{}
+				left <- struct{}{}
+			case <-time.After(10 * time.Millisecond):
+				left <- struct{}{}
+				fails++
+			}
+		case <-time.After(10 * time.Millisecond):
+			fails++
+		}
 
 		<-sem
 	}
-	fmt.Printf("Filozof %d zakończył posiłki.\n", id)
+	fmt.Printf("Filozof %d zakończył posiłki. Nieudane próby zjedzenia: %d\n", id, fails)
 }
 
 func main() {
@@ -54,5 +63,4 @@ func main() {
 	}
 
 	wg.Wait()
-	fmt.Println("Wszyscy filozofowie zjedli obiad")
 }

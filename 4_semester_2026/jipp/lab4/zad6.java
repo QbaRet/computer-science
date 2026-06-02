@@ -54,7 +54,7 @@ public class zad6 {
                                 break;
                             }
                             received++;
-                            System.out.println("Użytkownik " + id + " <- OTRZYMAŁ od " + incoming);
+                            System.out.println("Użytkownik " + id + " otrzymal od " + incoming);
                             continue; 
                         }
 
@@ -62,7 +62,7 @@ public class zad6 {
                             int target = rand.nextInt(N);
                             if (serverQueue.offer(new Message(id, target))) {
                                 sent++;
-                                System.out.println("Użytkownik " + id + " -> WYSŁAŁ do " + target);
+                                System.out.println("Użytkownik " + id + "wyslal do " + target);
                             } else {
                                 Thread.sleep(1);
                             }
@@ -73,10 +73,10 @@ public class zad6 {
                                 break;
                             }
                             received++;
-                            System.out.println("Użytkownik " + id + " <- OTRZYMAŁ od " + incoming);
+                            System.out.println("Użytkownik " + id + " otrzymal od " + incoming);
                         }
                     }
-                    System.out.println("=== Użytkownik " + id + " odebrał łącznie: " + received + " komunikatów ===");
+                    System.out.println("Użytkownik " + id + " odebrał łącznie: " + received + " komunikatów");
                 } catch (InterruptedException e) {
                     Thread.currentThread().interrupt();
                 }
@@ -90,6 +90,5 @@ public class zad6 {
             users[i].join();
         }
         server.join();
-        System.out.println("Symulacja zakończona.");
     }
 }

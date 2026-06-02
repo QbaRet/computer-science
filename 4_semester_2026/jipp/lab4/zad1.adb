@@ -51,7 +51,7 @@ procedure Dining_Philosophers is
    end Philosopher;
 
    task body Philosopher is
-      ID, Meals_To_Eat, Meals, Left, Right : Integer;
+      ID, Meals_To_Eat, Meals, Fails, Left, Right : Integer;
       Gen : Generator;
    begin
       accept Start (My_ID : Integer; M : Integer) do
@@ -63,25 +63,40 @@ procedure Dining_Philosophers is
       Left  := ID;
       Right := (ID mod Num_Philosophers) + 1;
       Meals := 0;
+      Fails := 0;
 
       while Meals < Meals_To_Eat loop
-         Put_Line("Filozof " & Integer'Image(ID) & " mysli.");
+         Put_Line("Filozof " & Integer'Image(ID) & "mysli");
          delay Duration(Random(Gen) * 0.1);
          
          Waiter.Enter;
-         Forks(Left).Grab;
-         Forks(Right).Grab;
          
-         Put_Line("Filozof " & Integer'Image(ID) & " JE.");
-         delay Duration(Random(Gen) * 0.1);
-         Meals := Meals + 1;
+         select
+            Forks(Left).Grab;
+            
+            select
+               Forks(Right).Grab;
+               
+               Put_Line("Filozof " & Integer'Image(ID) & "je");
+               delay Duration(Random(Gen) * 0.1);
+               Meals := Meals + 1;
+               
+               Forks(Right).Release;
+               Forks(Left).Release;
+               
+            or delay 0.01; 
+               Forks(Left).Release;
+               Fails := Fails + 1;
+            end select;
+            
+         or delay 0.01; 
+            Fails := Fails + 1;
+         end select;
          
-         Forks(Right).Release;
-         Forks(Left).Release;
          Waiter.Leave;
       end loop;
       
-      Put_Line("--> Filozof " & Integer'Image(ID) & " zakonczyl.");
+      Put_Line("Filozof " & Integer'Image(ID) & " zakonczyl. Nieudane proby zjedzenia: " & Integer'Image(Fails));
    end Philosopher;
 
    Phils : array (1 .. Num_Philosophers) of Philosopher;

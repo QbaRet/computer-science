@@ -1,6 +1,7 @@
 import java.util.Random;
-import java.util.concurrent.locks.ReentrantLock;
 import java.util.concurrent.Semaphore;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.locks.ReentrantLock;
 
 public class zad3 {
     static final int NUM_PHILOSOPHERS = 5;
@@ -10,6 +11,7 @@ public class zad3 {
     static class Philosopher extends Thread {
         int id;
         ReentrantLock left, right;
+        int fails = 0;
         Random rand = new Random();
 
         Philosopher(int id, ReentrantLock left, ReentrantLock right) {
@@ -24,27 +26,33 @@ public class zad3 {
             try {
                 while (meals < NUM_MEALS) {
                     System.out.println("Filozof " + id + " myśli.");
-                    Thread.sleep(rand.nextInt(50));
+                    Thread.sleep(rand.nextInt(10));
                     
                     sem.acquire();
                     
-                    left.lock();
-                    try {
-                        right.lock();
+                    if (left.tryLock(10, TimeUnit.MILLISECONDS)) {
                         try {
-                            System.out.println("Filozof " + id + " JE.");
-                            Thread.sleep(rand.nextInt(50));
-                            meals++;
+                            if (right.tryLock(10, TimeUnit.MILLISECONDS)) {
+                                try {
+                                    System.out.println("Filozof " + id + " JE.");
+                                    Thread.sleep(rand.nextInt(10));
+                                    meals++;
+                                } finally {
+                                    right.unlock();
+                                }
+                            } else {
+                                fails++; 
+                            }
                         } finally {
-                            right.unlock();
+                            left.unlock();
                         }
-                    } finally {
-                        left.unlock();
+                    } else {
+                        fails++; 
                     }
                     
                     sem.release();
                 }
-                System.out.println("--> Filozof " + id + " zakończył posiłki.");
+                System.out.println("Filozof " + id + " zakończył posiłki. Nieudane próby zjedzenia: " + fails);
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
             }
@@ -70,6 +78,6 @@ public class zad3 {
                 phils[i].join();
             } catch (InterruptedException e) {}
         }
-        System.out.println("Koniec symulacji. System był sprawiedliwy.");
+        System.out.println("Koniec symulacji.");
     }
 }

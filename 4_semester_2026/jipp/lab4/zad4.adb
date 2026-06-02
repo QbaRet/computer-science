@@ -55,7 +55,7 @@ procedure Star_Network is
          select
             accept Receive_Message(Sender : in Integer) do
                Received_Count := Received_Count + 1;
-               Put_Line("Uzytkownik" & Integer'Image(My_ID) & " <- OTRZYMAL od" & Integer'Image(Sender));
+               Put_Line("Uzytkownik" & Integer'Image(My_ID) & " otrzymal od" & Integer'Image(Sender));
             end Receive_Message;
          or
             accept Shutdown do
@@ -67,7 +67,7 @@ procedure Star_Network is
                select
                   Server.Send_Message(My_ID, Target);
                   Sent_Count := Sent_Count + 1;
-                  Put_Line("Uzytkownik" & Integer'Image(My_ID) & " -> WYSLAL do" & Integer'Image(Target));
+                  Put_Line("Uzytkownik" & Integer'Image(My_ID) & " wyslal do" & Integer'Image(Target));
                else
                   delay 0.005;
                end select;
