@@ -1,0 +1,55 @@
+#!/usr/bin/env python3
+import sys
+def fa_algorithm(pattern, alphabet):
+    m = len(pattern)
+    delta = {}
+    for q in range(m + 1):
+        for a in alphabet:
+            k = min(m, q + 1)
+            prefix_a = pattern[:q] + a
+            while k > 0 and not prefix_a.endswith(pattern[:k]):
+                k -= 1
+            delta[(q, a)] = k
+    return delta
+
+
+def text_search(text, pattern, delta):
+    n = len(text)
+    m = len(pattern)
+    q = 0
+    occurrences = []
+    for i in range(n):
+        q = delta.get((q, text[i]), 0)
+        if q == m:
+            occurrences.append(i - m + 1)
+    return occurrences
+
+def main():
+    if len(sys.argv) < 3:
+        print(f"Użycie: {sys.argv[0]} <wzorzec> <nazwa_pliku>")
+        sys.exit(1)
+
+    pattern = sys.argv[1]
+    filename = sys.argv[2]
+
+    try:
+        with open(filename, "r", encoding="utf-8") as f:
+            text = f.read()
+    except FileNotFoundError:
+        print(f"Błąd: Nie znaleziono pliku '{filename}'")
+        sys.exit(1)
+    except Exception as e:
+        print(f"Błąd podczas odczytu pliku: {e}")
+        sys.exit(1)
+
+    alphabet = set(text) | set(pattern)
+
+    delta = fa_algorithm(pattern, alphabet)
+    occurrences = text_search(text, pattern, delta)
+
+    for pos in occurrences:
+        print(pos)
+
+
+if __name__ == "__main__":
+    main()
