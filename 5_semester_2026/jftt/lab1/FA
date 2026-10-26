@@ -1,10 +1,11 @@
 #!/usr/bin/env python3
 import sys
-def fa_algorithm(pattern, alphabet):
+
+def compute_transition_function(pattern, sigma):
     m = len(pattern)
     delta = {}
     for q in range(m + 1):
-        for a in alphabet:
+        for a in sigma:
             k = min(m, q + 1)
             prefix_a = pattern[:q] + a
             while k > 0 and not prefix_a.endswith(pattern[:k]):
@@ -13,16 +14,20 @@ def fa_algorithm(pattern, alphabet):
     return delta
 
 
-def text_search(text, pattern, delta):
+def finite_automaton_matcher(text, pattern, delta):
     n = len(text)
     m = len(pattern)
-    q = 0
+    q0 = 0  
+    q = q0
     occurrences = []
+    
     for i in range(n):
-        q = delta.get((q, text[i]), 0)
-        if q == m:
+        q = delta.get((q, text[i]), q0)  
+        if q == m:  
             occurrences.append(i - m + 1)
+            
     return occurrences
+
 
 def main():
     if len(sys.argv) < 3:
@@ -42,13 +47,14 @@ def main():
         print(f"Błąd podczas odczytu pliku: {e}")
         sys.exit(1)
 
-    alphabet = set(text) | set(pattern)
+    sigma = set(text) | set(pattern)
 
-    delta = fa_algorithm(pattern, alphabet)
-    occurrences = text_search(text, pattern, delta)
+    delta = compute_transition_function(pattern, sigma)
+    occurrences = finite_automaton_matcher(text, pattern, delta)
 
     for pos in occurrences:
         print(pos)
+    print(f"ilosc wystapien {len(occurrences)}")
 
 
 if __name__ == "__main__":

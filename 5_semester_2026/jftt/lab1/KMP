@@ -48,7 +48,7 @@ def main():
         with open(filename, "r", encoding="utf-8") as f:
             text = f.read()
     except FileNotFoundError:
-        print(f"Błąd: Nie znaleziono pliku '{filename}'")
+        print(f"Braku pliku'{filename}'")
         sys.exit(1)
     except Exception as e:
         print(f"Błąd podczas odczytu pliku: {e}")
@@ -59,6 +59,7 @@ def main():
     for pos in occurrences:
         print(pos)
 
+    print(f"ilosc wystapien {len(occurrences)}")
 
 if __name__ == "__main__":
     main()
