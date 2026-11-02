@@ -1,0 +1,217 @@
+\documentclass[11pt,a4paper]{article}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage[polish]{babel}
+\usepackage[margin=2.3cm]{geometry}
+\usepackage{amsmath,amssymb}
+\usepackage{booktabs}
+\usepackage{enumitem}
+\usepackage{graphicx}
+\setlist[itemize]{itemsep=1pt,topsep=3pt,parsep=0pt}
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{4pt}
+\renewcommand{\arraystretch}{1.1}
+
+\title{Obliczenia naukowe -- Lista 2\\ Sprawozdanie}
+\author{Jakub Retmańczyk}
+\date{\today}
+
+\begin{document}
+\maketitle
+
+\section{Zadanie 1 -- iloczyn skalarny po zmianie danych}
+Z $x_4$ usunięto ostatnią 9 ($0{,}577215664$), z $x_5$ ostatnią 7 ($0{,}301029995$).
+
+\begin{table}[h]
+\centering\footnotesize
+\begin{tabular}{@{}lrrrr@{}}
+\toprule
+ & \multicolumn{2}{c}{Float32} & \multicolumn{2}{c}{Float64}\\
+ & dane pierwotne & zmienione & dane pierwotne & zmienione \\
+\midrule
+w przód & $-0{,}4999443$ & $-0{,}4999443$ & $1{,}03\cdot10^{-10}$ & $-4{,}2963\cdot10^{-3}$\\
+w tył & $-0{,}4543457$ & $-0{,}4543457$ & $-1{,}56\cdot10^{-10}$ & $-4{,}2963\cdot10^{-3}$\\
+od największych & $-0{,}5$ & $-0{,}5$ & $0$ & $-4{,}2963\cdot10^{-3}$\\
+od najmniejszych & $-0{,}5$ & $-0{,}5$ & $0$ & $-4{,}2963\cdot10^{-3}$\\
+\midrule
+dokładnie & \multicolumn{2}{c}{} & $-1{,}007\cdot10^{-11}$ & $-4{,}2963\cdot10^{-3}$\\
+\bottomrule
+\end{tabular}
+\caption{Zadanie 1: wyniki czterech metod sumowania.}
+\end{table}
+\begin{itemize}
+\item Zmiana danych o względną wielkość $\sim10^{-9}$ zmienia dokładny wynik z $-10^{-11}$ na $-4{,}3\cdot10^{-3}$, czyli o 8 rzędów wielkości: zadanie jest bardzo źle uwarunkowane (wskaźnik $\sim5\cdot10^{17}$).
+\item W Float64 wyniki dla danych pierwotnych były szumem zaokrągleń (zależnym od kolejności sumowania, nawet o złym znaku); dla danych zmienionych wszystkie metody zgadzają się z wynikiem dokładnym na ok. 7 cyfr, bo wynik nie jest już zdominowany przez kasowanie się składników.
+\item W Float32 (7 cyfr) po zaokrągleniu danych $x_4,x_5$ są identyczne w obu wersjach, więc wyniki się nie zmieniają, a i tak są bezwartościowe.
+\item Wniosek: małe zaburzenie danych (nieuniknione przy zapisie) może zniszczyć wynik niezależnie od algorytmu -- to cecha zadania, nie algorytmu.
+\end{itemize}
+
+\section{Zadanie 2 -- układ $Ax=b$}
+Błąd względny $\|\tilde x-x\|/\|x\|$, $x=(1,\dots,1)^T$, $b=Ax$. \texttt{Gauss} $=$ \verb|A\b|, \texttt{inv} $=$ \verb|inv(A)*b|.
+
+\begin{table}[h]
+\centering\footnotesize
+\begin{tabular}{@{}rrrcc@{}}
+\toprule
+$n$ & cond & rank & Gauss & inv \\
+\midrule
+2 & $1{,}9\cdot10^{1}$ & 2 & $5{,}7\cdot10^{-16}$ & $1{,}1\cdot10^{-15}$ \\
+4 & $1{,}6\cdot10^{4}$ & 4 & $3{,}6\cdot10^{-13}$ & $2{,}4\cdot10^{-13}$ \\
+6 & $1{,}5\cdot10^{7}$ & 6 & $2{,}6\cdot10^{-10}$ & $2{,}6\cdot10^{-10}$ \\
+8 & $1{,}5\cdot10^{10}$ & 8 & $3{,}8\cdot10^{-7}$ & $4{,}0\cdot10^{-7}$ \\
+10 & $1{,}6\cdot10^{13}$ & 10 & $2{,}1\cdot10^{-4}$ & $2{,}5\cdot10^{-4}$ \\
+12 & $1{,}7\cdot10^{16}$ & 11 & $4{,}7\cdot10^{-2}$ & $1{,}8\cdot10^{-1}$ \\
+14 & $1{,}9\cdot10^{17}$ & 11 & $3{,}0$ & $3{,}5$ \\
+20 & $1{,}9\cdot10^{18}$ & 13 & $6{,}6$ & $6{,}3$ \\
+30 & $6{,}5\cdot10^{18}$ & 14 & $1{,}1\cdot10^{1}$ & $1{,}1\cdot10^{2}$ \\
+\bottomrule
+\end{tabular}
+\caption{Zadanie 2a: macierze Hilberta.}
+\end{table}
+
+\begin{table}[h]
+\centering\footnotesize
+\begin{tabular}{@{}r|cc|cc|cc@{}}
+\toprule
+ & \multicolumn{2}{c|}{$n=5$} & \multicolumn{2}{c|}{$n=10$} & \multicolumn{2}{c}{$n=20$}\\
+$c$ & Gauss & inv & Gauss & inv & Gauss & inv \\
+\midrule
+$1$ & $2{,}7\mathrm{e}{-16}$ & $1{,}2\mathrm{e}{-16}$ & $2{,}0\mathrm{e}{-16}$ & $1{,}8\mathrm{e}{-16}$ & $5{,}9\mathrm{e}{-16}$ & $4{,}2\mathrm{e}{-16}$\\
+$10$ & $2{,}4\mathrm{e}{-16}$ & $1{,}4\mathrm{e}{-16}$ & $3{,}1\mathrm{e}{-16}$ & $4{,}4\mathrm{e}{-16}$ & $5{,}6\mathrm{e}{-16}$ & $3{,}4\mathrm{e}{-16}$\\
+$10^3$ & $9{,}0\mathrm{e}{-15}$ & $8{,}7\mathrm{e}{-15}$ & $5{,}4\mathrm{e}{-16}$ & $1{,}7\mathrm{e}{-15}$ & $3{,}6\mathrm{e}{-14}$ & $3{,}9\mathrm{e}{-14}$\\
+$10^7$ & $1{,}1\mathrm{e}{-11}$ & $3{,}6\mathrm{e}{-11}$ & $9{,}6\mathrm{e}{-11}$ & $1{,}2\mathrm{e}{-10}$ & $5{,}0\mathrm{e}{-11}$ & $8{,}5\mathrm{e}{-11}$\\
+$10^{12}$ & $1{,}8\mathrm{e}{-5}$ & $1{,}8\mathrm{e}{-5}$ & $1{,}0\mathrm{e}{-6}$ & $2{,}4\mathrm{e}{-6}$ & $3{,}0\mathrm{e}{-6}$ & $5{,}9\mathrm{e}{-6}$\\
+$10^{16}$ & $1{,}2\mathrm{e}{-1}$ & $1{,}6\mathrm{e}{-1}$ & $5{,}7\mathrm{e}{-1}$ & $6{,}1\mathrm{e}{-1}$ & $2{,}0$ & $1{,}8$\\
+\bottomrule
+\end{tabular}
+\caption{Zadanie 2b: macierze losowe $R_n$ (jedno losowanie, ziarno 1234). Dla $c=10^{16}$ \texttt{cond} wyszło $1{,}2\cdot10^{16}$, $1{,}0\cdot10^{16}$, $9{,}0\cdot10^{15}$, a \texttt{rank} spada o 1 ($4,9,19$).}
+\end{table}
+\begin{itemize}
+\item Błąd rośnie w przybliżeniu jak $\mathrm{cond}(A)\cdot\mathrm{eps}$ (od $\sim10^{-16}$ dla $c=1$ do $O(1)$ dla $c\approx10^{16}$) -- zgodnie z teorią uwarunkowania, niezależnie od $n$.
+\item Dla $H_n$ cond przekracza $1/\mathrm{eps}\approx4{,}5\cdot10^{15}$ już dla $n\approx12$; od tego miejsca wynik jest bezwartościowy, a \texttt{rank} (numeryczny) zaniża rząd ($\mathrm{rank}<n$), choć $H_n$ jest nieosobliwa. Wartości \texttt{cond} dla $n\ge14$ są niewiarygodne (nasycają się).
+\item Obie metody dają błędy tego samego rzędu; \texttt{inv(A)*b} jest zwykle nieco gorsze i droższe (np. $H_{12}$: $0{,}18$ vs $0{,}05$), więc Gauss jest preferowany.
+\end{itemize}
+
+\section{Zadanie 3 -- $f(x)=e^x\ln(1+e^{-x})$}
+Granica: $\lim_{x\to\infty}f(x)=\lim\frac{\ln(1+e^{-x})}{e^{-x}}=1$ (reguła de l'Hospitala / $\ln(1+t)\sim t$).
+
+\begin{figure}[h]
+\centering
+\includegraphics[width=.49\textwidth]{zad3_julia.png}
+\includegraphics[width=.49\textwidth]{zad3_python.png}
+\caption{Zadanie 3: wykres w Julii (Plots/GR) i w Pythonie (matplotlib); wzór naiwny i z \texttt{log1p}.}
+\end{figure}
+\begin{table}[h]
+\centering\footnotesize
+\begin{tabular}{@{}rccc@{}}
+\toprule
+$x$ & 10 & 30 & 36 \\ \midrule
+naiwnie & $0{,}99997730072$ & $0{,}99898$ & $0{,}9573$ \\
+\texttt{log1p} & $0{,}99997730072$ & $1-5\cdot10^{-14}$ & $1-3\cdot10^{-16}$ \\
+\bottomrule
+\end{tabular}
+\qquad
+\begin{tabular}{@{}rcc@{}}
+\toprule
+$x$ & $\ge37$ \\ \midrule
+naiwnie & $0$ \\
+\texttt{log1p} & $\approx1$ \\
+\bottomrule
+\end{tabular}
+\caption{Zadanie 3: wartości w Float64.}
+\end{table}
+\begin{itemize}
+\item Oba programy dają ten sam wykres: $f\to1$, ale wzór naiwny traci cyfry coraz wcześniej (błąd $3\cdot10^{-8}$ dla $x=20$), szum jest widoczny od $x\approx30$, a od $x\approx37$ spada do $0$ -- przeczy granicy $1$.
+\item Przyczyna: dla $x\gtrsim36{,}7$ mamy $e^{-x}<\mathrm{eps}/2$, więc $1+e^{-x}$ zaokrągla się do $1$, $\ln1=0$ i $f=e^x\cdot0=0$. Wcześniej $1+e^{-x}$ traci cyfry $e^{-x}$ (błąd względny $\ln$ rośnie), a mnożenie przez $e^x$ go wzmacnia.
+\item Naprawa: \texttt{log1p(t)} liczy $\ln(1+t)$ bez tworzenia $1+t$; wynik jest poprawny dla całego zakresu.
+\end{itemize}
+
+\section{Zadanie 4 -- wielomian Wilkinsona}
+\begin{table}[h]
+\centering\footnotesize
+\begin{tabular}{@{}rccc@{\qquad}rccc@{}}
+\toprule
+\multicolumn{4}{c}{(a) współczynniki oryginalne} & \multicolumn{4}{c}{(b) $-210\to-210-2^{-23}$}\\
+$k$ & $|P(z_k)|$ & $|p(z_k)|$ & $|z_k-k|$ & $k$ & $|P(z_k)|$ & $|p(z_k)|$ & $|z_k-k|$ \\
+\midrule
+1 & $1{,}6\mathrm{e}3$ & $2{,}0\mathrm{e}3$ & $1{,}7\mathrm{e}{-14}$ & 1 & $1{,}0\mathrm{e}4$ & $9{,}4\mathrm{e}3$ & $7{,}8\mathrm{e}{-14}$\\
+3 & $3{,}6\mathrm{e}5$ & $2{,}4\mathrm{e}5$ & $3{,}4\mathrm{e}{-10}$ & 3 & $8{,}1\mathrm{e}5$ & $6{,}3\mathrm{e}5$ & $8{,}9\mathrm{e}{-10}$\\
+5 & $3{,}1\mathrm{e}7$ & $2{,}8\mathrm{e}7$ & $8{,}8\mathrm{e}{-7}$ & 5 & $3{,}9\mathrm{e}7$ & $3{,}4\mathrm{e}7$ & $1{,}1\mathrm{e}{-6}$\\
+8 & $1{,}7\mathrm{e}9$ & $1{,}7\mathrm{e}9$ & $7{,}1\mathrm{e}{-4}$ & 8 & $5{,}0\mathrm{e}8$ & $1{,}7\mathrm{e}{10}$ & $7{,}0\mathrm{e}{-3}$\\
+10 & $1{,}2\mathrm{e}{10}$ & $1{,}2\mathrm{e}{10}$ & $9{,}4\mathrm{e}{-3}$ & 10 & $1{,}7\mathrm{e}9$ & $1{,}5\mathrm{e}{12}$ & $0{,}65$\\
+13 & $1{,}5\mathrm{e}{11}$ & $1{,}5\mathrm{e}{11}$ & $5{,}9\mathrm{e}{-2}$ & 12 & $1{,}9\mathrm{e}{10}$ & $3{,}3\mathrm{e}{13}$ & $1{,}7$\\
+14 & $3{,}1\mathrm{e}{11}$ & $2{,}8\mathrm{e}{11}$ & $6{,}5\mathrm{e}{-2}$ & 14 & $2{,}8\mathrm{e}{11}$ & $9{,}6\mathrm{e}{14}$ & $2{,}5$\\
+17 & $2{,}4\mathrm{e}{12}$ & $2{,}1\mathrm{e}{12}$ & $1{,}7\mathrm{e}{-2}$ & 16 & $1{,}1\mathrm{e}{12}$ & $2{,}7\mathrm{e}{16}$ & $2{,}9$\\
+20 & $1{,}2\mathrm{e}{13}$ & $1{,}4\mathrm{e}{13}$ & $1{,}1\mathrm{e}{-4}$ & 19 & $6{,}9\mathrm{e}{12}$ & $4{,}3\mathrm{e}{17}$ & $2{,}0$\\
+\bottomrule
+\end{tabular}
+\caption{Zadanie 4: wybrane pierwiastki (pełne dane w wyjściu \texttt{zad4.jl}).}
+\end{table}
+\begin{itemize}
+\item (a) Pierwiastki $z_k$ nie są dokładne: błąd $|z_k-k|$ rośnie od $10^{-14}$ ($k=1$) do $\approx6{,}5\cdot10^{-2}$ ($k=14$) i znów maleje dla $k\to20$.
+\item $|P(z_k)|$ i $|p(z_k)|$ są duże ($10^3$--$10^{13}$), choć $z_k$ są blisko zer. Wartość wielomianu w pobliżu zera jest czuła na błędy: część współczynników rzędu $10^{18}$--$10^{19}$ nie jest dokładnie reprezentowalna w Float64 (błędy do $\approx5\cdot10^{2}$), a przy $|x|\sim20$ składniki $a_kx^k$ sięgają $10^{25}$--$10^{26}$ i kasują się, więc $|P(z_k)|\approx|p(z_k)|$ to szum zaokrągleń, nie dowód, że $z_k$ są złe.
+\item Pierwiastki są źle uwarunkowane względem zaburzeń współczynników, a postać naturalna jest tu niekorzystna (zadanie źle uwarunkowane, nie błąd algorytmu).
+\item (b) Zmiana jednego współczynnika o $2^{-23}\approx1{,}2\cdot10^{-7}$ (względnie $6\cdot10^{-10}$) niszczy pierwiastki: 10 z nich przechodzi w 5 par sprzężonych zespolonych ($z_{10,11}\approx10{,}09\pm0{,}64i$, $z_{18,19}\approx19{,}5\pm1{,}9i$), a błędy sięgają $\approx3$. To klasyczny wynik Wilkinsona; $|p(z_k)|$ rośnie nawet do $10^{18}$.
+\end{itemize}
+
+\section{Zadanie 5 -- model logistyczny}
+\begin{table}[h]
+\centering\footnotesize
+\begin{tabular}{@{}rccc@{\qquad}rccc@{}}
+\toprule
+\multicolumn{4}{c}{(1) Float32: bez / z obcięciem} & \multicolumn{4}{c}{(2) Float32 vs Float64}\\
+$n$ & bez & obcięcie & & $n$ & Float32 & Float64 & $|\Delta|$ \\
+\midrule
+10 & $0{,}72293$ & $0{,}72200$ & & 10 & $0{,}72293$ & $0{,}72291$ & $1{,}6\mathrm{e}{-5}$\\
+12 & $0{,}03772$ & $0{,}03649$ & & 15 & $1{,}27048$ & $1{,}27026$ & $2{,}2\mathrm{e}{-4}$\\
+15 & $1{,}27048$ & $1{,}25722$ & & 20 & $0{,}57990$ & $0{,}59653$ & $1{,}7\mathrm{e}{-2}$\\
+20 & $0{,}57990$ & $1{,}30969$ & & 25 & $1{,}00708$ & $1{,}31559$ & $0{,}31$\\
+30 & $0{,}75292$ & $1{,}31918$ & & 30 & $0{,}75292$ & $0{,}37415$ & $0{,}38$\\
+40 & $0{,}25861$ & $1{,}09357$ & & 40 & $0{,}25861$ & $0{,}01161$ & $0{,}25$\\
+\bottomrule
+\end{tabular}
+\caption{Zadanie 5: $p_0=0{,}01$, $r=3$.}
+\end{table}
+\begin{itemize}
+\item Obcięcie $p_{10}$ o $\sim10^{-3}$ (błąd względny $\sim10^{-3}$) daje rozbieżne trajektorie: różnica rośnie z $10^{-3}$ ($n=10$) do $0{,}013$ ($n=15$) i $0{,}73$ ($n=20$), a $p_{40}$ różni się całkowicie ($0{,}26$ vs $1{,}09$).
+\item Float32 i Float64 startują od tego samego $p_0$ (różnica $2\cdot10^{-10}$), błąd rośnie od $10^{-10}$ do $10^{-5}$ w 10 iteracjach (ok. 10--50$\times$ na 5 iteracji), a po $n\approx25$ wyniki nie mają ze sobą nic wspólnego.
+\item Dla $r=3$ równanie jest chaotyczne (wrażliwa zależność od warunków początkowych): błąd zaokrąglenia jest wzmacniany wykładniczo. Wynik po 40 iteracjach nie jest wiarygodny w żadnej z precyzji; ciąg nie jest też ograniczony przez $1$ ($p_n>1$).
+\end{itemize}
+
+\section{Zadanie 6 -- $x_{n+1}=x_n^2+c$}
+\begin{table}[h]
+\centering\footnotesize
+\begin{tabular}{@{}clll@{}}
+\toprule
+ & $(c,x_0)$ & początek ($n=0..5$) & koniec ($n=36..40$)\\
+\midrule
+1 & $(-2;\ 1)$ & $1,-1,-1,\dots$ & $-1$ (punkt stały)\\
+2 & $(-2;\ 2)$ & $2,2,2,\dots$ & $2$ (punkt stały)\\
+3 & $(-2;\ 1{,}99999999999999)$ & $2,2,2,\dots$ & $-0{,}22;-1{,}95;1{,}81;1{,}29;-0{,}33$\\
+4 & $(-1;\ 1)$ & $1,0,-1,0,-1,0$ & $-1,0,-1,0,-1$\\
+5 & $(-1;\ -1)$ & $-1,0,-1,0,\dots$ & $-1,0,-1,0,-1$\\
+6 & $(-1;\ 0{,}75)$ & $0{,}75;-0{,}44;-0{,}81;-0{,}35;-0{,}88;-0{,}23$ & $-1,0,-1,0,-1$\\
+7 & $(-1;\ 0{,}25)$ & $0{,}25;-0{,}94;-0{,}12;-0{,}99;-0{,}03;-1{,}0$ & $0,-1,0,-1,0$\\
+\bottomrule
+\end{tabular}
+\caption{Zadanie 6: 40 iteracji w Float64.}
+\end{table}
+\begin{figure}[h]
+\centering
+\includegraphics[width=.8\textwidth]{zad6_cobweb.png}
+\caption{Zadanie 6: iteracja graficzna (czerwone) dla przypadków 1--7; linia przerywana $y=x$.}
+\end{figure}
+\begin{itemize}
+\item $c=-2$: punkty stałe z $x^2-x-2=0$: $x=2$ i $x=-1$; oba są odpychające ($|f'|=4$ i $2$). Dla $x_0=1$ ciąg wpada w $-1$ (dokładnie, bo $1\to-1$), dla $x_0=2$ stoi w $2$.
+\item Przypadek 3: $x_0$ różni się od $2$ o $10^{-14}$, błąd rośnie ok. $4\times$ na krok ($|f'(2)|=4$), po ok. 20 krokach ($4^{22}\cdot10^{-14}\sim1$) ciąg opuszcza otoczenie $2$ i zachowuje się chaotycznie w $[-2,2]$ -- to artefakt wzmacniania błędu początkowego i zaokrągleń, nie zbieżność.
+\item $c=-1$: punkty stałe z $x^2-x-1=0$: $x=\frac{1\pm\sqrt5}{2}$ (oba odpychające). Istnieje atrakcyjny 2-cykl $0\leftrightarrow-1$ ($f'(0)f'(-1)=0$ -- cykl superatrakcyjny). Przypadki 4--7 wszystkie do niego zbiegają: z $x_0=\pm1$ w jednym--dwóch krokach (dokładnie), z $0{,}75$ i $0{,}25$ asymptotycznie.
+\item Lekcja: ciąg zależy od typu punktu stałego/cyklu; w arytmetyce skończonej niestabilny punkt stały jest widoczny tylko, jeśli dane startowe go trafiają dokładnie.
+\end{itemize}
+
+\section{Podsumowanie}
+\begin{itemize}
+\item Zad.~1, 2, 4: duże wskaźniki uwarunkowania powodują, że drobne zaburzenia danych (obcięcie cyfr, błąd zapisu współczynnika) dają wynik całkowicie zmieniony; algorytm ma tu drugorzędne znaczenie.
+\item Zad.~3: zły algorytm (kasowanie/utrata cyfr) naprawia się równoważną, stabilną formułą (\texttt{log1p}).
+\item Zad.~5, 6: w układach chaotycznych błąd zaokrągleń rośnie wykładniczo i długoterminowe wyniki nie są wiarygodne.
+\end{itemize}
+\end{document}

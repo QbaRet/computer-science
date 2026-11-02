@@ -1,20 +1,7 @@
-/*
- * Sprawozdanie 3 - Lab 6
- * Numer indeksu: ________ (uzupelnij)
- * Zmienne a,b,c,d,e,f sa kolejnymi cyframi Twojego numeru indeksu (pozycje 1-6)
- *
- * Kompilacja: g++ -O2 -std=c++17 -o lab6 lab6_groebner.cpp
- *
- * Wymagania: C++17 lub nowszy
- */
 
 #include <bits/stdc++.h>
 using namespace std;
 
-// ============================================================
-//  KONFIGURACJA: wpisz cyfry swojego indeksu
-// ============================================================
-// Przyklad: indeks 186021  =>  a=1, b=8, c=6, d=0, e=2, f=1
 const int INDEX_A = 2; // 1. cyfra indeksu
 const int INDEX_B = 8; // 2. cyfra indeksu
 const int INDEX_C = 3; // 3. cyfra indeksu
