@@ -1,0 +1,254 @@
+V "GNAT Lib v13"
+M P W=b
+P SS ZX
+
+RN
+RV NO_DELAY
+RV NO_EXCEPTION_HANDLERS
+RV NO_EXCEPTIONS
+RV NO_FIXED_POINT
+RV NO_FLOATING_POINT
+RV NO_IO
+RV NO_IMPLICIT_CONDITIONALS
+RV NO_RELATIVE_DELAY
+RV NO_SECONDARY_STACK
+RV NO_SELECT_STATEMENTS
+RV NO_STANDARD_STORAGE_POOLS
+RV NO_TASK_HIERARCHY
+RV NO_TASKING
+RV NO_TERMINATE_ALTERNATIVES
+RV NO_DEFAULT_INITIALIZATION
+RV NO_DYNAMIC_SIZED_OBJECTS
+RV NO_IMPLICIT_LOOPS
+RV MAX_SELECT_ALTERNATIVES=3
+RV MAX_TASK_ENTRIES=1
+RV MAX_TASKS=1+
+
+U travelers%b		travelers.adb		5713d5cc NE OO SU
+W ada%s			ada.ads			ada.ali
+Z ada.calendar.delays%s	a-caldel.adb		a-caldel.ali
+W ada.characters%s	a-charac.ads		a-charac.ali
+W ada.characters.handling%s  a-chahan.adb	a-chahan.ali
+W ada.command_line%s	a-comlin.adb		a-comlin.ali
+W ada.numerics%s	a-numeri.ads		a-numeri.ali
+W ada.numerics.float_random%s  a-nuflra.adb	a-nuflra.ali
+W ada.real_time%s	a-reatim.adb		a-reatim.ali
+Z ada.strings.text_buffers%s  a-sttebu.adb	a-sttebu.ali
+W ada.text_io%s		a-textio.adb		a-textio.ali
+Z interfaces%s		interfac.ads		interfac.ali
+Z system%s		system.ads		system.ali
+Z system.arith_64%s	s-arit64.adb		s-arit64.ali
+Z system.concat_6%s	s-conca6.adb		s-conca6.ali
+Z system.concat_9%s	s-conca9.adb		s-conca9.ali
+Z system.fat_flt%s	s-fatflt.ads		s-fatflt.ali
+Z system.img_fixed_64%s	s-imfi64.ads		s-imfi64.ali
+Z system.img_int%s	s-imgint.ads		s-imgint.ali
+Z system.parameters%s	s-parame.adb		s-parame.ali
+Z system.secondary_stack%s  s-secsta.adb	s-secsta.ali
+Z system.soft_links%s	s-soflin.adb		s-soflin.ali
+Z system.task_info%s	s-tasinf.adb		s-tasinf.ali
+Z system.tasking%s	s-taskin.adb		s-taskin.ali
+Z system.tasking.rendezvous%s  s-tasren.adb	s-tasren.ali
+Z system.tasking.stages%s  s-tassta.adb		s-tassta.ali
+Z system.val_int%s	s-valint.ads		s-valint.ali
+
+D ada.ads		20240521074738 76789da1 ada%s
+D a-assert.ads		20240521074737 ba465f5c ada.assertions%s
+D a-calend.ads		20251218205951 e6961b4c ada.calendar%s
+D a-caldel.ads		20240521074737 9f20b83d ada.calendar.delays%s
+D a-charac.ads		20240521074737 2d3ec45b ada.characters%s
+D a-chahan.ads		20240521074737 278246c0 ada.characters.handling%s
+D a-chlat1.ads		20240521074737 e0d72e76 ada.characters.latin_1%s
+D a-comlin.ads		20240521074737 4aa66568 ada.command_line%s
+D a-except.ads		20240521074738 2a7d8d70 ada.exceptions%s
+D a-finali.ads		20240521074738 bf4f806b ada.finalization%s
+D a-ioexce.ads		20240521074738 40018c65 ada.io_exceptions%s
+D a-numeri.ads		20240521074738 84bea7a3 ada.numerics%s
+D a-nubinu.ads		20240521074738 93f1f3d1 ada.numerics.big_numbers%s
+D a-nbnbig.ads		20240521074738 711e0174 ada.numerics.big_numbers.big_integers_ghost%s
+D a-nuflra.ads		20240521074738 4056ab7a ada.numerics.float_random%s
+D a-reatim.ads		20240521074737 b89a10c3 ada.real_time%s
+D a-stream.ads		20240521074738 119b8fb3 ada.streams%s
+D a-string.ads		20240521074738 90ac6797 ada.strings%s
+D a-sttebu.ads		20240521074738 f1ad67a2 ada.strings.text_buffers%s
+D a-stuten.ads		20240521074738 c6ced0ae ada.strings.utf_encoding%s
+D a-tags.ads		20240521074738 9eaa38c6 ada.tags%s
+D a-textio.ads		20240521074738 5c2c6153 ada.text_io%s
+D a-unccon.ads		20240521074738 0e9b276f ada.unchecked_conversion%s
+D interfac.ads		20240521074738 15f799c2 interfaces%s
+D i-c.ads		20240521074738 5c5a6c17 interfaces.c%s
+D i-cstrea.ads		20240521074738 e53d8b8e interfaces.c_streams%s
+D system.ads		20240521074738 426dafb8 system%s
+D s-atacco.ads		20240521074738 903317eb system.address_to_access_conversions%s
+D s-arit64.ads		20240521074738 90488c35 system.arith_64%s
+D s-assert.ads		20240521074738 9c4520c7 system.assertions%s
+D s-c_time.ads		20251218205951 535885c5 system.c_time%s
+D s-casuti.ads		20240521074738 cf13d755 system.case_util%s
+D s-conca6.ads		20240521074738 8252f108 system.concat_6%s
+D s-conca9.ads		20240521074738 54efc86b system.concat_9%s
+D s-crtl.ads		20240521074738 8a0692f8 system.crtl%s
+D s-exctab.ads		20240521074738 91bef6ef system.exception_table%s
+D s-fatflt.ads		20240521074738 11beb392 system.fat_flt%s
+D s-fatgen.ads		20240521074738 d28c6cfe system.fat_gen%s
+D s-ficobl.ads		20240521074738 dc5161d4 system.file_control_block%s
+D s-finroo.ads		20240521074738 4ff27390 system.finalization_root%s
+D s-imagef.ads		20240521074738 2a557a85 system.image_f%s
+D s-imagei.ads		20240521074738 c707dfd0 system.image_i%s
+D s-imfi64.ads		20240521074738 c2808cae system.img_fixed_64%s
+D s-imgint.ads		20240521074738 d4a52a9b system.img_int%s
+D s-linux.ads		20251218205951 96312dab system.linux%s
+D s-multip.ads		20240521074738 38ac9f73 system.multiprocessors%s
+D s-oscons.ads		20251218205951 ece202eb system.os_constants%s
+D s-osinte.ads		20251218205951 a8f58951 system.os_interface%s
+D s-parame.ads		20251218205951 1f39ba92 system.parameters%s
+D s-putima.ads		20240521074738 17291fe4 system.put_images%s
+D s-rannum.ads		20240521074738 95815eca system.random_numbers%s
+D s-secsta.ads		20240521074738 578279f5 system.secondary_stack%s
+D s-soflin.ads		20240521074738 df77073e system.soft_links%s
+D s-stache.ads		20240521074738 0b81c1fe system.stack_checking%s
+D s-stausa.ads		20240521074738 5be75682 system.stack_usage%s
+D s-stalib.ads		20240521074738 1c9580f6 system.standard_library%s
+D s-stoele.ads		20240521074738 ab5468e4 system.storage_elements%s
+D s-stoele.adb		20240521074738 8f5a9db6 system.storage_elements%b
+D s-tasinf.ads		20240521074737 528dde74 system.task_info%s
+D s-taspri.ads		20240521074737 4ec891e7 system.task_primitives%s
+D s-taprop.ads		20240521074737 6eefbe12 system.task_primitives.operations%s
+D s-taskin.ads		20240521074737 0ec7ab0b system.tasking%s
+D s-taprob.ads		20240521074737 acd6094d system.tasking.protected_objects%s
+D s-tpoben.ads		20240521074737 60ad3dae system.tasking.protected_objects.entries%s
+D s-tasren.ads		20240521074737 a67a9949 system.tasking.rendezvous%s
+D s-tassta.ads		20240521074737 cca55c94 system.tasking.stages%s
+D s-traent.ads		20240521074738 c81cbf8c system.traceback_entries%s
+D s-unstyp.ads		20240521074738 fa2a7f59 system.unsigned_types%s
+D s-valint.ads		20240521074738 1f610d7a system.val_int%s
+D s-valuns.ads		20240521074738 e8a1f424 system.val_uns%s
+D s-valuti.ads		20240521074738 fcd603d8 system.val_util%s
+D s-valuei.ads		20240521074738 11081e09 system.value_i%s
+D s-vaispe.ads		20240521074738 44130d39 system.value_i_spec%s
+D s-valueu.ads		20240521074738 18770347 system.value_u%s
+D s-vauspe.ads		20240521074738 a67b2f28 system.value_u_spec%s
+D s-wchcon.ads		20240521074738 d9032363 system.wch_con%s
+D s-widuns.ads		20240521074738 866a5800 system.wid_uns%s
+D s-widthu.ads		20240521074738 b32f15e2 system.width_u%s
+D travelers.adb		20261104150413 9ed72c8e travelers%b
+G a e
+G c Z b b [travelers standard 7 11 none]
+X 1 ada.ads
+16K9*Ada 20e8 79|1r6 1r37 2r6 2r37 3r6 3r37 4r6 4r37 5r6 5r37
+X 5 a-charac.ads
+16K13*Characters 18e19 79|4r10 4r41
+X 6 a-chahan.ads
+43K24*Handling 455e28 79|4w21 4r52
+210V13*To_Lower{character} 79|202s32
+X 8 a-comlin.ads
+36K13*Command_Line 144e21 79|5w10 5r41
+39V13*Argument_Count{natural} 79|14s10
+52V13*Argument{string} 79|14s50
+X 12 a-numeri.ads
+16K13*Numerics 35e17 79|2r10 2r41
+X 15 a-nuflra.ads
+41K22*Float_Random 74e30 79|2w19 2r50
+47R9*Generator<51|65R9> 79|135r22 212r19
+49F12*Uniformly_Distributed{float}
+51V13*Random{49F12}<51|73p13> 79|155s43 171s65 173s66 186s52 192s64 227s43
+53U14*Reset<51|103p14> 79|222s4
+54U14*Reset<51|109p14> 79|166s10
+X 16 a-reatim.ads
+39K13*Real_Time 186e18 79|3w10 3r41
+50O9*Time<duration> 79|24r26
+55O9*Time_Span<duration>
+62V13*Clock{50O9} 79|24s34 146s40
+72V14*"-"{55O9} 79|146s46
+111V13*To_Duration{duration} 79|146s27
+X 22 a-textio.ads
+58K13*Text_IO 787e16 79|1w10 1r41
+566U14*Put_Line 79|67s7 216s4
+X 24 interfac.ads
+56I9*Integer_64<long_long_integer>
+X 29 s-arit64.ads
+59I12*Int64{24|56I9}
+92V13*Multiply_With_Ovflo_Check64{59I12} 96i<c,__gnat_mulv64>22
+X 55 s-stausa.ads
+207U14*Initialize 208i<c,__gnat_stack_usage_initialize>22
+272U14*Output_Results 276i<c,__gnat_stack_usage_output_results>22
+X 79 travelers.adb
+7U11*Travelers 7b11 234l5 234t14
+8i4 Board_Width{integer} 11r55 27r30 43r42 48r35 48r56 120r24 171r50 172r27
+. 219r22
+9i4 Board_Height{integer} 11r69 28r30 33r42 38r35 38r57 120r46 173r50 174r27
+. 220r22
+11I12 Travelers_Count_Type{integer} 13r31
+13i4 Nr_Of_Travelers{11I12} 88r21 211r31 218r22
+16i4 Min_Steps{integer} 185r13 186r35
+17i4 Max_Steps{integer} 58r41 184r13 186r23
+19o4 Min_Delay{duration} 192r16 192r41
+20o4 Max_Delay{duration} 22r39 192r29
+22o4 Timeout{duration} 201r19
+24o4 Start_Time{16|50O9} 146r48
+26R9 Position_Type 29e14 31r43 36r41 41r44 46r43 54r20 126r18 139r22 140r22
+. 152r40 153r21
+27i7 X{integer} 43m16 43r31 48m16 48r31 70r40 171m16 176r41 195r33 199r33
+28i7 Y{integer} 33m16 33r31 38m16 38r31 71r40 173m16 176r62 195r49 199r49
+31U14 Move_Down 31b14 31=25 34l8 34t17 157s28
+31r25 Position{26R9} 33m7 33r22
+36U14 Move_Up 36b14 36=23 39l8 39t15 156s28
+36r23 Position{26R9} 38m7 38r22
+41U14 Move_Right 41b14 41=26 44l8 44t18 159s28
+41r26 Position{26R9} 43m7 43r22
+46U14 Move_Left 46b14 46=25 49l8 49t17 158s28
+46r25 Position{26R9} 48m7 48r22
+51R9 Trace_Type 56e14 58r55 65r35
+52o7 Time_Stamp{duration} 68r32 146m13
+53i7 Id{integer} 69r31 147m13
+54r7 Position{26R9} 70r31 71r31 148m13
+55e7 Symbol{character} 72r22 149m13
+58A9 Trace_Array_Type(51R9)<integer> 62r21
+60R9 Traces_Sequence_Type 63e14 75r37 83r30 89r34 138r22
+61i7 Last{integer} 77r28 144m17 144r32 145r37
+62a7 Trace_Array{58A9} 78r30 145m17
+65U14 Print_Trace 65b14 65>27 73l8 73t19 78s10
+65r27 Trace{51R9} 68r26 69r25 70r25 71r25 72r16
+75U14 Print_Traces 75b14 75>28 80l8 80t20 90s13
+75r28 Traces{60R9} 77r21 78r23
+77i11 I{integer} 78r43
+82t9 Printer 86b14 93l8 93t15 208r7
+83Y13 Report 83>21 89b17 91l14 91t20 208s15
+83r21 Traces{60R9} 90r27
+88i11 I{integer}
+89r25 Traces{60R9}
+95T14 Field_Task_Type 98l8 98e23 100b14 118l8 118t23 121r9
+96Y13 Enter 106b23 108l20 108t25 176s65 195s52
+97Y13 Leave 111b23 113l20 113t25 199s52
+101b7 Occupied{boolean} 105r22 107m19 110r18 112m19
+120a4 Board(95T14) 176r16 195r13 199r13
+123R9 Traveler_Type 127e14 136r22
+124i7 Id{integer} 147r36 167m19
+125e7 Symbol{character} 149r36 168m19 202m22 202r51
+126r7 Position{26R9} 148r36 153r47 170m22 176r32 176r53 196r38 197m22
+129T14 Traveler_Task_Type 132l8 132e26 134b14 209l8 209t26 211r55
+130Y13 Init 130>19 130>33 130>49 165b14 187l11 187t15 226s24
+130i19 Id{integer} 167r25
+130i33 Seed{integer} 166r20
+130e49 Symbol{character} 168r29
+131Y13 Start 189b14 231s24
+135r7 G{15|47R9} 155r51 166r17 171r73 173r74 186r60 192r72
+136r7 Traveler{123R9} 147r27 148r27 149r27 153r38 167m10 168m10 170m13 176r23
+. 176r44 196r29 197m13 202m13 202r42
+137i7 Nr_Of_Steps{integer} 183m10 191r24
+138r7 Traces{60R9} 144m10 144r25 145m10 145r30 208r23
+139r7 New_Position{26R9} 193m10 195r20 195r36 197r34
+140r7 Old_Position{26R9} 196m13 199r20 199r36
+142U17 Store_Trace 142b17 150l11 150t22 182s10 198s13 203s13
+152V16 Random_Neighbour{26R9} 152b16 162l11 162t27 193s26
+153r10 Position{26R9} 156m37 156r37 157m39 157r39 158m39 158r39 159m40 159r40
+. 161r17
+165i20 Id{integer}
+165i34 Seed{integer}
+165e50 Symbol{character}
+191i11 Step{integer}
+211a4 Travel_Tasks(129T14) 224r13 226r7 230r13 231r7
+212r4 Seed_Gen{15|47R9} 222r11 227r51
+213e4 Symbol{character} 225m7 227r64
+224i8 I{integer} 225r54 226r21 227r10
+230i8 I{integer} 231r21
+

@@ -1,8 +1,3 @@
-// Zadanie 5: modyfikacja Zadania 3 (odpowiednik Zadania 4 w Go).
-// NrOfTravelers = BoardWidth = BoardHeight = 15.
-// Podróżnik o identyfikatorze i startuje na polu (i, i).
-// Parzysty Id losuje kierunek w pionie, nieparzysty w poziomie,
-// i potem zawsze idzie w tym samym kierunku.
 package main
 
 import (
@@ -12,7 +7,6 @@ import (
 	"unicode"
 )
 
-// Travelers moving on the board
 const (
 	NrOfTravelers = 15
 
@@ -22,26 +16,20 @@ const (
 	MinDelay = 10 * time.Millisecond
 	MaxDelay = 50 * time.Millisecond
 
-	// A traveler that waits longer than this for a free field
-	// suspects a deadlock (its neighbour had a few chances to move away).
 	Timeout = 3 * MaxDelay
 )
 
-// 2D Board with torus topology
 const (
 	BoardWidth  = 15
 	BoardHeight = 15
 )
 
-// Timing
-var startTime = time.Now() // global starting time
+var startTime = time.Now()
 
-// Positions on the board
 type Position struct {
 	X, Y int
 }
 
-// elementary steps
 func (p *Position) MoveDown()  { p.Y = (p.Y + 1) % BoardHeight }
 func (p *Position) MoveUp()    { p.Y = (p.Y + BoardHeight - 1) % BoardHeight }
 func (p *Position) MoveRight() { p.X = (p.X + 1) % BoardWidth }
@@ -69,8 +57,6 @@ func (p *Position) Move(d Direction) {
 	}
 }
 
-// Each field of the board: a channel with capacity 1.
-// Sending a token = entering the field, receiving it = leaving the field.
 var board [BoardWidth][BoardHeight]chan struct{}
 
 func initBoard() {
@@ -100,7 +86,6 @@ func leave(p Position) {
 	<-board[p.X][p.Y]
 }
 
-// traces of travelers
 type Trace struct {
 	TimeStamp time.Duration
 	Id        int
@@ -115,7 +100,6 @@ func printTraces(traces []Trace) {
 	}
 }
 
-// Printer: receives the histories of all travelers and prints them
 func printer(reports <-chan []Trace, done chan<- struct{}) {
 	for i := 0; i < NrOfTravelers; i++ {
 		printTraces(<-reports)
@@ -150,41 +134,37 @@ func (t *Traveler) init(id int, seed int64, symbol rune) {
 	t.rng = rand.New(rand.NewSource(seed))
 	t.Id = id
 	t.Symbol = symbol
-	// Start on the diagonal; the fields (i, i) are all different.
 	t.Position = Position{X: id, Y: id}
 	enter(t.Position)
-	// Even Id moves vertically, odd Id horizontally; fixed direction.
 	if id%2 == 0 {
-		t.Direction = Direction(t.rng.Intn(2)) // Up or Down
+		t.Direction = Direction(t.rng.Intn(2))
 	} else {
-		t.Direction = Left + Direction(t.rng.Intn(2)) // Left or Right
+		t.Direction = Left + Direction(t.rng.Intn(2))
 	}
-	t.storeTrace() // store starting position
-	// Number of steps to be made by the traveler
+	t.storeTrace()
 	t.nrOfSteps = MinSteps + t.rng.Intn(MaxSteps-MinSteps+1)
 }
 
 func (t *Traveler) run(start <-chan struct{}, reports chan<- []Trace) {
-	<-start // wait for initialisations of the remaining travelers
+	<-start
 	for step := 0; step < t.nrOfSteps; step++ {
 		time.Sleep(t.randomDelay())
 		next := t.Position
 		next.Move(t.Direction)
 		if !enterWithTimeout(next, Timeout) {
-			// suspected deadlock: leave the last trace and stop
 			t.Symbol = unicode.ToLower(t.Symbol)
 			t.storeTrace()
 			break
 		}
-		leave(t.Position)
+		prev := t.Position
 		t.Position = next
-		t.storeTrace()
+		t.storeTrace() // before leave, so the trace precedes any later entry
+		leave(prev)
 	}
 	reports <- t.traces
 }
 
 func main() {
-	// Print the line with the parameters needed for display script:
 	fmt.Printf("-1 %d %d %d\n", NrOfTravelers, BoardWidth, BoardHeight)
 
 	initBoard()
@@ -193,14 +173,12 @@ func main() {
 	start := make(chan struct{})
 	go printer(reports, done)
 
-	// init travelers
 	travelers := make([]Traveler, NrOfTravelers)
 	seed := time.Now().UnixNano()
 	for i := range travelers {
 		travelers[i].init(i, seed+int64(i)*7919, rune('A'+i))
 	}
 
-	// start travelers
 	for i := range travelers {
 		go travelers[i].run(start, reports)
 	}

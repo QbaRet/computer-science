@@ -1,4 +1,3 @@
-// Zadanie 1: symulacja podróżników na planszy-torusie (odpowiednik travelers.adb).
 package main
 
 import (
@@ -7,7 +6,6 @@ import (
 	"time"
 )
 
-// Travelers moving on the board
 const (
 	NrOfTravelers = 15
 
@@ -18,27 +16,22 @@ const (
 	MaxDelay = 50 * time.Millisecond
 )
 
-// 2D Board with torus topology
 const (
 	BoardWidth  = 15
 	BoardHeight = 15
 )
 
-// Timing
-var startTime = time.Now() // global starting time
+var startTime = time.Now()
 
-// Positions on the board
 type Position struct {
 	X, Y int
 }
 
-// elementary steps
 func (p *Position) MoveDown()  { p.Y = (p.Y + 1) % BoardHeight }
 func (p *Position) MoveUp()    { p.Y = (p.Y + BoardHeight - 1) % BoardHeight }
 func (p *Position) MoveRight() { p.X = (p.X + 1) % BoardWidth }
 func (p *Position) MoveLeft()  { p.X = (p.X + BoardWidth - 1) % BoardWidth }
 
-// traces of travelers
 type Trace struct {
 	TimeStamp time.Duration
 	Id        int
@@ -53,7 +46,6 @@ func printTraces(traces []Trace) {
 	}
 }
 
-// Printer: receives the histories of all travelers and prints them
 func printer(reports <-chan []Trace, done chan<- struct{}) {
 	for i := 0; i < NrOfTravelers; i++ {
 		printTraces(<-reports)
@@ -100,15 +92,13 @@ func (t *Traveler) init(id int, seed int64, symbol rune) {
 	t.rng = rand.New(rand.NewSource(seed))
 	t.Id = id
 	t.Symbol = symbol
-	// Random initial position:
 	t.Position = Position{X: t.rng.Intn(BoardWidth), Y: t.rng.Intn(BoardHeight)}
-	t.storeTrace() // store starting position
-	// Number of steps to be made by the traveler
+	t.storeTrace()
 	t.nrOfSteps = MinSteps + t.rng.Intn(MaxSteps-MinSteps+1)
 }
 
 func (t *Traveler) run(start <-chan struct{}, reports chan<- []Trace) {
-	<-start // wait for initialisations of the remaining travelers
+	<-start
 	for step := 0; step < t.nrOfSteps; step++ {
 		time.Sleep(t.randomDelay())
 		t.makeStep()
@@ -118,7 +108,6 @@ func (t *Traveler) run(start <-chan struct{}, reports chan<- []Trace) {
 }
 
 func main() {
-	// Print the line with the parameters needed for display script:
 	fmt.Printf("-1 %d %d %d\n", NrOfTravelers, BoardWidth, BoardHeight)
 
 	reports := make(chan []Trace)
@@ -126,7 +115,6 @@ func main() {
 	start := make(chan struct{})
 	go printer(reports, done)
 
-	// init travelers
 	travelers := make([]Traveler, NrOfTravelers)
 	seed := time.Now().UnixNano()
 	symbol := 'A'
@@ -135,7 +123,6 @@ func main() {
 		symbol++
 	}
 
-	// start travelers
 	for i := range travelers {
 		go travelers[i].run(start, reports)
 	}

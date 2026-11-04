@@ -1,9 +1,3 @@
-// Zadanie 3: wersja Zadania 2 w Go.
-// Na jednym polu może przebywać co najwyżej jeden podróżnik.
-// Każde pole to kanał o pojemności 1 (token = pole zajęte).
-// Podejrzenie deadlocku wykrywane jest przez Timeout.
-//
-// Uruchomienie:  ./travelers [NrOfTravelers]   (domyślnie 15)
 package main
 
 import (
@@ -15,13 +9,11 @@ import (
 	"unicode"
 )
 
-// 2D Board with torus topology
 const (
 	BoardWidth  = 15
 	BoardHeight = 15
 )
 
-// Travelers moving on the board
 const (
 	DefaultNrOfTravelers = 15
 
@@ -31,30 +23,22 @@ const (
 	MinDelay = 10 * time.Millisecond
 	MaxDelay = 50 * time.Millisecond
 
-	// A traveler that waits longer than this for a free field
-	// suspects a deadlock (its neighbour had a few chances to move away).
 	Timeout = 3 * MaxDelay
 )
 
-// set once in main; optional first argument changes the crowding of the board
 var NrOfTravelers = DefaultNrOfTravelers
 
-// Timing
-var startTime = time.Now() // global starting time
+var startTime = time.Now()
 
-// Positions on the board
 type Position struct {
 	X, Y int
 }
 
-// elementary steps
 func (p *Position) MoveDown()  { p.Y = (p.Y + 1) % BoardHeight }
 func (p *Position) MoveUp()    { p.Y = (p.Y + BoardHeight - 1) % BoardHeight }
 func (p *Position) MoveRight() { p.X = (p.X + 1) % BoardWidth }
 func (p *Position) MoveLeft()  { p.X = (p.X + BoardWidth - 1) % BoardWidth }
 
-// Each field of the board: a channel with capacity 1.
-// Sending a token = entering the field, receiving it = leaving the field.
 var board [BoardWidth][BoardHeight]chan struct{}
 
 func initBoard() {
@@ -89,7 +73,6 @@ func leave(p Position) {
 	<-board[p.X][p.Y]
 }
 
-// traces of travelers
 type Trace struct {
 	TimeStamp time.Duration
 	Id        int
@@ -104,7 +87,6 @@ func printTraces(traces []Trace) {
 	}
 }
 
-// Printer: receives the histories of all travelers and prints them
 func printer(reports <-chan []Trace, done chan<- struct{}) {
 	for i := 0; i < NrOfTravelers; i++ {
 		printTraces(<-reports)
@@ -153,32 +135,30 @@ func (t *Traveler) init(id int, seed int64, symbol rune) {
 	t.rng = rand.New(rand.NewSource(seed))
 	t.Id = id
 	t.Symbol = symbol
-	// Random initial position on a free field:
 	for {
 		t.Position = Position{X: t.rng.Intn(BoardWidth), Y: t.rng.Intn(BoardHeight)}
 		if tryEnter(t.Position) {
 			break
 		}
 	}
-	t.storeTrace() // store starting position
-	// Number of steps to be made by the traveler
+	t.storeTrace()
 	t.nrOfSteps = MinSteps + t.rng.Intn(MaxSteps-MinSteps+1)
 }
 
 func (t *Traveler) run(start <-chan struct{}, reports chan<- []Trace) {
-	<-start // wait for initialisations of the remaining travelers
+	<-start
 	for step := 0; step < t.nrOfSteps; step++ {
 		time.Sleep(t.randomDelay())
 		next := t.randomNeighbour()
 		if !enterWithTimeout(next, Timeout) {
-			// suspected deadlock: leave the last trace and stop
 			t.Symbol = unicode.ToLower(t.Symbol)
 			t.storeTrace()
 			break
 		}
-		leave(t.Position)
+		prev := t.Position
 		t.Position = next
-		t.storeTrace()
+		t.storeTrace() // before leave, so the trace precedes any later entry
+		leave(prev)
 	}
 	reports <- t.traces
 }
@@ -193,7 +173,6 @@ func main() {
 		NrOfTravelers = n
 	}
 
-	// Print the line with the parameters needed for display script:
 	fmt.Printf("-1 %d %d %d\n", NrOfTravelers, BoardWidth, BoardHeight)
 
 	initBoard()
@@ -202,14 +181,12 @@ func main() {
 	start := make(chan struct{})
 	go printer(reports, done)
 
-	// init travelers
 	travelers := make([]Traveler, NrOfTravelers)
 	seed := time.Now().UnixNano()
 	for i := range travelers {
 		travelers[i].init(i, seed+int64(i)*7919, rune('A'+i%26))
 	}
 
-	// start travelers
 	for i := range travelers {
 		go travelers[i].run(start, reports)
 	}
