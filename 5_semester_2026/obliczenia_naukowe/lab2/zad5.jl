@@ -33,3 +33,20 @@ println("\n2) Float32 vs Float64")
 for n in [0, 5, 10, 15, 20, 25, 30, 35, 40]
     @printf("%3d %14.8f %18.14f %10.2e\n", n, f32[n+1], f64[n+1], abs(f32[n+1] - f64[n+1]))
 end
+
+# 3) odniesienie: te same iteracje w BigFloat (512 bitów), błąd Float32 i Float64
+setprecision(BigFloat, 512)
+N = 80                                      # liczba iteracji odniesienia
+ref = logistyczny(big"0.01", 3, N, BigFloat)
+d64 = logistyczny(0.01, 3, N, Float64)
+d32 = logistyczny(0.01, 3, N, Float32)
+println("\n3) błąd względem BigFloat")
+@printf("%3s %16s %12s %12s\n", "n", "BigFloat", "błąd F32", "błąd F64")
+for n in [10, 20, 30, 40, 50, 60]
+    @printf("%3d %16.10f %12.2e %12.2e\n", n, Float64(ref[n+1]),
+            Float64(abs(d32[n+1] - ref[n+1])), Float64(abs(d64[n+1] - ref[n+1])))
+end
+# pierwsze n, dla którego różnica przekracza 0.1
+pierwsze(u, v) = findfirst(abs.(Float64.(u) .- Float64.(v)) .> 0.1) - 1
+println("różnica > 0.1: obcięcie od n=", pierwsze(a, bb), ", Float32 vs Float64 od n=", pierwsze(f32, f64),
+        ", Float64 vs BigFloat od n=", pierwsze(d64, ref))

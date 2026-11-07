@@ -1,0 +1,4 @@
+/* Zadanie 6 - zasięg kamery. Autor: Jakub Retmańczyk */
+data;
+param k := 3;
+end;

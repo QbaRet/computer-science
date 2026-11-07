@@ -1,0 +1,18 @@
+/* Zadanie 4(d) - dwie ścieżki o równym koszcie (bez ograniczenia czasu).
+   Autor: Jakub Retmańczyk
+   Każda kombinacja wypukła obu ścieżek jest optimum LP, ale wierzchołki
+   wielościanu są całkowitoliczbowe. */
+data;
+
+set Nodes := 1 2 3 4;
+param source := 1;
+param target := 4;
+param T := 0;
+param useTime := 0;
+
+param : Arcs : c t :=
+    1 2   1  1
+    2 4   1  1
+    1 3   1  1
+    3 4   1  1;
+end;

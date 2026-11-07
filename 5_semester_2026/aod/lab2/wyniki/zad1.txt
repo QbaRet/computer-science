@@ -1,0 +1,40 @@
+GLPSOL--GLPK LP/MIP Solver 5.0
+Parameter(s) specified in the command line:
+ --math zadanie1/zad1.mod -d zadanie1/zad1.dat
+Reading model section from zadanie1/zad1.mod...
+44 lines were read
+Reading data section from zadanie1/zad1.dat...
+18 lines were read
+Checking (line 14)...
+Generating TotalCost...
+Generating SupplyLimit...
+Generating DemandMet...
+Model has been successfully generated
+GLPK Simplex Optimizer 5.0
+8 rows, 12 columns, 36 non-zeros
+Preprocessing...
+7 rows, 12 columns, 24 non-zeros
+Scaling...
+ A: min|aij| =  1.000e+00  max|aij| =  1.000e+00  ratio =  1.000e+00
+Problem data seem to be well scaled
+Constructing initial basis...
+Size of triangular part is 7
+      0: obj =   9.240000000e+06 inf =   4.400e+05 (1)
+      4: obj =   9.515000000e+06 inf =   0.000e+00 (0)
+*     8: obj =   8.525000000e+06 inf =   0.000e+00 (0)
+OPTIMAL LP SOLUTION FOUND
+Time used:   0.0 secs
+Memory used: 0.1 Mb (135883 bytes)
+Minimalny koszt: 8525000.00 $
+Plan dostaw [galony]:
+  F1 -> L2: 165000.00
+  F1 -> L4: 110000.00
+  F2 -> L1: 110000.00
+  F2 -> L2: 55000.00
+  F3 -> L3: 330000.00
+  F3 -> L4: 330000.00
+Wykorzystanie podaży:
+  F1: 275000.00 / 275000.00 (zapas 0.00)
+  F2: 165000.00 / 550000.00 (zapas 385000.00)
+  F3: 660000.00 / 660000.00 (zapas 0.00)
+Model has been successfully processed

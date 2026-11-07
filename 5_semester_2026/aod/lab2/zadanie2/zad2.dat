@@ -1,0 +1,20 @@
+/* Zadanie 2 - dane z treści listy.
+   Autor: Jakub Retmańczyk */
+data;
+
+set Products := P1 P2 P3 P4;
+set Machines := M1 M2 M3;
+
+param price     := P1 9    P2 7    P3 6    P4 5;
+param material  := P1 4    P2 1    P3 1    P4 1;
+param maxDemand := P1 400  P2 100  P3 150  P4 500;
+
+param machineCost := M1 2   M2 2   M3 3;
+param hours       := M1 60  M2 60  M3 60;
+
+param time :  M1  M2  M3 :=
+         P1    5  10   6
+         P2    3   6   4
+         P3    4   5   3
+         P4    4   2   1;
+end;

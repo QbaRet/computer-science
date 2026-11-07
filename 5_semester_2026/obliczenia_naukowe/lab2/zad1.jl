@@ -32,3 +32,11 @@ setprecision(BigFloat, 256)
 ex_new = sum(BigFloat(string(x_new[i])) * BigFloat(string(y[i])) for i in 1:5)
 println("Dokładnie (dane zmienione, BigFloat): ", Float64(ex_new))
 println("Dokładnie (dane pierwotne, lista 1):  ", dokladna)
+
+# czy obcięcie w ogóle zmienia dane po konwersji do Float32?
+println("Float32: x4 bez zmian? ", Float32(x_old[4]) == Float32(x_new[4]),
+        ", x5 bez zmian? ", Float32(x_old[5]) == Float32(x_new[5]))
+# główny wkład do zmiany wyniku: y4*dx4 + y5*dx5
+println("y4*dx4 + y5*dx5 = ", y[4] * (x_new[4] - x_old[4]) + y[5] * (x_new[5] - x_old[5]))
+# wskaźnik uwarunkowania sumy dla danych pierwotnych: sum|x_i y_i| / |sum x_i y_i|
+println("wskaźnik uwarunkowania: ", sum(abs.(x_old .* y)) / abs(dokladna))

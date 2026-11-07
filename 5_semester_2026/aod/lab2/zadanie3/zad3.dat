@@ -1,0 +1,16 @@
+/* Zadanie 3 - dane z treści listy.
+   Autor: Jakub Retmańczyk */
+data;
+
+param K := 4;
+param normalCap    := 100;
+param storageCap   := 70;
+param storageCost  := 1500;
+param initialStock := 15;
+
+param :   c      a    o      d :=
+     1   6000   60   8000   130
+     2   4000   65   6000    80
+     3   8000   70  10000   125
+     4   9000   60  11000   195;
+end;

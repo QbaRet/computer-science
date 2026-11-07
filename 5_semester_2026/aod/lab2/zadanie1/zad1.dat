@@ -1,0 +1,18 @@
+/* Zadanie 1 - dane z treści listy.
+   Autor: Jakub Retmańczyk
+   Nagłówek tabeli w treści ma literówkę ("Firma 2" dwukrotnie);
+   trzecia kolumna dotyczy Firmy 3. */
+data;
+
+set Suppliers := F1 F2 F3;
+set Airports  := L1 L2 L3 L4;
+
+param supply := F1 275000  F2 550000  F3 660000;
+param demand := L1 110000  L2 220000  L3 330000  L4 440000;
+
+param cost :  F1  F2  F3 :=
+         L1   10   7   8
+         L2   10  11  14
+         L3    9  12   4
+         L4   11  13   9;
+end;

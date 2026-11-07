@@ -1,0 +1,201 @@
+\documentclass[11pt,a4paper]{article}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage[polish]{babel}
+\usepackage{lmodern}
+\usepackage[margin=2.3cm]{geometry}
+\usepackage{amsmath,amssymb}
+\usepackage{booktabs}
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{5pt}
+\renewcommand{\arraystretch}{1.1}
+
+\title{Algorytmy optymalizacji dyskretnej -- Laboratorium 2\\ Sprawozdanie}
+\author{Jakub Retmańczyk}
+\date{7 listopada 2026}
+
+\begin{document}
+\maketitle
+
+Wszystkie modele są napisane w GNU MathProg i rozwiązane w GLPK 5.0, a dane trzymam w osobnych plikach \texttt{.dat}.
+
+\section*{Zadanie 1 -- zakup paliwa}
+To zwykły problem transportowy. Zmienna $x_{sl}\ge 0$ to liczba galonów, które firma $s\in S$ dostarcza na lotnisko $l\in L$.
+Firma ma podaż $p_s$, lotnisko potrzebuje $d_l$ galonów, a galon kosztuje $c_{ls}$ dolarów.
+\begin{align*}
+\min\ \sum_{s\in S}\sum_{l\in L} c_{ls}x_{sl}
+\quad\text{p.o.}\quad
+\sum_{l\in L} x_{sl}\le p_s\ \ \forall s\in S,
+\qquad
+\sum_{s\in S} x_{sl}= d_l\ \ \forall l\in L
+\end{align*}
+
+W nagłówku tabeli z treści dwa razy jest ,,Firma 2'', więc trzecią kolumnę traktuję jako Firmę 3.
+
+\begin{center}
+\begin{tabular}{@{}lrrrrr@{}}
+\toprule
+galony & L1 & L2 & L3 & L4 & razem / podaż \\ \midrule
+Firma 1 & -- & 165\,000 & -- & 110\,000 & 275\,000 / 275\,000 \\
+Firma 2 & 110\,000 & 55\,000 & -- & -- & 165\,000 / 550\,000 \\
+Firma 3 & -- & -- & 330\,000 & 330\,000 & 660\,000 / 660\,000 \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+Minimalny koszt to \textbf{8\,525\,000\,\$}. Paliwo dostarczają wszystkie trzy firmy. Firmy 1 i 3 wyczerpują swoje możliwości, a Firmie 2 zostaje 385\,000 galonów. Plan optymalny jest jedyny, więc te odpowiedzi nie zależą od solvera.
+
+\section*{Zadanie 2 -- plan produkcji}
+Zmienna $x_p$ to tygodniowa produkcja wyrobu $p\in P$ w kilogramach. Zysk z kilograma to cena $v_p$ minus materiał $u_p$
+minus koszt pracy maszyn, czyli $z_p=v_p-u_p-\sum_{m\in M} \frac{t_{pm}}{60}k_m$, gdzie $t_{pm}$ to czas obróbki w minutach, a $k_m$ koszt godziny pracy maszyny.
+Maszyna jest dostępna $h_m$ godzin, a popyt na wyrób wynosi $D_p$.
+\begin{align*}
+\max\ \sum_{p\in P} z_p x_p
+\quad\text{p.o.}\quad
+\sum_{p\in P} t_{pm}x_p\le 60\,h_m\ \ \forall m\in M,
+\qquad
+0\le x_p\le D_p\ \ \forall p\in P
+\end{align*}
+
+\begin{center}
+\begin{tabular}{@{}lrrrr@{}}
+\toprule
+ & $P_1$ & $P_2$ & $P_3$ & $P_4$ \\ \midrule
+zysk [\$/kg] & 4,20 & 5,50 & 4,55 & 3,75 \\
+produkcja [kg] & 125 & 100 & 150 & 500 \\
+popyt [kg] & 400 & 100 & 150 & 500 \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+Tygodniowy zysk wynosi \textbf{3632,50\,\$}. Ogranicza nas maszyna $M_2$, która pracuje pełne 3600 minut ($M_1$ ma 3525, a $M_3$ 2100), więc o planie decyduje zysk na minutę $M_2$, a nie na kilogram. Dlatego $P_4$, choć ma najmniejszy zysk na kilogram, idzie do końca popytu ($1{,}88$\,\$/min), a $P_1$ ($0{,}42$\,\$/min) dostaje tylko resztę czasu.
+
+\section*{Zadanie 3 -- produkcja i magazynowanie}
+Dla okresu $j\in\{1,\dots,K\}$ zmienne to produkcja normalna $x_j$, ponadwymiarowa $y_j$ i stan magazynu na koniec okresu $s_j$ (w sztukach).
+Parametry to koszty $c_j,o_j$, limit $a_j$, popyt $d_j$, limit produkcji normalnej $B=100$, pojemność magazynu $W=70$, koszt przechowania $h=1500$ i stan początkowy $s_0=15$.
+\begin{align*}
+\min\ \sum_{j=1}^{K}\left(c_jx_j+o_jy_j+h\,s_j\right)
+\quad\text{p.o.}\quad
+& s_{j-1}+x_j+y_j-d_j=s_j,\\
+& 0\le x_j\le B,\quad 0\le y_j\le a_j,\quad 0\le s_j\le W \qquad \forall j
+\end{align*}
+Płacę tylko za towar przenoszony na kolejny okres, więc początkowe 15 sztuk nie wchodzi do kosztu.
+
+\begin{center}
+\begin{tabular}{@{}lrrrr@{}}
+\toprule
+okres & 1 & 2 & 3 & 4 \\ \midrule
+produkcja normalna & 100 & 100 & 100 & 100 \\
+produkcja ponadwymiarowa & 15 & 50 & 0 & 50 \\
+stan magazynu & 0 & 70 & 45 & 0 \\
+popyt & 130 & 80 & 125 & 195 \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+Minimalny koszt to \textbf{3\,842\,500\,\$}. Produkcja ponadwymiarowa jest potrzebna w okresach 1, 2 i 4, a magazyn jest pełny tylko w okresie 2. Okres 2 jest najtańszy, więc wtedy firma produkuje na zapas. Rozwiązanie jest jedyne.
+
+\section*{Zadanie 4 -- najtańsza ścieżka z limitem czasu}
+Zmienna $x_{ij}\in\{0,1\}$ mówi, czy łuk $(i,j)\in A$ należy do ścieżki. Przyjmuję $b_{i^\circ}=1$, $b_{j^\circ}=-1$ oraz $b_v=0$ dla pozostałych wierzchołków.
+\begin{align*}
+\min\ \sum_{(i,j)\in A} c_{ij}x_{ij}
+\quad\text{p.o.}\quad
+& \sum_{j:(v,j)\in A}x_{vj}-\sum_{i:(i,v)\in A}x_{iv}=b_v\ \ \forall v\in N,\\
+& \sum_{(i,j)\in A} t_{ij}x_{ij}\le T,\qquad x_{ij}\in\{0,1\}\ \ \forall (i,j)\in A
+\end{align*}
+
+\textbf{(a)} Najlepsza ścieżka to $1\to2\to3\to5\to7\to9\to10$, jej koszt to \textbf{13}, a czas to 15, czyli dokładnie limit.
+
+\textbf{(b)} Mój graf ma 12 wierzchołków i 20 łuków, trasa prowadzi z 1 do 12, a limit to $T=20$ (plik \texttt{b.dat}).
+Bez limitu wygrywa $1\to2\to12$ (koszt 5, czas 25). Z limitem koszt rośnie do 14: solver zwrócił $1\to3\to4\to5\to12$ (czas 18), a tyle samo kosztuje też $1\to6\to7\to12$ (czas 19).
+
+\textbf{(c)} Tak, bo nierówność czasu psuje całkowitą unimodularność macierzy ograniczeń. Kontrprzykład: dwie rozłączne ścieżki i $T=10$, tania $1\to2\to4$ (koszt 2, czas 16) oraz szybka $1\to3\to4$ (koszt 10, czas 4). Relaksacja daje $x_{ij}=0{,}5$ na każdym łuku i koszt 6 przy czasie 10, a prawdziwe optimum to 10. Dla egzemplarza (a) relaksacja akurat daje wynik całkowity, ale nie ma na to gwarancji.
+
+\textbf{(d)} Nie zawsze. Bez limitu czasu zostaje zwykła najkrótsza ścieżka. Macierz incydencji jest całkowicie unimodularna, więc sympleks zwraca rozwiązanie całkowite, a przy dodatnich kosztach jest to poprawna ścieżka. Ta ścieżka nie musi jednak mieścić się w limicie: w egzemplarzu (a) dostajemy $1\to3\to10$ o koszcie 10 i czasie $20>15$. Całkowite są też tylko wierzchołki, więc przy dwóch równie tanich ścieżkach metoda punktu wewnętrznego zwróciła $0{,}5$ na każdym łuku, a sympleks jedną ze ścieżek. Łuki o zerowym koszcie mogą z kolei dorzucić zbędny cykl.
+
+\section*{Zadanie 5 -- radiowozy}
+Zmienna $x_{dz}$ to całkowita liczba radiowozów w dzielnicy $d\in D$ na zmianie $z\in Z$. Tabele z treści dają limity $l_{dz},u_{dz}$,
+a $r_z$ i $q_d$ to wymagane minima dla zmiany i dzielnicy.
+\begin{align*}
+\min\ \sum_{d\in D}\sum_{z\in Z} x_{dz}
+\quad\text{p.o.}\quad
+& \sum_{d\in D} x_{dz}\ge r_z\ \ \forall z\in Z,
+\qquad
+\sum_{z\in Z} x_{dz}\ge q_d\ \ \forall d\in D,\\
+& l_{dz}\le x_{dz}\le u_{dz},\quad x_{dz}\in\mathbb{Z}\ \ \forall d\in D,\ z\in Z
+\end{align*}
+
+\begin{center}
+\begin{tabular}{@{}lrrrrr@{}}
+\toprule
+ & zmiana 1 & zmiana 2 & zmiana 3 & razem & minimum \\ \midrule
+$p_1$ & 2 & 7 & 5 & 14 & 10 \\
+$p_2$ & 3 & 6 & 7 & 16 & 14 \\
+$p_3$ & 5 & 7 & 6 & 18 & 13 \\ \midrule
+razem & 10 & 20 & 18 & \textbf{48} & \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+Potrzeba \textbf{48 radiowozów}. Mniej się nie da, bo same minima zmian sumują się do $10+20+18=48$, więc o wyniku decydują zmiany, a nie dzielnice. Przydziałów z 48 radiowozami jest 74, a powyższy to jeden z nich.
+
+\section*{Zadanie 6 -- kamery}
+Zmienna $y_{pq}\in\{0,1\}$ mówi, czy w wolnym kwadracie $(p,q)\in F$ stoi kamera. Dla kontenera $(i,j)\in C$ zbiór $V(i,j)$ to wolne kwadraty, z których go widać:
+\[ V(i,j)=\{(p,q)\in F:\ (p=i\wedge|q-j|\le k)\ \vee\ (q=j\wedge|p-i|\le k)\}. \]
+\begin{align*}
+\min\ \sum_{(p,q)\in F} y_{pq}
+\quad\text{p.o.}\quad
+\sum_{(p,q)\in V(i,j)} y_{pq}\ge 1\ \ \forall (i,j)\in C,
+\qquad y_{pq}\in\{0,1\}\ \ \forall (p,q)\in F
+\end{align*}
+Zakładam, że kontenery nie zasłaniają kamerom widoku, bo treść o tym nie wspomina.
+
+Mój teren ma wymiary $8\times10$ i 18 kontenerów (K to kontener, C to kamera):
+
+{\small
+\begin{center}
+\begin{tabular}{ccc}
+$k=1$: 17 kamer & $k=2$: 7 kamer & $k=3$: 6 kamer \\
+\begin{minipage}[t]{0.3\textwidth}\centering
+\begin{verbatim}
+C K K C . C C C K .
+C . . C . K K . . C
+K . . K . . . C . K
+. C C K . C . K . .
+. K . . . K . . C .
+. . . . C K . . K .
+K C K . C . . . . C
+. . . . K . . . . K
+\end{verbatim}
+\end{minipage} &
+\begin{minipage}[t]{0.3\textwidth}\centering
+\begin{verbatim}
+. K K C . . C . K C
+. . . . . K K . . .
+K . . K . . . . . K
+. . . K . C . K . .
+C K . . . K . . . .
+. . . . . K . . K C
+K . K . C . . . . .
+. . . . K . . . . K
+\end{verbatim}
+\end{minipage} &
+\begin{minipage}[t]{0.3\textwidth}\centering
+\begin{verbatim}
+C K K . . . . . K .
+. . . C . K K . . .
+K . . K . . . . . K
+. . . K . . . K C .
+. K . . . K . . . .
+. . . . . K . . K C
+K C K . . . . . . .
+. . . . K C . . . K
+\end{verbatim}
+\end{minipage}
+\end{tabular}
+\end{center}
+}
+
+Dla $k=1$ tylko jedna kamera widzi dwa kontenery naraz, więc kamer jest prawie tyle samo co kontenerów. Przy $k=2$ liczba kamer spada ponad dwukrotnie, a przy $k=3$ oszczędzamy już tylko jedną.
+
+\end{document}

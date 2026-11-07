@@ -1,0 +1,35 @@
+GLPSOL--GLPK LP/MIP Solver 5.0
+Parameter(s) specified in the command line:
+ --math zadanie2/zad2.mod -d zadanie2/zad2.dat
+Reading model section from zadanie2/zad2.mod...
+42 lines were read
+Reading data section from zadanie2/zad2.dat...
+20 lines were read
+Generating Profit...
+Generating MachineTime...
+Model has been successfully generated
+GLPK Simplex Optimizer 5.0
+4 rows, 4 columns, 16 non-zeros
+Preprocessing...
+3 rows, 4 columns, 12 non-zeros
+Scaling...
+ A: min|aij| =  1.000e+00  max|aij| =  1.000e+01  ratio =  1.000e+01
+Problem data seem to be well scaled
+Constructing initial basis...
+Size of triangular part is 3
+*     0: obj =  -0.000000000e+00 inf =   0.000e+00 (4)
+*     4: obj =   3.632500000e+03 inf =   0.000e+00 (0)
+OPTIMAL LP SOLUTION FOUND
+Time used:   0.0 secs
+Memory used: 0.1 Mb (134422 bytes)
+Maksymalny zysk: 3632.5000 $
+Plan produkcji [kg] (zysk jednostkowy [$/kg]):
+  P1: 125.0000 / 400 (4.2000)
+  P2: 100.0000 / 100 (5.5000)
+  P3: 150.0000 / 150 (4.5500)
+  P4: 500.0000 / 500 (3.7500)
+Wykorzystanie maszyn [min]:
+  M1: 3525.00 / 3600
+  M2: 3600.00 / 3600
+  M3: 2100.00 / 3600
+Model has been successfully processed

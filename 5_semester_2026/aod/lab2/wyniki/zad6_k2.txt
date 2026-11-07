@@ -1,0 +1,49 @@
+GLPSOL--GLPK LP/MIP Solver 5.0
+Parameter(s) specified in the command line:
+ --math zadanie6/zad6.mod -d zadanie6/teren.dat -d zadanie6/k2.dat
+Reading model section from zadanie6/zad6.mod...
+43 lines were read
+Reading data section from zadanie6/teren.dat...
+18 lines were read
+Reading data section from zadanie6/k2.dat...
+4 lines were read
+Generating Cameras...
+Generating Covered...
+Model has been successfully generated
+GLPK Integer Optimizer 5.0
+19 rows, 62 columns, 170 non-zeros
+62 integer variables, all of which are binary
+Preprocessing...
+18 rows, 59 columns, 108 non-zeros
+59 integer variables, all of which are binary
+Scaling...
+ A: min|aij| =  1.000e+00  max|aij| =  1.000e+00  ratio =  1.000e+00
+Problem data seem to be well scaled
+Constructing initial basis...
+Size of triangular part is 18
+Solving LP relaxation...
+GLPK Simplex Optimizer 5.0
+18 rows, 59 columns, 108 non-zeros
+      0: obj =   0.000000000e+00 inf =   1.800e+01 (18)
+      8: obj =   8.000000000e+00 inf =   0.000e+00 (0)
+*    26: obj =   7.000000000e+00 inf =   0.000e+00 (0)
+OPTIMAL LP SOLUTION FOUND
+Integer optimization begins...
+Long-step dual simplex will be used
++    26: mip =     not found yet >=              -inf        (1; 0)
++    26: >>>>>   7.000000000e+00 >=   7.000000000e+00   0.0% (1; 0)
++    26: mip =   7.000000000e+00 >=     tree is empty   0.0% (0; 1)
+INTEGER OPTIMAL SOLUTION FOUND
+Time used:   0.0 secs
+Memory used: 0.2 Mb (239679 bytes)
+k = 2, liczba kamer: 7
+Legenda: K = kontener, C = kamera, . = wolne
+. K K C . . C . K C 
+. . . . . K K . . . 
+K . . K . . . . . K 
+. . . K . C . K . . 
+C K . . . K . . . . 
+. . . . . K . . K C 
+K . K . C . . . . . 
+. . . . K . . . . K 
+Model has been successfully processed

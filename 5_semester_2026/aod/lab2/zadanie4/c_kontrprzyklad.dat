@@ -1,0 +1,16 @@
+/* Zadanie 4(c) - kontrprzykład: relaksacja LP daje wartości ułamkowe.
+   Autor: Jakub Retmańczyk
+   Dwie rozłączne ścieżki 1-2-4 (tania, wolna) i 1-3-4 (droga, szybka). */
+data;
+
+set Nodes := 1 2 3 4;
+param source := 1;
+param target := 4;
+param T := 10;
+
+param : Arcs : c t :=
+    1 2   1  8
+    2 4   1  8
+    1 3   5  2
+    3 4   5  2;
+end;

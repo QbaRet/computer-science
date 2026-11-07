@@ -28,12 +28,16 @@ function test(A)
 end
 
 Random.seed!(1234)
+lepszy_gauss = 0   # w ilu testach Gauss dał mniejszy błąd niż inv
+liczba_testow = 0  # ile testów wykonano
 println("== Macierze Hilberta ==")
 @printf("%3s %10s %6s %12s %12s\n", "n", "cond", "rank", "Gauss", "inv")
 for n in [2:2:20; 25; 30]
     A = hilb(n)
     g, i = test(A)
     @printf("%3d %10.3e %6d %12.3e %12.3e\n", n, cond(A), rank(A), g, i)
+    global lepszy_gauss += g < i
+    global liczba_testow += 1
 end
 
 println("\n== Macierze losowe R_n ==")
@@ -42,4 +46,7 @@ for n in (5, 10, 20), c in (1.0, 10.0, 1e3, 1e7, 1e12, 1e16)
     A = matcond(n, c)
     g, i = test(A)
     @printf("%3d %8.0e %10.3e %6d %12.3e %12.3e\n", n, c, cond(A), rank(A), g, i)
+    global lepszy_gauss += g < i
+    global liczba_testow += 1
 end
+println("\nGauss dokładniejszy w ", lepszy_gauss, " z ", liczba_testow, " testów")
