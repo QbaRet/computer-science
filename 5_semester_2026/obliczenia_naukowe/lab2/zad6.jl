@@ -56,14 +56,37 @@ function cobweb(x0, c, n)
     end
     return xs, ys
 end
+# punkty stałe x = x^2 + c, czyli x = (1 ± sqrt(1 - 4c)) / 2
+punkty_stale(c) = [(1 - sqrt(1 - 4c)) / 2, (1 + sqrt(1 - 4c)) / 2]
+
+wybrane = [2, 3, 6, 7]   # przypadki na rysunku; 1, 4 i 5 widać w tabeli
 plots = []
-for (i, (c, x0)) in enumerate(przyp)
+for i in wybrane
+    c, x0 = przyp[i]
     t = range(-2.2, 2.2, length = 400)
-    p = plot(t, t .^ 2 .+ c, label = "x²+$c", ylims = (-3, 3), xlims = (-2.2, 2.2),
-             title = "$i) c=$c, x0=$x0", legend = false, titlefontsize = 8)
-    plot!(p, t, t, color = :black, ls = :dash)
-    xs, ys = cobweb(x0, c, i == 3 ? 40 : 15)
-    plot!(p, xs, ys, color = :red, lw = 1)
+    p = plot(t, t .^ 2 .+ c, label = "x² + c", color = :steelblue, lw = 1.5,
+             xlims = (-2.2, 2.2), ylims = (-2.5, 2.5), aspect_ratio = :equal,
+             title = "przypadek $i: c = $(Int(c)), x₀ = $x0", titlefontsize = 10,
+             tickfontsize = 8, legend = i == 7 ? :bottomright : false)
+    plot!(p, t, t, label = "y = x", color = :black, ls = :dash)
+    xs, ys = cobweb(x0, c, 30)
+    plot!(p, xs, ys, label = "iteracja", color = :red, lw = 0.8)
+    ps = punkty_stale(c)
+    scatter!(p, ps, ps, label = "punkty stałe", color = :black, ms = 4)
     push!(plots, p)
 end
-savefig(plot(plots..., layout = (3, 3), size = (900, 800)), joinpath(@__DIR__, "zad6_cobweb.png"))
+savefig(plot(plots..., layout = (2, 2), size = (800, 800)), joinpath(@__DIR__, "zad6_cobweb.png"))
+
+# przebieg ciągu x_n w zależności od n -> zad6_przebieg.png
+ns = 0:40   # numery iteracji
+p23 = plot(ns, iteruj(2.0, -2.0, 40), label = "przypadek 2", color = :black, ls = :dash, lw = 1.5,
+           title = "przypadki 2 i 3: c = -2", titlefontsize = 10, xlabel = "n", ylabel = "xₙ", ylims = (-2.2, 2.2),
+           legend = :bottomleft)
+plot!(p23, ns, iteruj(1.99999999999999, -2.0, 40), label = "przypadek 3", color = :red,
+      marker = :circle, ms = 2.5, lw = 1)
+p6 = plot(ns, iteruj(0.75, -1.0, 40), label = false, color = :steelblue, marker = :circle, ms = 2.5,
+          title = "przypadek 6: c = -1, x₀ = 0.75", titlefontsize = 10, xlabel = "n", ylims = (-1.1, 0.9))
+p7 = plot(ns, iteruj(0.25, -1.0, 40), label = false, color = :steelblue, marker = :circle, ms = 2.5,
+          title = "przypadek 7: c = -1, x₀ = 0.25", titlefontsize = 10, xlabel = "n", ylims = (-1.1, 0.9))
+savefig(plot(p23, p6, p7, layout = (1, 3), size = (1050, 330), left_margin = 4Plots.mm,
+             bottom_margin = 5Plots.mm), joinpath(@__DIR__, "zad6_przebieg.png"))

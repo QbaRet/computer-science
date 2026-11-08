@@ -1,37 +1,28 @@
-/* Zadanie 3 - plan produkcji i magazynowania (LP)
-   Autor: Jakub Retmańczyk */
+param K, integer, >= 1;
+set Periods := 1..K;
 
-/* ---------- Parametry ---------- */
-param K, integer, >= 1;              # liczba okresów
-set Periods := 1..K;                 # okresy planowania
+param normalCap, >= 0;
+param storageCap, >= 0;
+param storageCost, >= 0;
+param initialStock, >= 0;
 
-param normalCap, >= 0;               # limit produkcji normalnej [szt./okres]
-param storageCap, >= 0;              # pojemność magazynu [szt.]
-param storageCost, >= 0;             # koszt przechowania [$/szt./okres]
-param initialStock, >= 0;            # początkowy stan magazynu [szt.]
+param c{Periods}, >= 0;
+param a{Periods}, >= 0;
+param o{Periods}, >= 0;
+param d{Periods}, >= 0;
 
-param c{Periods}, >= 0;              # koszt produkcji normalnej [$/szt.]
-param a{Periods}, >= 0;              # limit produkcji ponadwymiarowej [szt.]
-param o{Periods}, >= 0;              # koszt produkcji ponadwymiarowej [$/szt.]
-param d{Periods}, >= 0;              # zapotrzebowanie [szt.]
+var x{j in Periods}, >= 0, <= normalCap;
+var y{j in Periods}, >= 0, <= a[j];
+var s{j in Periods}, >= 0, <= storageCap;
 
-/* ---------- Zmienne decyzyjne ---------- */
-var x{j in Periods}, >= 0, <= normalCap;   # produkcja normalna w okresie j [szt.]
-var y{j in Periods}, >= 0, <= a[j];        # produkcja ponadwymiarowa w okresie j [szt.]
-var s{j in Periods}, >= 0, <= storageCap;  # stan magazynu na koniec okresu j [szt.]
-
-/* ---------- Funkcja celu ---------- */
-minimize TotalCost:                  # łączny koszt produkcji i magazynowania [$]
+minimize TotalCost:
     sum{j in Periods} (c[j] * x[j] + o[j] * y[j] + storageCost * s[j]);
 
-/* ---------- Ograniczenia ---------- */
-/* Bilans magazynu: stan poprzedni + produkcja - popyt = stan bieżący. */
 s.t. Balance{j in Periods}:
     (if j = 1 then initialStock else s[j - 1]) + x[j] + y[j] - d[j] = s[j];
 
 solve;
 
-/* ---------- Raport ---------- */
 printf "Minimalny koszt: %.2f $\n", TotalCost;
 printf "okres  normalna  ponadwym.  magazyn  popyt\n";
 for {j in Periods}

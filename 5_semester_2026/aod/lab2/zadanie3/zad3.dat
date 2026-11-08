@@ -1,5 +1,3 @@
-/* Zadanie 3 - dane z treści listy.
-   Autor: Jakub Retmańczyk */
 data;
 
 param K := 4;

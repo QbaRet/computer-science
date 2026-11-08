@@ -1,5 +1,3 @@
-# Lista 2 AOD: rozwiązuje wszystkie egzemplarze i buduje sprawozdanie.
-# Autor: Jakub Retmańczyk
 GLPSOL = glpsol
 RUN = $(GLPSOL) --math
 

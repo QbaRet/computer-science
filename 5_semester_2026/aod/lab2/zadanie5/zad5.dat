@@ -1,5 +1,3 @@
-/* Zadanie 5 - dane z zadania 5 z Listy 2 na ćwiczenia.
-   Autor: Jakub Retmańczyk */
 data;
 
 set Districts := p1 p2 p3;

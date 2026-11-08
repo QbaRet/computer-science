@@ -1,6 +1,3 @@
-/* Zadanie 6 - własny egzemplarz: teren 8 x 10 z 18 kontenerami.
-   Autor: Jakub Retmańczyk
-   Parametr k jest w osobnych plikach k1.dat, k2.dat, k3.dat. */
 data;
 
 param m := 8;

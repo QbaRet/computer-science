@@ -1,7 +1,3 @@
-/* Zadanie 1 - dane z treści listy.
-   Autor: Jakub Retmańczyk
-   Nagłówek tabeli w treści ma literówkę ("Firma 2" dwukrotnie);
-   trzecia kolumna dotyczy Firmy 3. */
 data;
 
 set Suppliers := F1 F2 F3;

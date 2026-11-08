@@ -6,57 +6,68 @@
 \usepackage[margin=2.3cm]{geometry}
 \usepackage{amsmath,amssymb}
 \usepackage{booktabs}
+\usepackage{enumitem}
+\usepackage{tikz}
+\usetikzlibrary{arrows.meta}
+\setlist{nosep,leftmargin=*}
 \setlength{\parindent}{0pt}
 \setlength{\parskip}{5pt}
 \renewcommand{\arraystretch}{1.1}
 
-\title{Algorytmy optymalizacji dyskretnej -- Laboratorium 2\\ Sprawozdanie}
+\title{Algorytmy optymalizacji dyskretnej, laboratorium 2}
 \author{Jakub Retmańczyk}
-\date{7 listopada 2026}
+\date{8 listopada 2026}
 
 \begin{document}
 \maketitle
 
-Wszystkie modele są napisane w GNU MathProg i rozwiązane w GLPK 5.0, a dane trzymam w osobnych plikach \texttt{.dat}.
+\section*{Zadanie 1}
+\textbf{Zmienne decyzyjne.} $x_{sl}\ge 0$ to liczba galonów paliwa, które firma $s\in S$ dostarcza na lotnisko $l\in L$.
+Firma $s$ może dostarczyć najwyżej $p_s$ galonów, lotnisko $l$ potrzebuje $d_l$ galonów, a galon od firmy $s$ na lotnisku $l$ kosztuje $c_{ls}$ dolarów.
 
-\section*{Zadanie 1 -- zakup paliwa}
-To zwykły problem transportowy. Zmienna $x_{sl}\ge 0$ to liczba galonów, które firma $s\in S$ dostarcza na lotnisko $l\in L$.
-Firma ma podaż $p_s$, lotnisko potrzebuje $d_l$ galonów, a galon kosztuje $c_{ls}$ dolarów.
+\textbf{Ograniczenia.}
 \begin{align*}
-\min\ \sum_{s\in S}\sum_{l\in L} c_{ls}x_{sl}
-\quad\text{p.o.}\quad
-\sum_{l\in L} x_{sl}\le p_s\ \ \forall s\in S,
-\qquad
-\sum_{s\in S} x_{sl}= d_l\ \ \forall l\in L
+\sum_{l\in L} x_{sl} &\le p_s, && s\in S && \text{(podaż firmy)}\\
+\sum_{s\in S} x_{sl} &= d_l, && l\in L && \text{(zapotrzebowanie lotniska)}\\
+x_{sl} &\ge 0, && s\in S,\ l\in L
 \end{align*}
 
-W nagłówku tabeli z treści dwa razy jest ,,Firma 2'', więc trzecią kolumnę traktuję jako Firmę 3.
+\textbf{Funkcja celu.} Minimalizacja łącznego kosztu dostaw w dolarach:
+\[ \min \sum_{s\in S}\sum_{l\in L} c_{ls}x_{sl}. \]
 
+\textbf{Wyniki.}
 \begin{center}
 \begin{tabular}{@{}lrrrrr@{}}
 \toprule
 galony & L1 & L2 & L3 & L4 & razem / podaż \\ \midrule
-Firma 1 & -- & 165\,000 & -- & 110\,000 & 275\,000 / 275\,000 \\
-Firma 2 & 110\,000 & 55\,000 & -- & -- & 165\,000 / 550\,000 \\
-Firma 3 & -- & -- & 330\,000 & 330\,000 & 660\,000 / 660\,000 \\
+Firma 1 & 0 & 165\,000 & 0 & 110\,000 & 275\,000 / 275\,000 \\
+Firma 2 & 110\,000 & 55\,000 & 0 & 0 & 165\,000 / 550\,000 \\
+Firma 3 & 0 & 0 & 330\,000 & 330\,000 & 660\,000 / 660\,000 \\
 \bottomrule
 \end{tabular}
 \end{center}
 
-Minimalny koszt to \textbf{8\,525\,000\,\$}. Paliwo dostarczają wszystkie trzy firmy. Firmy 1 i 3 wyczerpują swoje możliwości, a Firmie 2 zostaje 385\,000 galonów. Plan optymalny jest jedyny, więc te odpowiedzi nie zależą od solvera.
+\begin{enumerate}[label=(\alph*)]
+\item Minimalny łączny koszt wynosi \textbf{8\,525\,000\,\$}.
+\item Tak, paliwo dostarczają wszystkie trzy firmy.
+\item Firmy 1 i 3 sprzedają całe swoje paliwo, a Firmie 2 zostaje 385\,000 galonów.
+\end{enumerate}
 
-\section*{Zadanie 2 -- plan produkcji}
-Zmienna $x_p$ to tygodniowa produkcja wyrobu $p\in P$ w kilogramach. Zysk z kilograma to cena $v_p$ minus materiał $u_p$
-minus koszt pracy maszyn, czyli $z_p=v_p-u_p-\sum_{m\in M} \frac{t_{pm}}{60}k_m$, gdzie $t_{pm}$ to czas obróbki w minutach, a $k_m$ koszt godziny pracy maszyny.
-Maszyna jest dostępna $h_m$ godzin, a popyt na wyrób wynosi $D_p$.
+\section*{Zadanie 2}
+\textbf{Zmienne decyzyjne.} $x_p\ge 0$ to tygodniowa produkcja wyrobu $p\in P$ w kilogramach.
+Kilogram wyrobu $p$ sprzedaję po $v_p$ dolarów, materiał na niego kosztuje $u_p$ dolarów, a obróbka na maszynie $m\in M$ trwa $t_{pm}$ minut. Godzina pracy maszyny $m$ kosztuje $k_m$ dolarów, maszyna jest dostępna przez $h_m$ godzin w tygodniu, a popyt na wyrób $p$ wynosi $D_p$ kilogramów. Zysk z kilograma wyrobu to
+\[ z_p=v_p-u_p-\sum_{m\in M} \frac{t_{pm}}{60}\,k_m. \]
+
+\textbf{Ograniczenia.}
 \begin{align*}
-\max\ \sum_{p\in P} z_p x_p
-\quad\text{p.o.}\quad
-\sum_{p\in P} t_{pm}x_p\le 60\,h_m\ \ \forall m\in M,
-\qquad
-0\le x_p\le D_p\ \ \forall p\in P
+\sum_{p\in P} t_{pm}x_p &\le 60\,h_m, && m\in M && \text{(czas pracy maszyny w minutach)}\\
+0\le x_p &\le D_p, && p\in P && \text{(popyt)}
 \end{align*}
 
+\textbf{Funkcja celu.} Maksymalizacja tygodniowego zysku w dolarach:
+\[ \max \sum_{p\in P} z_p x_p. \]
+
+\textbf{Wyniki.}
 \begin{center}
 \begin{tabular}{@{}lrrrr@{}}
 \toprule
@@ -68,19 +79,25 @@ popyt [kg] & 400 & 100 & 150 & 500 \\
 \end{tabular}
 \end{center}
 
-Tygodniowy zysk wynosi \textbf{3632,50\,\$}. Ogranicza nas maszyna $M_2$, która pracuje pełne 3600 minut ($M_1$ ma 3525, a $M_3$ 2100), więc o planie decyduje zysk na minutę $M_2$, a nie na kilogram. Dlatego $P_4$, choć ma najmniejszy zysk na kilogram, idzie do końca popytu ($1{,}88$\,\$/min), a $P_1$ ($0{,}42$\,\$/min) dostaje tylko resztę czasu.
+Maksymalny zysk wynosi \textbf{3632,50\,\$} tygodniowo. Wyroby $P_2$, $P_3$ i $P_4$ produkuję w ilości równej popytowi, a $P_1$ tylko 125 z 400 kg.
+Cały dostępny czas wykorzystuje tylko maszyna $M_2$ (3600 min). $M_1$ pracuje 3525 min, a $M_3$ 2100 min. $P_1$ wypada najsłabiej, bo zajmuje maszynę $M_2$ aż 10 minut na kilogram.
 
-\section*{Zadanie 3 -- produkcja i magazynowanie}
-Dla okresu $j\in\{1,\dots,K\}$ zmienne to produkcja normalna $x_j$, ponadwymiarowa $y_j$ i stan magazynu na koniec okresu $s_j$ (w sztukach).
-Parametry to koszty $c_j,o_j$, limit $a_j$, popyt $d_j$, limit produkcji normalnej $B=100$, pojemność magazynu $W=70$, koszt przechowania $h=1500$ i stan początkowy $s_0=15$.
+\section*{Zadanie 3}
+\textbf{Zmienne decyzyjne.} Dla okresu $j=1,\dots,K$ zmienne $x_j$ i $y_j$ to liczba sztuk wyprodukowanych normalnie i ponadwymiarowo, a $s_j$ to liczba sztuk w magazynie na koniec okresu.
+Sztuka kosztuje $c_j$ lub $o_j$ dolarów, produkcja ponadwymiarowa jest ograniczona przez $a_j$, a zapotrzebowanie wynosi $d_j$. Produkcja normalna jest ograniczona przez $B=100$, magazyn mieści $W=70$ sztuk, przechowanie sztuki przez jeden okres kosztuje $h=1500$ dolarów, a na początku w magazynie jest $s_0=15$ sztuk.
+
+\textbf{Ograniczenia.}
 \begin{align*}
-\min\ \sum_{j=1}^{K}\left(c_jx_j+o_jy_j+h\,s_j\right)
-\quad\text{p.o.}\quad
-& s_{j-1}+x_j+y_j-d_j=s_j,\\
-& 0\le x_j\le B,\quad 0\le y_j\le a_j,\quad 0\le s_j\le W \qquad \forall j
+s_{j-1}+x_j+y_j-d_j &= s_j, && j=1,\dots,K && \text{(bilans magazynu)}\\
+0\le x_j &\le B, && j=1,\dots,K && \text{(produkcja normalna)}\\
+0\le y_j &\le a_j, && j=1,\dots,K && \text{(produkcja ponadwymiarowa)}\\
+0\le s_j &\le W, && j=1,\dots,K && \text{(pojemność magazynu)}
 \end{align*}
-Płacę tylko za towar przenoszony na kolejny okres, więc początkowe 15 sztuk nie wchodzi do kosztu.
 
+\textbf{Funkcja celu.} Minimalizacja łącznego kosztu produkcji i magazynowania w dolarach:
+\[ \min \sum_{j=1}^{K}\left(c_jx_j+o_jy_j+h\,s_j\right). \]
+
+\textbf{Wyniki.}
 \begin{center}
 \begin{tabular}{@{}lrrrr@{}}
 \toprule
@@ -88,43 +105,102 @@ okres & 1 & 2 & 3 & 4 \\ \midrule
 produkcja normalna & 100 & 100 & 100 & 100 \\
 produkcja ponadwymiarowa & 15 & 50 & 0 & 50 \\
 stan magazynu & 0 & 70 & 45 & 0 \\
-popyt & 130 & 80 & 125 & 195 \\
+zapotrzebowanie & 130 & 80 & 125 & 195 \\
 \bottomrule
 \end{tabular}
 \end{center}
 
-Minimalny koszt to \textbf{3\,842\,500\,\$}. Produkcja ponadwymiarowa jest potrzebna w okresach 1, 2 i 4, a magazyn jest pełny tylko w okresie 2. Okres 2 jest najtańszy, więc wtedy firma produkuje na zapas. Rozwiązanie jest jedyne.
+\begin{enumerate}[label=(\alph*)]
+\item Minimalny łączny koszt wynosi \textbf{3\,842\,500\,\$}.
+\item Produkcja ponadwymiarowa jest potrzebna w okresach 1, 2 i 4.
+\item Magazyn jest pełny tylko w okresie 2.
+\end{enumerate}
+W okresie 2 produkcja jest najtańsza, dlatego firma produkuje wtedy na zapas.
 
-\section*{Zadanie 4 -- najtańsza ścieżka z limitem czasu}
-Zmienna $x_{ij}\in\{0,1\}$ mówi, czy łuk $(i,j)\in A$ należy do ścieżki. Przyjmuję $b_{i^\circ}=1$, $b_{j^\circ}=-1$ oraz $b_v=0$ dla pozostałych wierzchołków.
+\section*{Zadanie 4}
+\textbf{Zmienne decyzyjne.} $x_{ij}\in\{0,1\}$ jest równe 1, jeśli łuk $(i,j)\in A$ należy do ścieżki.
+Przejazd łukiem kosztuje $c_{ij}$ i trwa $t_{ij}$, a $T$ to limit czasu. Przyjmuję $b_{i^\circ}=1$, $b_{j^\circ}=-1$ i $b_v=0$ dla pozostałych miast.
+
+\textbf{Ograniczenia.}
 \begin{align*}
-\min\ \sum_{(i,j)\in A} c_{ij}x_{ij}
-\quad\text{p.o.}\quad
-& \sum_{j:(v,j)\in A}x_{vj}-\sum_{i:(i,v)\in A}x_{iv}=b_v\ \ \forall v\in N,\\
-& \sum_{(i,j)\in A} t_{ij}x_{ij}\le T,\qquad x_{ij}\in\{0,1\}\ \ \forall (i,j)\in A
+\sum_{j:(v,j)\in A}x_{vj}-\sum_{i:(i,v)\in A}x_{iv} &= b_v, && v\in N && \text{(zachowanie przepływu)}\\
+\sum_{(i,j)\in A} t_{ij}x_{ij} &\le T && && \text{(limit czasu)}\\
+x_{ij} &\in\{0,1\}, && (i,j)\in A
 \end{align*}
 
-\textbf{(a)} Najlepsza ścieżka to $1\to2\to3\to5\to7\to9\to10$, jej koszt to \textbf{13}, a czas to 15, czyli dokładnie limit.
+\textbf{Funkcja celu.} Minimalizacja kosztu ścieżki:
+\[ \min \sum_{(i,j)\in A} c_{ij}x_{ij}. \]
 
-\textbf{(b)} Mój graf ma 12 wierzchołków i 20 łuków, trasa prowadzi z 1 do 12, a limit to $T=20$ (plik \texttt{b.dat}).
-Bez limitu wygrywa $1\to2\to12$ (koszt 5, czas 25). Z limitem koszt rośnie do 14: solver zwrócił $1\to3\to4\to5\to12$ (czas 18), a tyle samo kosztuje też $1\to6\to7\to12$ (czas 19).
+\textbf{Wyniki.}
 
-\textbf{(c)} Tak, bo nierówność czasu psuje całkowitą unimodularność macierzy ograniczeń. Kontrprzykład: dwie rozłączne ścieżki i $T=10$, tania $1\to2\to4$ (koszt 2, czas 16) oraz szybka $1\to3\to4$ (koszt 10, czas 4). Relaksacja daje $x_{ij}=0{,}5$ na każdym łuku i koszt 6 przy czasie 10, a prawdziwe optimum to 10. Dla egzemplarza (a) relaksacja akurat daje wynik całkowity, ale nie ma na to gwarancji.
+\textbf{(a)} Najtańsza ścieżka to $1\to2\to3\to5\to7\to9\to10$. Kosztuje \textbf{13}, a jej czas wynosi 15.
 
-\textbf{(d)} Nie zawsze. Bez limitu czasu zostaje zwykła najkrótsza ścieżka. Macierz incydencji jest całkowicie unimodularna, więc sympleks zwraca rozwiązanie całkowite, a przy dodatnich kosztach jest to poprawna ścieżka. Ta ścieżka nie musi jednak mieścić się w limicie: w egzemplarzu (a) dostajemy $1\to3\to10$ o koszcie 10 i czasie $20>15$. Całkowite są też tylko wierzchołki, więc przy dwóch równie tanich ścieżkach metoda punktu wewnętrznego zwróciła $0{,}5$ na każdym łuku, a sympleks jedną ze ścieżek. Łuki o zerowym koszcie mogą z kolei dorzucić zbędny cykl.
+\textbf{(b)} Mój egzemplarz ma 12 miast, $i^\circ=1$, $j^\circ=12$ i $T=20$. Na rysunku przy każdym łuku jest koszt (na czerwono) i czas (na niebiesko). Pogrubiona jest najtańsza ścieżka mieszcząca się w limicie.
 
-\section*{Zadanie 5 -- radiowozy}
-Zmienna $x_{dz}$ to całkowita liczba radiowozów w dzielnicy $d\in D$ na zmianie $z\in Z$. Tabele z treści dają limity $l_{dz},u_{dz}$,
-a $r_z$ i $q_d$ to wymagane minima dla zmiany i dzielnicy.
+\begin{center}
+\begin{tikzpicture}[x=1.15cm,y=1.05cm,>=Stealth,
+  v/.style={circle,draw,fill=gray!20,minimum size=6.5mm,inner sep=0pt,font=\small},
+  e/.style={->,thin,gray!70!black},
+  opt/.style={->,very thick,black},
+  lab/.style={font=\scriptsize,fill=white,inner sep=1pt}]
+\newcommand{\ct}[2]{\textcolor{red}{#1},\,\textcolor{blue}{#2}}
+\node[v] (1) at (0,0) {1};
+\node[v] (2) at (1.5,3.2) {2};
+\node[v] (6) at (3.2,1.6) {6};
+\node[v] (3) at (3.2,-1.2) {3};
+\node[v] (8) at (5.2,-3) {8};
+\node[v] (4) at (6,-1.2) {4};
+\node[v] (7) at (6.8,1.6) {7};
+\node[v] (10) at (7.4,0.1) {10};
+\node[v] (11) at (10.4,-0.25) {11};
+\node[v] (5) at (9,-1.5) {5};
+\node[v] (9) at (10.2,-3) {9};
+\node[v] (12) at (12,0) {12};
+\draw[e] (1) -- node[lab] {\ct{2}{10}} (2);
+\draw[e] (2) to[out=15,in=105] node[lab,pos=0.55] {\ct{3}{15}} (12);
+\draw[opt] (1) -- node[lab] {\ct{4}{5}} (3);
+\draw[opt] (3) -- node[lab] {\ct{3}{4}} (4);
+\draw[opt] (4) -- node[lab] {\ct{3}{4}} (5);
+\draw[opt] (5) -- node[lab] {\ct{4}{5}} (12);
+\draw[e] (1) -- node[lab] {\ct{5}{6}} (6);
+\draw[e] (6) -- node[lab] {\ct{4}{5}} (7);
+\draw[e] (7) -- node[lab,pos=0.5] {\ct{5}{8}} (12);
+\draw[e] (3) -- node[lab] {\ct{4}{7}} (8);
+\draw[e] (8) -- node[lab] {\ct{2}{6}} (9);
+\draw[e] (9) -- node[lab] {\ct{2}{6}} (12);
+\draw[e] (4) -- node[lab] {\ct{6}{3}} (10);
+\draw[e] (10) -- node[lab,pos=0.6] {\ct{5}{2}} (11);
+\draw[e] (11) -- node[lab] {\ct{6}{2}} (12);
+\draw[e] (2) -- node[lab] {\ct{1}{3}} (6);
+\draw[e] (6) -- node[lab] {\ct{2}{2}} (3);
+\draw[e] (5) -- node[lab] {\ct{1}{2}} (9);
+\draw[e] (7) -- node[lab,pos=0.8] {\ct{2}{3}} (5);
+\draw[e] (10) -- node[lab,left,pos=0.45] {\ct{2}{2}} (7);
+\end{tikzpicture}
+\end{center}
+
+Bez limitu czasu najtańsza jest ścieżka $1\to2\to12$ o koszcie 5, ale jej czas to 25. Z limitem najtańsza jest $1\to3\to4\to5\to12$ o koszcie \textbf{14} i czasie 18. Tyle samo kosztuje $1\to6\to7\to12$ o czasie 19.
+
+\textbf{(c)} Tak. Kontrprzykład to dwie ścieżki z 1 do 4 i $T=10$. Ścieżka $1\to2\to4$ kosztuje 2 i trwa 16, a $1\to3\to4$ kosztuje 10 i trwa 4. Relaksacja daje $x_{ij}=0{,}5$ na wszystkich łukach i koszt 6, a optimum całkowite wynosi 10. Przyczyną jest ograniczenie czasu, przez które macierz nie jest całkowicie unimodularna.
+
+\textbf{(d)} Nie zawsze. Bez limitu czasu macierz jest całkowicie unimodularna, więc sympleks zwraca ścieżkę, ale może ona przekraczać limit. W egzemplarzu (a) jest to $1\to3\to10$ o czasie $20>15$. Przy kilku ścieżkach o tym samym koszcie metoda punktu wewnętrznego może też zwrócić rozwiązanie ułamkowe (\texttt{d\_remis.dat}).
+
+\section*{Zadanie 5}
+\textbf{Zmienne decyzyjne.} $x_{dz}$ to liczba radiowozów przydzielonych do dzielnicy $d\in D$ na zmianie $z\in Z$ (liczba całkowita).
+Tabele z listy na ćwiczenia dają dolne i górne limity $l_{dz}$ i $u_{dz}$, a $r_z$ i $q_d$ to minimalne liczby radiowozów na zmianie i w dzielnicy.
+
+\textbf{Ograniczenia.}
 \begin{align*}
-\min\ \sum_{d\in D}\sum_{z\in Z} x_{dz}
-\quad\text{p.o.}\quad
-& \sum_{d\in D} x_{dz}\ge r_z\ \ \forall z\in Z,
-\qquad
-\sum_{z\in Z} x_{dz}\ge q_d\ \ \forall d\in D,\\
-& l_{dz}\le x_{dz}\le u_{dz},\quad x_{dz}\in\mathbb{Z}\ \ \forall d\in D,\ z\in Z
+\sum_{d\in D} x_{dz} &\ge r_z, && z\in Z && \text{(minimum dla zmiany)}\\
+\sum_{z\in Z} x_{dz} &\ge q_d, && d\in D && \text{(minimum dla dzielnicy)}\\
+l_{dz}\le x_{dz} &\le u_{dz}, && d\in D,\ z\in Z && \text{(limity z tabel)}\\
+x_{dz} &\in\mathbb{Z}, && d\in D,\ z\in Z
 \end{align*}
 
+\textbf{Funkcja celu.} Minimalizacja łącznej liczby radiowozów:
+\[ \min \sum_{d\in D}\sum_{z\in Z} x_{dz}. \]
+
+\textbf{Wyniki.}
 \begin{center}
 \begin{tabular}{@{}lrrrrr@{}}
 \toprule
@@ -133,29 +209,33 @@ $p_1$ & 2 & 7 & 5 & 14 & 10 \\
 $p_2$ & 3 & 6 & 7 & 16 & 14 \\
 $p_3$ & 5 & 7 & 6 & 18 & 13 \\ \midrule
 razem & 10 & 20 & 18 & \textbf{48} & \\
+minimum & 10 & 20 & 18 & & \\
 \bottomrule
 \end{tabular}
 \end{center}
 
-Potrzeba \textbf{48 radiowozów}. Mniej się nie da, bo same minima zmian sumują się do $10+20+18=48$, więc o wyniku decydują zmiany, a nie dzielnice. Przydziałów z 48 radiowozami jest 74, a powyższy to jeden z nich.
+Potrzeba \textbf{48 radiowozów}. Mniej być nie może, bo minima dla trzech zmian dają razem $10+20+18=48$.
 
-\section*{Zadanie 6 -- kamery}
-Zmienna $y_{pq}\in\{0,1\}$ mówi, czy w wolnym kwadracie $(p,q)\in F$ stoi kamera. Dla kontenera $(i,j)\in C$ zbiór $V(i,j)$ to wolne kwadraty, z których go widać:
+\section*{Zadanie 6}
+\textbf{Zmienne decyzyjne.} $y_{pq}\in\{0,1\}$ jest równe 1, jeśli w kwadracie $(p,q)\in F$ stoi kamera. $F$ to zbiór wolnych kwadratów, bo na kontenerze kamery postawić nie można.
+$C$ to zbiór kwadratów z kontenerami, a $V(i,j)$ to wolne kwadraty, z których widać kontener $(i,j)$:
 \[ V(i,j)=\{(p,q)\in F:\ (p=i\wedge|q-j|\le k)\ \vee\ (q=j\wedge|p-i|\le k)\}. \]
-\begin{align*}
-\min\ \sum_{(p,q)\in F} y_{pq}
-\quad\text{p.o.}\quad
-\sum_{(p,q)\in V(i,j)} y_{pq}\ge 1\ \ \forall (i,j)\in C,
-\qquad y_{pq}\in\{0,1\}\ \ \forall (p,q)\in F
-\end{align*}
-Zakładam, że kontenery nie zasłaniają kamerom widoku, bo treść o tym nie wspomina.
 
-Mój teren ma wymiary $8\times10$ i 18 kontenerów (K to kontener, C to kamera):
+\textbf{Ograniczenia.}
+\begin{align*}
+\sum_{(p,q)\in V(i,j)} y_{pq} &\ge 1, && (i,j)\in C && \text{(każdy kontener jest widziany)}\\
+y_{pq} &\in\{0,1\}, && (p,q)\in F
+\end{align*}
+
+\textbf{Funkcja celu.} Minimalizacja liczby kamer:
+\[ \min \sum_{(p,q)\in F} y_{pq}. \]
+
+\textbf{Wyniki.} Mój teren ma $8\times10$ kwadratów i 18 kontenerów. Rozwiązałem go dla $k=1,2,3$. Na rysunkach K oznacza kontener, a C kamerę.
 
 {\small
 \begin{center}
 \begin{tabular}{ccc}
-$k=1$: 17 kamer & $k=2$: 7 kamer & $k=3$: 6 kamer \\
+$k=1$, 17 kamer & $k=2$, 7 kamer & $k=3$, 6 kamer \\
 \begin{minipage}[t]{0.3\textwidth}\centering
 \begin{verbatim}
 C K K C . C C C K .
@@ -196,6 +276,6 @@ K C K . . . . . . .
 \end{center}
 }
 
-Dla $k=1$ tylko jedna kamera widzi dwa kontenery naraz, więc kamer jest prawie tyle samo co kontenerów. Przy $k=2$ liczba kamer spada ponad dwukrotnie, a przy $k=3$ oszczędzamy już tylko jedną.
+Dla $k=1$ potrzeba 17 kamer, czyli prawie tyle, ile jest kontenerów, bo tylko jedna kamera widzi dwa kontenery naraz. Dla $k=2$ wystarczy 7 kamer, a dla $k=3$ o jedną mniej.
 
 \end{document}

@@ -1,299 +1,323 @@
-\documentclass[10pt,a4paper]{article}
-
-\usepackage{polski}
-\usepackage[utf8]{inputenc}
+\documentclass[11pt,a4paper]{article}
 \usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage[polish]{babel}
+\usepackage[margin=2.3cm]{geometry}
 \usepackage{amsmath,amssymb}
 \usepackage{booktabs}
-\usepackage{graphicx}
-\usepackage{geometry}
-\usepackage{microtype}
-\usepackage{caption}
-\usepackage{float}
-\usepackage{tabularx}
-\usepackage{titlesec}
+\usepackage{multirow}
 \usepackage{enumitem}
-
-\geometry{
-    margin=1.6cm,
-    top=1.4cm,
-    bottom=1.4cm
-}
-
-\captionsetup{skip=2pt}
-\titlespacing*{\section}{0pt}{4pt}{1pt}
-\titlespacing*{\subsection}{0pt}{2pt}{1pt}
-\setlength{\parskip}{1.5pt}
+\usepackage{pgfplots}
+\pgfplotsset{compat=1.16}
+\setlist[itemize]{itemsep=1pt,topsep=3pt,parsep=0pt}
 \setlength{\parindent}{0pt}
-\setlist{nosep, leftmargin=12pt}
+\setlength{\parskip}{4pt}
+\renewcommand{\arraystretch}{1.12}
 
-\title{\vspace{-1.0cm}\textbf{Obliczenia Naukowe - Lista 1}}
-\author{Jakub Retmańczyk}
-\date{25 października 2026}
+\title{Obliczenia naukowe -- Lista 1\\ Sprawozdanie}
+\author{Imię Nazwisko}
+\date{\today}
 
 \begin{document}
-
 \maketitle
-\vspace{-0.6cm}
 
-\section{Zadanie 1}
+%% ======================================================================
+\section{Zadanie 1 -- rozpoznanie arytmetyki}
 
-Wyznaczyłem iteracyjnie epsilon maszynowy ($\text{macheps}$), najmniejszą dodatnią liczbę maszynową ($\eta$) oraz największą liczbę skończoną ($\text{MAX}$) dla typów \texttt{Float16}, \texttt{Float32} i \texttt{Float64}. Wyniki porównałem z funkcjami wbudowanymi Julii oraz wartościami z \texttt{float.h}.
+Wartości wyznaczone iteracyjnie (dzielenie lub mnożenie przez 2) porównano z funkcjami Julii i ze stałymi z \texttt{float.h}.
 
-\begin{table}[H]
-\centering
-\footnotesize
-\caption{Porównanie parametrów arytmetyki wyznaczonych iteracyjnie ze stałymi bibliotecznymi.}
-\label{tab:zad1}
-\begin{tabularx}{\textwidth}{lXXX}
+\begin{table}[h]
+\centering\footnotesize\setlength{\tabcolsep}{4pt}
+\begin{tabular}{@{}llll@{}}
 \toprule
-\textbf{Parametr} & \textbf{Float16} & \textbf{Float32} & \textbf{Float64} \\
+ & Float16 & Float32 & Float64 \\
 \midrule
-$\text{macheps}$ (obliczone) & $9.765625 \cdot 10^{-4}$ & $1.19209290 \cdot 10^{-7}$ & $2.220446049250313 \cdot 10^{-16}$ \\
-Wartość teoretyczna & $2^{-10}$ & $2^{-23}$ & $2^{-52}$ \\
-\texttt{eps(T)} & $9.765625 \cdot 10^{-4}$ & $1.19209290 \cdot 10^{-7}$ & $2.220446049250313 \cdot 10^{-16}$ \\
-\texttt{float.h} (\texttt{*\_EPSILON}) & - & $1.19209290 \cdot 10^{-7}$ & $2.220446049250313 \cdot 10^{-16}$ \\
+$t$ (bity mantysy z ukrytym) & 11 & 24 & 53 \\
+$e_{\min}$, $e_{\max}$ & $-14$, $15$ & $-126$, $127$ & $-1022$, $1023$ \\
 \midrule
-$\eta$ (obliczone) & $5.960464 \cdot 10^{-8}$ & $1.40129846 \cdot 10^{-45}$ & $4.940656458412465 \cdot 10^{-324}$ \\
-Wartość teoretyczna & $2^{-24}$ & $2^{-149}$ & $2^{-1074}$ \\
-\texttt{nextfloat(T(0.0))} & $5.960464 \cdot 10^{-8}$ & $1.40129846 \cdot 10^{-45}$ & $4.940656458412465 \cdot 10^{-324}$ \\
+macheps (iteracyjnie) $=$ \texttt{eps(T)} & $2^{-10}\approx 9{,}766\cdot10^{-4}$ & $2^{-23}\approx1{,}1920929\cdot10^{-7}$ & $2^{-52}\approx2{,}2204460\cdot10^{-16}$ \\
+\texttt{float.h} (\texttt{FLT/DBL\_EPSILON}) & -- & $1{,}19209290\cdot10^{-7}$ & $2{,}2204460\cdot10^{-16}$ \\
 \midrule
-\texttt{floatmin(T)} & $6.103516 \cdot 10^{-5}$ & $1.17549435 \cdot 10^{-38}$ & $2.225073858507201 \cdot 10^{-308}$ \\
-Wartość teoretyczna & $2^{-14}$ & $2^{-126}$ & $2^{-1022}$ \\
-\texttt{float.h} (\texttt{*\_MIN}) & - & $1.17549435 \cdot 10^{-38}$ & $2.225073858507201 \cdot 10^{-308}$ \\
+eta (iteracyjnie) $=$ \texttt{nextfloat(0)} & $2^{-24}\approx5{,}96\cdot10^{-8}$ & $2^{-149}\approx1{,}4\cdot10^{-45}$ & $2^{-1074}\approx4{,}94\cdot10^{-324}$ \\
 \midrule
-$\text{MAX}$ (obliczone) & $65504.0$ & $3.40282347 \cdot 10^{38}$ & $1.7976931348623157 \cdot 10^{308}$ \\
-Wartość teoretyczna & $(2 - 2^{-10})\cdot 2^{15}$ & $(2 - 2^{-23})\cdot 2^{127}$ & $(2 - 2^{-52})\cdot 2^{1023}$ \\
-\texttt{floatmax(T)} & $65504.0$ & $3.40282347 \cdot 10^{38}$ & $1.7976931348623157 \cdot 10^{308}$ \\
-\texttt{float.h} (\texttt{*\_MAX}) & - & $3.40282347 \cdot 10^{38}$ & $1.7976931348623157 \cdot 10^{308}$ \\
-\bottomrule
-\end{tabularx}
-\end{table}
-
-\subsection*{Interpretacja}
-\begin{itemize}
-    \item Precyzja arytmetyki to połowa epsilona maszynowego: $\epsilon = \frac{1}{2}\text{macheps} = 2^{-t-1}$.
-    \item Wartość $\eta$ to najmniejsza dodatnia liczba maszynowa większa od zera ($2^{e_{\min} - t}$, czyli $2^{-1074}$ w \texttt{Float64}), odpowiadająca \texttt{nextfloat(zero(T))}. Funkcja \texttt{floatmin} zwraca natomiast najmniejszą liczbę o pełnej precyzji mantysy ($2^{e_{\min}} = 2^{-1022}$). Zachodzi relacja $\eta = \text{macheps} \cdot \text{floatmin}$.
-    \item Wyznaczone iteracyjnie parametry $\text{macheps}$, $\eta$ oraz $\text{MAX}$ są ściśle zgodne ze stałymi bibliotecznymi Julii oraz \texttt{float.h}.
-\end{itemize}
-
-
-\section{Zadanie 2}
-
-Zbadałem, czy liczby \texttt{Float64} są równomiernie rozmieszczone w przedziale $[1, 2]$ z krokiem $\delta = 2^{-52}$ oraz jak wygląda rozmieszczenie w $[1/2, 1]$ i $[2, 4]$.
-
-Dla każdego przedziału sprawdziłem $10^6$ kolejnych kroków \texttt{nextfloat}. Zależność $x = a + k \cdot \delta_a$ była spełniona w każdym kroku.
-
-\begin{table}[H]
-\centering
-\small
-\caption{Kroki siatki liczb maszynowych w badanych przedziałach (\texttt{Float64}).}
-\label{tab:zad2_krok}
-\begin{tabular}{lccc}
-\toprule
-\textbf{Przedział} & \textbf{Krok zmierzony $\delta_a$} & \textbf{Krok teoretyczny} & \textbf{Zgodność ($10^6$ kroków)} \\
+\texttt{floatmin(T)} & $2^{-14}\approx6{,}104\cdot10^{-5}$ & $2^{-126}\approx1{,}1754944\cdot10^{-38}$ & $2^{-1022}\approx2{,}2250739\cdot10^{-308}$ \\
+\texttt{float.h} (\texttt{FLT/DBL\_MIN}) & -- & $1{,}17549435\cdot10^{-38}$ & $2{,}2250739\cdot10^{-308}$ \\
 \midrule
-$[1/2, 1]$ & $\approx 1.110223 \cdot 10^{-16}$ & $2^{-53} = \frac{1}{2}\delta$ & Tak \\
-$[1, 2]$   & $\approx 2.220446 \cdot 10^{-16}$ & $2^{-52} = \delta$            & Tak \\
-$[2, 4]$   & $\approx 4.440892 \cdot 10^{-16}$ & $2^{-51} = 2\delta$           & Tak \\
+MAX (iteracyjnie) $=$ \texttt{floatmax(T)} & $65504$ & $3{,}4028235\cdot10^{38}$ & $1{,}7976931\cdot10^{308}$ \\
+\texttt{float.h} (\texttt{FLT/DBL\_MAX}) & -- & $3{,}40282347\cdot10^{38}$ & $1{,}7976931\cdot10^{308}$ \\
 \bottomrule
 \end{tabular}
+\caption{Zadanie 1: wyniki dla trzech typów (wartości dziesiętne z 8 cyframi znaczącymi).}
 \end{table}
 
-\begin{table}[H]
-\centering
-\footnotesize
-\caption{Reprezentacja binarna liczb na granicach przedziałów (funkcja \texttt{bitstring}).}
-\label{tab:zad2_bity}
-\begin{tabular}{lccl}
-\toprule
-\textbf{Punkt $x$} & \textbf{Waga $2^p$} & \textbf{Format IEEE 754: znak $|$ cecha $|$ mantysa} & \textbf{Krok do sąsiada} \\
-\midrule
-$0.5$                   & $2^{-1}$ & \texttt{0 | 01111111110 | 0000\dots0000} & baza przedziału $[1/2, 1)$ \\
-\texttt{nextfloat(0.5)} & $2^{-1}$ & \texttt{0 | 01111111110 | 0000\dots0001} & $+2^{-53} = \frac{1}{2}\delta$ \\
-\midrule
-$1.0$                   & $2^0$    & \texttt{0 | 01111111111 | 0000\dots0000} & nowa cecha ($1023$), baza $[1, 2)$ \\
-\texttt{nextfloat(1.0)} & $2^0$    & \texttt{0 | 01111111111 | 0000\dots0001} & $+2^{-52} = \delta$ \\
-$1.0 + 2\delta$         & $2^0$    & \texttt{0 | 01111111111 | 0000\dots0010} & $+2\cdot 2^{-52}$ \\
-\midrule
-$2.0$                   & $2^1$    & \texttt{0 | 10000000000 | 0000\dots0000} & nowa cecha ($1024$), baza $[2, 4)$ \\
-\texttt{nextfloat(2.0)} & $2^1$    & \texttt{0 | 10000000000 | 0000\dots0001} & $+2^{-51} = 2\delta$ \\
-\bottomrule
-\end{tabular}
-\end{table}
-
-\subsection*{Interpretacja}
+\textbf{Obserwacje.}
 \begin{itemize}
-    \item Liczby \texttt{Float64} są rozmieszczone lokalnie równomiernie w przedziałach $[2^p, 2^{p+1})$ ze stałym krokiem siatki $\delta_p = 2^{p-52}$.
-    \item Każdą liczbę z przedziału $[2^p, 2^{p+1})$ można przedstawić jako $x = 2^p + k \cdot 2^{p-52}$ dla $k = 0, 1, \dots, 2^{52}-1$.
-    \item Przekroczenie każdej kolejnej potęgi dwójki podwaja odległość między sąsiednimi liczbami maszynowymi.
+\item Wartości iteracyjne są identyczne z \texttt{eps(T)}, \texttt{nextfloat(zero(T))} i \texttt{floatmax(T)} dla wszystkich typów; dla Float32 i Float64 zgadzają się też z \texttt{float.h} (Float16 nie występuje w standardowym \texttt{float.h}).
+\item Julia wypisuje eta skrótowo (\texttt{1.0e-45}, \texttt{5.0e-324}) -- to najkrótszy zapis jednoznacznie wskazujący liczbę; dokładne wartości ($2^{-149}$, $2^{-1074}$) są w tabeli.
+\item \texttt{floatmin} jest o czynnik $2^{t-1}$ większe od eta ($2^{23}$ w Float32, $2^{52}$ w Float64).
 \end{itemize}
 
-
-\section{Zadanie 3}
-
-Szukałem w arytmetyce \texttt{Float64} liczby $x \in (1, 2)$ takiej, że $\text{fl}(x \cdot \text{fl}(1/x)) \neq 1.0$.
-
-\subsection*{Wyniki}
+\textbf{Wnioski.}
 \begin{itemize}
-    \item Zadanie 3a (dowolny przykład): już \texttt{nextfloat(1.5)} spełnia warunek:
-    \begin{align*}
-        x &= 1.5 + 2^{-52}, \quad
-        \text{fl}(x \cdot \text{fl}(1/x)) = 1.0 - 2^{-53} \neq 1.0.
-    \end{align*}
-    \item Zadanie 3b (najmniejsza liczba): przeszukując od $1.0$ funkcją \texttt{nextfloat}, znalazłem ją po $257\,736\,490$ krokach:
-    \begin{align*}
-        x_{\min} &= 1.0 + 257\,736\,490 \cdot 2^{-52} \approx 1.00000005722899709681, \\
-        \text{fl}(x_{\min} \cdot \text{fl}(1/x_{\min})) &= 1.0 - 2^{-53} \neq 1.0.
-    \end{align*}
+\item macheps $=2^{1-t}$, czyli macheps $=2\epsilon$, gdzie $\epsilon=2^{-t}$ jest precyzją arytmetyki (ograniczeniem względnego błędu zaokrąglenia). Zatem macheps jest miarą \emph{względnej} dokładności arytmetyki.
+\item eta $=2^{e_{\min}-t+1}=\mathrm{MIN}_{sub}$ -- najmniejsza liczba zdenormalizowana, a \texttt{floatmin} $=2^{e_{\min}}=\mathrm{MIN}_{nor}$ -- najmniejsza znormalizowana. Pomiędzy 0 a \texttt{floatmin} leży $2^{t-1}-1$ liczb zdenormalizowanych (gradual underflow), więc eta i \texttt{floatmin} to różne wielkości.
+\item MAX $=(2-2^{1-t})\,2^{e_{\max}}$; zakres Float16 ($\approx6{,}6\cdot10^4$) jest bardzo wąski, a precyzja niska ($\approx3$ cyfry dziesiętne).
 \end{itemize}
 
-\subsection*{Pseudokod}
-\begin{center}
-\begin{minipage}{0.65\textwidth}
-\hrule \vspace{2pt}
-\footnotesize
-Wyszukiwanie najmniejszego $x \in (1, 2)$ takiego, że $\text{fl}(x \cdot \text{fl}(1/x)) \neq 1$
-\vspace{1pt}\hrule\vspace{2pt}
-\begin{enumerate}
-    \item $x \leftarrow \text{nextfloat}(1.0)$, \quad $k \leftarrow 1$
-    \item \textbf{while} $x < 2.0$ \textbf{do}
-    \item \quad \textbf{if} $x \cdot (1.0 / x) \neq 1.0$ \textbf{then return} $(x, k)$
-    \item \quad $x \leftarrow \text{nextfloat}(x)$, \quad $k \leftarrow k + 1$
-    \item \textbf{end while}
-\end{enumerate}
-\vspace{1pt}\hrule
-\end{minipage}
-\end{center}
+%% ======================================================================
+\section{Zadanie 2 -- rozmieszczenie liczb w Float64}
 
-\subsection*{Interpretacja}
-Dla $x \in (1, 2)$ błąd zaokrąglenia odwrotności spełnia $x\delta < 2^{-53}$, co uniemożliwia zaokrąglenie iloczynu w górę; jedyną możliwą niezgodnością jest zaokrąglenie w dół do $1 - 2^{-53}$. Wymagany do tego margines błędu pojawia się po raz pierwszy dopiero przy kroku $k = 257\,736\,490$.
-
-
-\section{Zadanie 4}
-
-Obliczyłem iloczyn skalarny wektorów:
-\begin{align*}
-    x &= [2.718281828, -3.141592654, 1.414213562, 0.5772156649, 0.3010299957]^T, \\
-    y &= [1486.2497, 878366.9879, -22.37492, 4773714.647, 0.000185049]^T,
-\end{align*}
-czterema metodami w precyzji \texttt{Float32} i \texttt{Float64}. Wartość dokładna: $S_{\text{dokładna}} = -1.00657107000000 \cdot 10^{-11}$.
-
-\begin{table}[H]
-\centering
-\small
-\setlength{\tabcolsep}{4.5pt}
-\caption{Wyniki iloczynu skalarnego w arytmetyce \texttt{Float32} i \texttt{Float64}.}
-\label{tab:zad4}
-\begin{tabular}{lcccc}
+\begin{table}[h]
+\centering\footnotesize
+\begin{tabular}{@{}llllll@{}}
 \toprule
-\textbf{Metoda} & \multicolumn{2}{c}{\textbf{Float32}} & \multicolumn{2}{c}{\textbf{Float64}} \\
-\cmidrule(lr){2-3} \cmidrule(lr){4-5}
-& Wartość & Błąd bezwzgl. & Wartość & Błąd bezwzgl. \\
+liczba & znak & cecha & mantysa (52 bity) & krok w przedziale & postać \\
 \midrule
-(a) w przód               & $-0.4999443$ & $0.4999443$ & $1.025 \cdot 10^{-10}$ & $1.126 \cdot 10^{-10}$ \\
-(b) w tył                 & $-0.4543457$ & $0.4543457$ & $-1.564 \cdot 10^{-10}$ & $1.464 \cdot 10^{-10}$ \\
-(c) od największych       & $-0.5000000$ & $0.5000000$ & $0.000000$                & $1.007 \cdot 10^{-11}$ \\
-(d) od najmniejszych      & $-0.5000000$ & $0.5000000$ & $0.000000$                & $1.007 \cdot 10^{-11}$ \\
+$0{,}5$ & 0 & \texttt{01111111110} & \texttt{0\ldots000} & \multirow{2}{*}{$2^{-53}$ w $[\tfrac12,1)$} & $\tfrac12+k\,2^{-53}$ \\
+\texttt{nextfloat}$(0{,}5)$ & 0 & \texttt{01111111110} & \texttt{0\ldots001} & & \\
+\midrule
+$1{,}0$ & 0 & \texttt{01111111111} & \texttt{0\ldots000} & \multirow{3}{*}{$2^{-52}=\delta$ w $[1,2)$} & \multirow{3}{*}{$1+k\delta$} \\
+\texttt{nextfloat}$(1)=1+\delta$ & 0 & \texttt{01111111111} & \texttt{0\ldots001} & & \\
+$1+2\delta$ & 0 & \texttt{01111111111} & \texttt{0\ldots010} & & \\
+\midrule
+$2{,}0$ & 0 & \texttt{10000000000} & \texttt{0\ldots000} & \multirow{2}{*}{$2^{-51}$ w $[2,4)$} & $2+k\,2^{-51}$ \\
+\texttt{nextfloat}$(2)$ & 0 & \texttt{10000000000} & \texttt{0\ldots001} & & \\
 \bottomrule
 \end{tabular}
+\caption{Zadanie 2: reprezentacja bitowa kolejnych liczb ($k=0,\dots,2^{52}-1$).}
 \end{table}
 
-\subsection*{Interpretacja}
+\textbf{Obserwacje.}
 \begin{itemize}
-    \item Wynik iloczynu skalarnego ($10^{-11}$) powstaje z odejmowania składników rzędu $10^6$, powodując redukcję cyfr znaczących.
-    \item Precyzja \texttt{Float32} (ok. 7 cyfr dziesiętnych) wyczerpuje się na samych składnikach rzędu $10^6$. Komputer traci część ułamkową i nie jest w stanie wyznaczyć różnicy rzędu $10^{-11}$ (stąd wynik ok. $-0.5$ i błąd względny rzędu $10^{10}$).
-    \item W \texttt{Float64} metody (a) i (b) dają błąd względny ponad 1100\%. Metody (c) i (d) sumują składniki do dokładnie przeciwnych wartości maszynowych ($S_1 + S_2 = 0.0$); błąd bezwzględny wynosi wówczas $1.007 \cdot 10^{-11}$, lecz błąd względny to dokładnie 100\% (żadna cyfra znacząca nie jest poprawna).
+\item Dla każdego z trzech przedziałów pętla po $10^6$ kolejnych liczbach (\texttt{nextfloat}) od lewego końca potwierdziła, że $x=a+k\cdot\mathrm{krok}$ (test dał \texttt{true}); kroki: $1{,}11\cdot10^{-16}=2^{-53}$, $2{,}22\cdot10^{-16}=2^{-52}$, $4{,}44\cdot10^{-16}=2^{-51}$.
+\item Wewnątrz przedziału cecha jest stała, a mantysa rośnie o 1 na najmłodszym bicie, co daje równe odstępy.
 \end{itemize}
 
+\textbf{Wnioski.}
+\begin{itemize}
+\item Każdy przedział $[2^e,2^{e+1})$ zawiera tyle samo liczb ($2^{52}$), więc krok wynosi $2^{e-52}$: w $[\tfrac12,1]$ liczby leżą dwa razy gęściej niż w $[1,2]$, a w $[2,4]$ dwa razy rzadziej.
+\item Odstęp zmienia się razem z wielkością liczby, więc \emph{bezwzględny} błąd reprezentacji rośnie z $|x|$, a \emph{względny} pozostaje rzędu $2^{-52}$--$2^{-53}$. To wyjaśnia wyniki zadań 4 i 6: duże liczby mają duży bezwzględny błąd zaokrąglenia.
+\end{itemize}
 
-\section{Zadanie 5}
+%% ======================================================================
+\section{Zadanie 3 -- $x\cdot(1/x)\neq1$}
 
-Zbadałem wartości dwóch algebraicznie tożsamych funkcji dla $x = 8^{-k}$ ($k = 1, \dots, 25$):
-\begin{equation}
-    f(x) = \sqrt{x^2 + 1} - 1, \qquad g(x) = \frac{x^2}{\sqrt{x^2 + 1} + 1}.
-\end{equation}
-
-\begin{table}[H]
-\centering
-\small
-\caption{Wartości $f(x)$ i $g(x)$ w arytmetyce \texttt{Float64}.}
-\label{tab:zad5}
-\begin{tabular}{rccc}
+\begin{table}[h]
+\centering\small
+\begin{tabular}{@{}lll@{}}
 \toprule
-$k$ & $x = 8^{-k}$ & $f(x)$ & $g(x)$ \\
+ & $x$ & $\mathrm{fl}(x\cdot\mathrm{fl}(1/x))$ \\
 \midrule
-1  & $1.25 \cdot 10^{-1}$  & $7.782218537318641 \cdot 10^{-3}$  & $7.782218537318706 \cdot 10^{-3}$ \\
-3  & $1.95 \cdot 10^{-3}$  & $1.907346813823096 \cdot 10^{-6}$  & $1.907346813826566 \cdot 10^{-6}$ \\
-5  & $3.05 \cdot 10^{-5}$  & $4.656612873077393 \cdot 10^{-10}$ & $4.656612871993190 \cdot 10^{-10}$ \\
-7  & $4.77 \cdot 10^{-7}$  & $1.136868377216160 \cdot 10^{-13}$ & $1.136868377216096 \cdot 10^{-13}$ \\
-8  & $5.96 \cdot 10^{-8}$  & $1.776356839400250 \cdot 10^{-15}$ & $1.776356839400249 \cdot 10^{-15}$ \\
-\textbf{9}  & $\mathbf{7.45 \cdot 10^{-9}}$  & $\mathbf{0.0}$ & $\mathbf{2.775557561562891 \cdot 10^{-17}}$ \\
-10 & $9.31 \cdot 10^{-10}$ & $0.0$                & $4.336808689942018 \cdot 10^{-19}$ \\
-15 & $2.84 \cdot 10^{-14}$ & $0.0$                & $4.038967834731580 \cdot 10^{-28}$ \\
-20 & $8.67 \cdot 10^{-19}$ & $0.0$                & $3.761581922631320 \cdot 10^{-37}$ \\
+(a) przykład & \texttt{1.5000000000000002} & \texttt{0.9999999999999999} \\
+(b) najmniejsza & \texttt{1.000000057228997} & \texttt{0.9999999999999999} \\
 \bottomrule
 \end{tabular}
+\caption{Zadanie 3: liczby, dla których $x\cdot(1/x)\neq1$.}
 \end{table}
 
-\begin{figure}[H]
+\textbf{Obserwacje.}
+\begin{itemize}
+\item Najmniejszą liczbę znaleziono, przeglądając liczby maszynowe od \texttt{nextfloat(1.0)} w górę -- pierwsza znaleziona jest najmniejsza. Wynosi ona $x=1+257736490\cdot2^{-52}$, a jej reprezentacja bitowa to \texttt{0 01111111111 0000000000000000000000001111010111001011111100101010}.
+\item Wynik iloczynu to $0{,}9999999999999999=1-2^{-53}$, czyli poprzednik liczby 1 (o jedno ulp mniej).
+\end{itemize}
+
+\textbf{Wnioski.}
+\begin{itemize}
+\item $\mathrm{fl}(1/x)$ jest zaokrągloną wartością, a kolejne mnożenie zaokrągla się ponownie; błędy nie muszą się znosić, więc $x\cdot(1/x)=1$ nie jest gwarantowane.
+\item Pierwszy kontrprzykład pojawia się dopiero dla $k\approx2{,}6\cdot10^{8}$ spośród $2^{52}\approx4{,}5\cdot10^{15}$ liczb w $[1,2)$, więc dla wielu liczb równość zachodzi -- ale nie dla wszystkich. W praktyce nie wolno sprawdzać wyników obliczeń zmiennopozycyjnych przez \texttt{==}; porównuje się z tolerancją.
+\end{itemize}
+
+%% ======================================================================
+\section{Zadanie 4 -- iloczyn skalarny}
+
+Wartość dokładna: $-1{,}00657107\cdot10^{-11}$. Iloczyny cząstkowe (Float64):
+
+\begin{table}[h]
+\centering\small
+\begin{tabular}{@{}rlll@{}}
+\toprule
+$i$ & $x_i$ & $y_i$ & $x_iy_i$ \\
+\midrule
+1 & $2{,}718281828$ & $1486{,}2497$ & $4040{,}05$ \\
+2 & $-3{,}141592654$ & $8{,}78366988\cdot10^{5}$ & $-2{,}75947\cdot10^{6}$ \\
+3 & $1{,}414213562$ & $-22{,}37492$ & $-31{,}6429$ \\
+4 & $0{,}5772156649$ & $4{,}77371465\cdot10^{6}$ & $2{,}75546\cdot10^{6}$ \\
+5 & $0{,}3010299957$ & $1{,}85049000\cdot10^{-4}$ & $5{,}57053\cdot10^{-5}$ \\
+\bottomrule
+\end{tabular}
+\caption{Zadanie 4: dane i iloczyny cząstkowe.}
+\end{table}
+
+\begin{table}[h]
+\centering\footnotesize\setlength{\tabcolsep}{4pt}
+\begin{tabular}{@{}lllllll@{}}
+\toprule
+ & \multicolumn{3}{c}{Float32} & \multicolumn{3}{c}{Float64} \\
+\cmidrule(lr){2-4}\cmidrule(lr){5-7}
+metoda & wynik & błąd bezwzgl. & błąd wzgl. & wynik & błąd bezwzgl. & błąd wzgl. \\
+\midrule
+(a) w przód & $-0{,}4999$ & $0{,}4999$ & $5{,}0\cdot10^{10}$ & $1{,}025\cdot10^{-10}$ & $1{,}13\cdot10^{-10}$ & $11$ \\
+(b) w tył & $-0{,}4543$ & $0{,}4543$ & $4{,}5\cdot10^{10}$ & $-1{,}564\cdot10^{-10}$ & $1{,}46\cdot10^{-10}$ & $15$ \\
+(c) od największego & $-0{,}5$ & $0{,}5$ & $5{,}0\cdot10^{10}$ & $0$ & $1{,}01\cdot10^{-11}$ & $1$ \\
+(d) od najmniejszego & $-0{,}5$ & $0{,}5$ & $5{,}0\cdot10^{10}$ & $0$ & $1{,}01\cdot10^{-11}$ & $1$ \\
+\bottomrule
+\end{tabular}
+\caption{Zadanie 4: wyniki czterech metod sumowania.}
+\end{table}
+
+\textbf{Obserwacje.}
+\begin{itemize}
+\item W Float32 wszystkie metody dają $\approx-0{,}5$ zamiast $\approx-10^{-11}$; błąd względny rzędu $10^{10}$.
+\item W Float64 metody (a) i (b) dają wyniki rzędu $10^{-10}$ (w (a) nawet z błędnym znakiem), a (c) i (d) zwracają dokładnie $0$ (błąd względny 100\%).
+\item Wyniki (c) i (d) są w obu precyzjach identyczne; (a) i (b) różnią się między sobą, więc kolejność dodawania zmienia wynik.
+\end{itemize}
+
+\textbf{Wnioski.}
+\begin{itemize}
+\item Zadanie jest skrajnie źle uwarunkowane: $\sum|x_iy_i|\approx5{,}5\cdot10^{6}$ przy wyniku $\approx10^{-11}$, więc wskaźnik uwarunkowania wynosi $\approx5{,}5\cdot10^{17}$, czyli więcej niż $1/\text{macheps}_{64}\approx4{,}5\cdot10^{15}$. Dwa składniki $\approx\pm2{,}8\cdot10^{6}$ prawie się znoszą (odejmowanie bliskich liczb).
+\item Odstęp liczb w okolicy $2{,}8\cdot10^{6}$ wynosi $2^{-31}\approx4{,}7\cdot10^{-10}$ w Float64 i $0{,}25$ w Float32. Wynik $10^{-11}$ jest ok.\ 50 razy mniejszy od odstępu w Float64, więc nie da się go odtworzyć; w Float32 błędy rzędu $0{,}25$--$0{,}5$ wynikają wprost z tego odstępu.
+\item Zmiana kolejności sumowania lub podwójna precyzja nie naprawia problemu -- w Float64 błąd bezwzględny jest mniejszy tylko dlatego, że wszystkie błędy zaokrągleń są proporcjonalnie mniejsze, a wynik (0) nadal nie ma żadnej poprawnej cyfry. Rozwiązaniem byłaby wyższa precyzja (np. BigFloat) lub inny sposób obliczeń.
+\end{itemize}
+
+%% ======================================================================
+\section{Zadanie 5 -- $f(x)=\sqrt{x^2+1}-1$ i $g(x)=x^2/(\sqrt{x^2+1}+1)$}
+
+Błędy względne liczono względem wartości $g$ obliczonej w BigFloat (tabela i wykres dla $k\le21$; dla większych $k$ użyta precyzja BigFloat była zbyt mała, by wartość odniesienia była wiarygodna).
+
+\begin{table}[h]
+\centering\footnotesize\setlength{\tabcolsep}{5pt}
+\begin{tabular}{@{}rlllll@{}}
+\toprule
+$k$ ($x=8^{-k}$) & $f(x)$ & $g(x)$ & błąd wzgl. $f$ & $x^2/4$ & błąd wzgl. $g$ \\
+\midrule
+1 & $7{,}782\cdot10^{-3}$ & $7{,}782\cdot10^{-3}$ & $8{,}37\cdot10^{-15}$ & $3{,}91\cdot10^{-3}$ & $7{,}1\cdot10^{-18}$ \\
+2 & $1{,}221\cdot10^{-4}$ & $1{,}221\cdot10^{-4}$ & $6{,}82\cdot10^{-13}$ & $6{,}10\cdot10^{-5}$ & $8{,}3\cdot10^{-17}$ \\
+3 & $1{,}907\cdot10^{-6}$ & $1{,}907\cdot10^{-6}$ & $1{,}82\cdot10^{-12}$ & $9{,}54\cdot10^{-7}$ & $4{,}3\cdot10^{-18}$ \\
+4 & $2{,}980\cdot10^{-8}$ & $2{,}980\cdot10^{-8}$ & $4{,}44\cdot10^{-16}$ & $1{,}49\cdot10^{-8}$ & $1{,}7\cdot10^{-23}$ \\
+5 & $4{,}657\cdot10^{-10}$ & $4{,}657\cdot10^{-10}$ & $2{,}33\cdot10^{-10}$ & $2{,}33\cdot10^{-10}$ & $1{,}1\cdot10^{-19}$ \\
+6 & $7{,}276\cdot10^{-12}$ & $7{,}276\cdot10^{-12}$ & $3{,}64\cdot10^{-12}$ & $3{,}64\cdot10^{-12}$ & $2{,}6\cdot10^{-23}$ \\
+7 & $1{,}137\cdot10^{-13}$ & $1{,}137\cdot10^{-13}$ & $5{,}68\cdot10^{-14}$ & $5{,}68\cdot10^{-14}$ & $6{,}5\cdot10^{-27}$ \\
+8 & $1{,}776\cdot10^{-15}$ & $1{,}776\cdot10^{-15}$ & $8{,}88\cdot10^{-16}$ & $8{,}88\cdot10^{-16}$ & $1{,}6\cdot10^{-30}$ \\
+9 & $0$ & $2{,}776\cdot10^{-17}$ & $1$ & $1{,}39\cdot10^{-17}$ & $1{,}4\cdot10^{-17}$ \\
+10 & $0$ & $4{,}337\cdot10^{-19}$ & $1$ & $2{,}17\cdot10^{-19}$ & $2{,}2\cdot10^{-19}$ \\
+15 & $0$ & $4{,}039\cdot10^{-28}$ & $1$ & $2{,}02\cdot10^{-28}$ & $2{,}0\cdot10^{-28}$ \\
+21 & $0$ & $5{,}877\cdot10^{-39}$ & $1$ & $2{,}94\cdot10^{-39}$ & $2{,}9\cdot10^{-39}$ \\
+\bottomrule
+\end{tabular}
+\caption{Zadanie 5: wybrane wartości i błędy względne (Float64).}
+\end{table}
+
+\begin{figure}[h]
 \centering
-\includegraphics[width=0.36\textwidth]{zad5.png}
-\caption{Porównanie wartości $f(x)$ i $g(x)$ w zależności od $k$.}
-\label{fig:zad5}
+\begin{tikzpicture}
+\begin{semilogyaxis}[width=0.88\linewidth,height=5.8cm,xlabel={$k$ \quad ($x=8^{-k}$)},ylabel={błąd względny},
+  ymin=1e-40,ymax=10,xmin=1,xmax=21,legend pos=south west,legend style={font=\small},grid=major,
+  ytick={1e-40,1e-30,1e-20,1e-10,1}]
+\addplot[mark=o,thick] coordinates {(1,8.366216019448647e-15) (2,6.823569224686462e-13) (3,1.8189868014664328e-12) (4,4.440891999238956e-16) (5,2.3283064359965952e-10) (6,3.637978807078478e-12) (7,5.6843418860804784e-14) (8,8.881784197001244e-16) (9,1.0) (10,1.0) (11,1.0) (12,1.0) (13,1.0) (14,1.0) (15,1.0) (16,1.0) (17,1.0) (18,1.0) (19,1.0) (20,1.0) (21,1.0)};
+\addplot[mark=square,thick,dashed] coordinates {(1,7.143341499488932e-18) (2,8.323623800271718e-17) (3,4.3368012453346486e-18) (4,1.6543611807326312e-23) (5,1.0842021721068512e-19) (6,2.646977960155244e-23) (7,6.462348535569978e-27) (8,1.5777218104420215e-30) (9,1.3877787807814457e-17) (10,2.168404344971009e-19) (11,3.3881317890172014e-21) (12,5.293955920339377e-23) (13,8.271806125530277e-25) (14,1.2924697071141057e-26) (15,2.0194839173657902e-28) (16,3.1554436208840472e-30) (17,4.930380657631324e-32) (18,7.703719777548943e-34) (19,1.2037062152420224e-35) (20,1.88079096131566e-37) (21,2.938735877055719e-39)};
+\legend{$f(x)$,$g(x)$}
+\end{semilogyaxis}
+\end{tikzpicture}
+\caption{Zadanie 5: błąd względny $f$ i $g$ w zależności od $k$.}
 \end{figure}
 
-\subsection*{Interpretacja}
+\textbf{Obserwacje.}
 \begin{itemize}
-    \item Wiarygodne są wyłącznie wyniki funkcji $g(x)$. We wzorze $f(x)$ od $k = 9$ wartość $x^2 \le 2^{-54}$ staje się mniejsza niż próg precyzji, więc komputer zaokrągla $x^2 + 1$ do $1.0$, dając błędne $f(x) = 0.0$.
-    \item We wzorze $g(x)$ nie występuje odejmowanie bliskich sobie liczb, dlatego wyniki są poprawne dla wszystkich badanych $k$.
+\item Błąd względny $g$ nie przekracza $8{,}3\cdot10^{-17}$ (poniżej $2^{-53}\approx1{,}1\cdot10^{-16}$) dla żadnego $k$.
+\item Błąd $f$ jest nieregularny dla $k\le4$ ($4\cdot10^{-16}$--$2\cdot10^{-12}$), potem rośnie: $2{,}3\cdot10^{-10}$ ($k=5$), $3{,}6\cdot10^{-12}$ ($k=6$), $5{,}7\cdot10^{-14}$ ($k=7$), $8{,}9\cdot10^{-16}$ ($k=8$) -- dla $k=5,\dots,8$ dokładnie równy $x^2/4$ (kolumna tabeli).
+\item Od $k=9$ mamy $f(x)=0$, a więc błąd względny równy 1, podczas gdy $g(x)\approx x^2/2$ jest poprawne.
 \end{itemize}
 
+\textbf{Wnioski.}
+\begin{itemize}
+\item Wiarygodne są wartości $g$, niewiarygodne wartości $f$ (dla $k\ge9$ całkowicie błędne). Wzory są równoważne matematycznie, ale numerycznie nie: $g$ nie zawiera odejmowania bliskich liczb.
+\item Wyjaśnienie dla $f$: $\sqrt{1+x^2}=1+\tfrac{x^2}{2}-\tfrac{x^4}{8}+\dots$ Gdy $x^4/8<2^{-53}$ (tj.\ $k\ge5$), składnik $x^4/8$ znika przy zaokrągleniu pierwiastka, więc $\mathrm{fl}(f)=x^2/2$, a błąd względny wynosi dokładnie $x^2/4$ -- zgodnie z tabelą. Odjęcie 1 odsłania ten błąd, bo wynik jest rzędu $x^2/2\ll1$.
+\item Gdy $x^2<2^{-53}$ (tj.\ $k\ge9$), $\mathrm{fl}(x^2+1)=1$, więc $f=0$ -- całkowita utrata cyfr znaczących. Wzór $g$ unika tej pułapki, przekształcając wyrażenie algebraicznie.
+\end{itemize}
 
-\section{Zadanie 6}
+%% ======================================================================
+\section{Zadanie 6 -- przybliżenie pochodnej}
 
-Obliczyłem przybliżenie pochodnej $f(x) = \sin x + \cos 3x$ w punkcie $x_0 = 1$ ilorazem różnicowym w przód:
-\begin{equation}
-    \tilde{f}'(x_0) = \frac{f(x_0 + h) - f(x_0)}{h}, \qquad h = 2^{-n},\ n = 0, 1, \dots, 54.
-\end{equation}
-Wartość dokładna: $f'(1) = \cos(1) - 3\sin(3) \approx 0.116942281688538$.
+$f(x)=\sin x+\cos3x$, $x_0=1$, dokładna pochodna $f'(1)=0{,}11694228168853815$, $h=2^{-n}$, $n=0,\dots,54$.
 
-\begin{table}[H]
-\centering
-\small
-\caption{Przybliżenia pochodnej i błędy bezwzględne dla wybranych $h = 2^{-n}$.}
-\label{tab:zad6}
-\begin{tabular}{rcccc}
+\begin{table}[h]
+\centering\footnotesize
+\begin{tabular}{@{}rllll@{}}
 \toprule
-$n$ & $h = 2^{-n}$ & $1 + h$ & Przybliżenie $\tilde{f}'(1)$ & Błąd bezwzględny \\
+$n$ & $h=2^{-n}$ & $1+h=1$? & przybliżenie $\tilde f'(1)$ & $|f'(1)-\tilde f'(1)|$ \\
 \midrule
-0  & $1.0$                 & $2.0000000000000000$ & $2.017989$ & $1.9010$ \\
-5  & $3.125 \cdot 10^{-2}$ & $1.0312500000000000$ & $0.243443$ & $1.2650 \cdot 10^{-1}$ \\
-10 & $9.766 \cdot 10^{-4}$ & $1.0009765625000000$ & $0.120882$ & $3.9402 \cdot 10^{-3}$ \\
-20 & $9.537 \cdot 10^{-7}$ & $1.0000009536743164$ & $0.116946$ & $3.8473 \cdot 10^{-6}$ \\
-\textbf{26} & $\mathbf{1.490 \cdot 10^{-8}}$ & $\mathbf{1.0000000149011612}$ & $\mathbf{0.11694234}$ & $\mathbf{5.70 \cdot 10^{-8}}$ \\
-\textbf{27} & $\mathbf{7.451 \cdot 10^{-9}}$ & $\mathbf{1.0000000074505806}$ & $\mathbf{0.11694232}$ & $\mathbf{3.46 \cdot 10^{-8}}$ \\
-\textbf{28} & $\mathbf{3.725 \cdot 10^{-9}}$ & $\mathbf{1.0000000037252903}$ & $\mathbf{0.11694229}$ & $\mathbf{4.80 \cdot 10^{-9}}$ \\
-35 & $2.910 \cdot 10^{-11}$ & $1.0000000000291038$ & $0.11693954$ & $2.7370 \cdot 10^{-6}$ \\
-50 & $8.882 \cdot 10^{-16}$ & $1.0000000000000009$ & $0.00000000$ & $1.1694 \cdot 10^{-1}$ \\
-52 & $2.220 \cdot 10^{-16}$ & $1.0000000000000002$ & $-0.5000000$ & $6.1694 \cdot 10^{-1}$ \\
-\textbf{53} & $\mathbf{1.110 \cdot 10^{-16}}$ & $\mathbf{1.0000000000000000}$ & $\mathbf{0.00000000}$ & $\mathbf{1.1694 \cdot 10^{-1}}$ \\
+0 & $1$ & nie & $2{,}01799$ & $1{,}9$ \\
+5 & $0{,}0312$ & nie & $0{,}243443$ & $0{,}127$ \\
+10 & $9{,}77\cdot10^{-4}$ & nie & $0{,}120882$ & $3{,}94\cdot10^{-3}$ \\
+15 & $3{,}05\cdot10^{-5}$ & nie & $0{,}117065$ & $1{,}23\cdot10^{-4}$ \\
+20 & $9{,}54\cdot10^{-7}$ & nie & $0{,}116946$ & $3{,}85\cdot10^{-6}$ \\
+25 & $2{,}98\cdot10^{-8}$ & nie & $0{,}116942$ & $1{,}17\cdot10^{-7}$ \\
+26 & $1{,}49\cdot10^{-8}$ & nie & $0{,}116942$ & $5{,}70\cdot10^{-8}$ \\
+28 & $3{,}73\cdot10^{-9}$ & nie & $0{,}116942$ & $4{,}80\cdot10^{-9}$ \\
+30 & $9{,}31\cdot10^{-10}$ & nie & $0{,}116942$ & $1{,}14\cdot10^{-7}$ \\
+35 & $2{,}91\cdot10^{-11}$ & nie & $0{,}11694$ & $2{,}74\cdot10^{-6}$ \\
+40 & $9{,}09\cdot10^{-13}$ & nie & $0{,}116821$ & $1{,}21\cdot10^{-4}$ \\
+45 & $2{,}84\cdot10^{-14}$ & nie & $0{,}113281$ & $3{,}66\cdot10^{-3}$ \\
+50 & $8{,}88\cdot10^{-16}$ & nie & $0$ & $0{,}117$ \\
+52 & $2{,}22\cdot10^{-16}$ & nie & $-0{,}5$ & $0{,}617$ \\
+53 & $1{,}11\cdot10^{-16}$ & tak & $0$ & $0{,}117$ \\
 \bottomrule
 \end{tabular}
+\caption{Zadanie 6: wybrane wartości (Float64); pełne dane dla $n=0,\dots,54$ na wykresach.}
 \end{table}
 
-\begin{figure}[H]
+\begin{figure}[h]
 \centering
-\includegraphics[width=0.33\textwidth]{zad6.png}
-\caption{Błąd bezwzględny przybliżenia pochodnej w skali log-log.}
-\label{fig:zad6}
+\begin{tikzpicture}
+\begin{loglogaxis}[width=0.88\linewidth,height=6.2cm,xlabel={$h=2^{-n}$ (malejące w prawo)},ylabel={$|f'(1)-\tilde f'(1)|$},
+  x dir=reverse,xmin=1e-17,xmax=1,ymin=1e-9,ymax=10,grid=major,xtick={1e0,1e-4,1e-8,1e-12,1e-16},
+  legend style={at={(0.5,1.03)},anchor=south,legend columns=-1,font=\scriptsize}]
+\addplot[only marks,mark=*,mark size=1.4pt] coordinates {(1.0,1.9010469435800585) (0.5,1.753499116243109) (0.25,0.9908448135457593) (0.125,0.5062989976090435) (0.0625,0.253457784514981) (0.03125,0.1265007927090087) (0.015625,0.0631552816187897) (0.0078125,0.03154911368255764) (0.00390625,0.015766832591977753) (0.001953125,0.007881411252170345) (0.0009765625,0.0039401951225235265) (0.00048828125,0.001969968780300313) (0.000244140625,0.0009849520504721099) (0.0001220703125,0.0004924679222275685) (6.103515625e-05,0.0002462319323930373) (3.0517578125e-05,0.00012311545724141837) (1.52587890625e-05,6.155759983439424e-05) (7.62939453125e-06,3.077877117529937e-05) (3.814697265625e-06,1.5389378673624776e-05) (1.9073486328125e-06,7.694675146829866e-06) (9.5367431640625e-07,3.8473233834324105e-06) (4.76837158203125e-07,1.9235601902423127e-06) (2.384185791015625e-07,9.612711400208696e-07) (1.1920928955078125e-07,4.807086915192826e-07) (5.960464477539063e-08,2.394961446938737e-07) (2.9802322387695312e-08,1.1656156484463054e-07) (1.4901161193847656e-08,5.6956920069239914e-08) (7.450580596923828e-09,3.460517827846843e-08) (3.725290298461914e-09,4.802855890773117e-09) (1.862645149230957e-09,5.480178888461751e-08) (9.313225746154785e-10,1.1440643366000813e-07) (4.656612873077393e-10,1.1440643366000813e-07) (2.3283064365386963e-10,3.5282501276157063e-07) (1.1641532182693481e-10,8.296621709646956e-07) (5.820766091346741e-11,8.296621709646956e-07) (2.9103830456733704e-11,2.7370108037771956e-06) (1.4551915228366852e-11,1.0776864618478044e-06) (7.275957614183426e-12,1.4181102600652196e-05) (3.637978807091713e-12,1.0776864618478044e-06) (1.8189894035458565e-12,5.9957469788152196e-05) (9.094947017729282e-13,0.0001209926260381522) (4.547473508864641e-13,1.0776864618478044e-06) (2.2737367544323206e-13,0.0002430629385381522) (1.1368683772161603e-13,0.0007313441885381522) (5.684341886080802e-14,0.0002452183114618478) (2.842170943040401e-14,0.003661031688538152) (1.4210854715202004e-14,0.007567281688538152) (7.105427357601002e-15,0.007567281688538152) (3.552713678800501e-15,0.023192281688538152) (1.7763568394002505e-15,0.008057718311461848) (8.881784197001252e-16,0.11694228168853815) (4.440892098500626e-16,0.11694228168853815) (2.220446049250313e-16,0.6169422816885382) (1.1102230246251565e-16,0.11694228168853815) (5.551115123125783e-17,0.11694228168853815)};
+\addplot[dashed,domain=1e-17:1,samples=2] {4.03*x};
+\addplot[dotted,thick,domain=1e-17:1,samples=2] {1.1e-16/x};
+\legend{błąd,$\approx4h$ (obcięcie),$\approx1{,}1\cdot10^{-16}/h$ (zaokrąglenia)}
+\end{loglogaxis}
+\end{tikzpicture}
+\caption{Zadanie 6: błąd przybliżenia pochodnej w zależności od $h$.}
 \end{figure}
 
-\subsection*{Interpretacja}
+\begin{figure}[h]
+\centering
+\begin{tikzpicture}
+\begin{axis}[width=0.88\linewidth,height=5.2cm,xlabel={$n$ ($h=2^{-n}$)},ylabel={$\tilde f'(1)$},
+  xmin=20,xmax=54,ymin=-0.6,ymax=0.3,grid=major,legend pos=south west,legend style={font=\small}]
+\addplot[only marks,mark=*,mark size=1.4pt] coordinates {(20,0.11694612901192158) (21,0.1169442052487284) (22,0.11694324295967817) (23,0.11694276239722967) (24,0.11694252118468285) (25,0.116942398250103) (26,0.11694233864545822) (27,0.11694231629371643) (28,0.11694228649139404) (29,0.11694222688674927) (30,0.11694216728210449) (31,0.11694216728210449) (32,0.11694192886352539) (33,0.11694145202636719) (34,0.11694145202636719) (35,0.11693954467773438) (36,0.116943359375) (37,0.1169281005859375) (38,0.116943359375) (39,0.11688232421875) (40,0.1168212890625) (41,0.116943359375) (42,0.11669921875) (43,0.1162109375) (44,0.1171875) (45,0.11328125) (46,0.109375) (47,0.109375) (48,0.09375) (49,0.125) (50,0.0) (51,0.0) (52,-0.5) (53,0.0) (54,0.0)};
+\addplot[dashed,domain=20:54,samples=2] {0.11694228168853815};
+\legend{$\tilde f'(1)$,$f'(1)$}
+\end{axis}
+\end{tikzpicture}
+\caption{Zadanie 6: wartość przybliżenia dla $n\ge20$ -- rozpad wyniku przy małych $h$.}
+\end{figure}
+
+\textbf{Obserwacje.}
 \begin{itemize}
-    \item Błąd całkowity stanowi sumę błędu metody $O(h)$ (dominującego dla dużych $h$) oraz błędu zaokrągleń $O(\epsilon/h)$ (dominującego dla małych $h$).
-    \item Optymalny krok minimalizujący błąd wynosi $h_{\text{opt}} \approx \sqrt{\text{macheps}} = 2^{-26} \approx 1.49 \cdot 10^{-8}$; najmniejszy błąd bezwzględny w eksperymencie uzyskałem dla $n = 28$ ($4.80 \cdot 10^{-9}$).
-    \item Dla $n \ge 53$ zachodzi $\text{fl}(1+h) = 1.0$, przybliżenie pochodnej wynosi $0.0$, a błąd bezwzględny stabilizuje się na poziomie dokładnej wartości $|f'(1)| \approx 0.1169$ (błąd względny 100\%).
+\item Dla $n\lesssim26$ błąd maleje dwukrotnie przy każdym kroku $n\to n+1$ (np. $n=10$: $3{,}94\cdot10^{-3}$, $n=15$: $1{,}23\cdot10^{-4}$, $n=20$: $3{,}85\cdot10^{-6}$) i jest bliski $\tfrac12|f''(1)|\,h\approx4{,}03\,h$.
+\item Najmniejszy błąd $4{,}8\cdot10^{-9}$ występuje dla $n=28$; dla $n=26$--$29$ błąd obcięcia i błąd zaokrągleń są porównywalne (wartości $5{,}7\cdot10^{-8}$, $3{,}5\cdot10^{-8}$, $4{,}8\cdot10^{-9}$, $5{,}5\cdot10^{-8}$).
+\item Dla $n=30$--$49$ błąd rośnie mniej więcej jak $1{,}1\cdot10^{-16}/h$ (np. $n=40$: $1{,}2\cdot10^{-4}$, $n=45$: $3{,}7\cdot10^{-3}$) i jest nieregularny. Różne $n$ dają identyczne przybliżenia (np. $n=30$ i $31$ oraz $n=36,38,41$: $0{,}116943359375$).
+\item Dla $n=50,51$ otrzymujemy $\tilde f'=0$ (błąd $=|f'(1)|\approx0{,}117$), dla $n=52$ wartość $-0{,}5$, a dla $n\ge53$ znowu $0$.
+\item $1+h\neq1$ dla $n\le52$ ($n=52$: $1+h=\texttt{nextfloat(1.0)}$); od $n=53$ ($h=\text{macheps}/2$) zachodzi $\mathrm{fl}(1+h)=1$.
+\end{itemize}
+
+\textbf{Wnioski.}
+\begin{itemize}
+\item Zmniejszanie $h$ poprawia przybliżenie tylko do pewnego momentu ($h\approx2^{-26}$--$2^{-28}$, czyli rzędu $\sqrt{\text{macheps}}$). Poniżej błąd rośnie, bo licznik $f(x_0+h)-f(x_0)$ jest różnicą bliskich liczb, a $f$ jest liczone z błędem $\approx10^{-16}$, który dzielimy przez coraz mniejsze $h$.
+\item Wartości $f(x_0+h)$ i $f(x_0)$ są dyskretne (krok $\approx10^{-16}$), więc licznik, a z nim iloraz, przyjmują tylko wartości z siatki -- stąd powtarzające się wyniki i skoki. Dla $h\lesssim10^{-15}$ licznik zaokrągla się do $0$ lub jednego kroku siatki.
+\item Dla $n\ge53$ mamy $x_0+h=x_0$ (bo $h\le\text{macheps}/2$), więc licznik jest dokładnie zerem, a $\tilde f'=0$: informacja o pochodnej zostaje całkowicie utracona. Wartość $1+h$ pokazuje, kiedy $h$ „znika'' przy dodawaniu do 1.
+\end{itemize}
+
+%% ======================================================================
+\section{Podsumowanie}
+\begin{itemize}
+\item Arytmetyka Float64 ma względną dokładność $\epsilon=2^{-53}$ i skończony zakres (eta, \texttt{floatmin}, MAX); liczby są gęstsze blisko zera i rzadsze dla dużych wartości (zad.~1, 2).
+\item Podstawowe tożsamości algebry nie muszą zachodzić dokładnie (zad.~3), a wynik zależy od kolejności działań (zad.~4).
+\item Główne źródło dużych błędów to odejmowanie bliskich liczb (zad.~4, 5, 6): błąd zaokrąglenia mały względem operandów staje się duży względem różnicy.
+\item Równoważne matematycznie wzory (zad.~5) lub metody sumowania (zad.~4) mogą mieć różną jakość numeryczną; przekształcenie algebraiczne usuwające odejmowanie (wzór $g$) całkowicie rozwiązuje problem w zad.~5.
+\item Zmniejszanie kroku w różnicy skończonej nie poprawia wyniku w nieskończoność -- istnieje optymalne $h\sim\sqrt{\text{macheps}}$ (zad.~6).
 \end{itemize}
 
 \end{document}
