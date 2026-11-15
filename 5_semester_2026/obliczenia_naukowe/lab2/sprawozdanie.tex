@@ -117,7 +117,7 @@ $10^{16}$ & $1.2 \cdot 10^{-1}$ & $1.6 \cdot 10^{-1}$ & $5.7 \cdot 10^{-1}$ & $6
     \item Dla macierzy $R_n$ błąd rośnie wraz z $c$, od około $10^{-16}$ dla $c = 1$ do wartości między $0.12$ a $2.0$ dla $c = 10^{16}$, więc przy największym $c$ wynik nie ma już poprawnych cyfr. O rzędzie błędu decyduje $c$, a rozmiar macierzy nie ma systematycznego wpływu. Tylko dla $c = 10^{16}$ błąd rósł z $n$, ale to wynik jednego losowania. Od $c = 10^{3}$ błąd jest mniejszy niż $c \cdot \text{macheps}$.
     \item Dla macierzy Hilberta błąd rośnie bardzo szybko, ponieważ wskaźnik uwarunkowania zwiększa się o około 3 rzędy wielkości na każde dwa stopnie. Dla $n = 10$ zostają 3 lub 4 poprawne cyfry, dla $n = 12$ błąd wynosi już $0.05$ (Gauss) i $0.18$ (\texttt{inv}), a od $n = 14$ przekracza 1, więc wynik nie ma poprawnych cyfr.
     \item Macierz $H_n$ jest nieosobliwa, a mimo to od $n = 12$ funkcja \texttt{rank} zwraca wartość mniejszą niż $n$. Wartości \texttt{cond} dla $n \ge 14$ też są niewiarygodne, bo dla $n = 30$ otrzymałem mniej niż dla $n = 25$. Podobnie jest dla $R_n$ przy $c = 10^{16}$. Rząd spadł tam o 1 (do 4, 9 i 19), a \texttt{cond} wyniosło $1.2 \cdot 10^{16}$, $1.0 \cdot 10^{16}$ i $9.0 \cdot 10^{15}$.
-    \item Żadna z metod nie jest wyraźnie dokładniejsza. Eliminacja Gaussa dała mniejszy błąd w 18 z 30 testów, a błędy obu metod były zwykle porównywalne, więc o dokładności decyduje przede wszystkim uwarunkowanie macierzy. W praktyce wybrałbym \verb|A\b|, bo nie trzeba wtedy wyznaczać całej macierzy odwrotnej.
+    \item Żadna z metod nie jest wyraźnie dokładniejsza. Eliminacja Gaussa dała mniejszy błąd w 18 z 30 testów, a błędy obu metod były zwykle porównywalne, więc o dokładności decyduje przede wszystkim uwarunkowanie macierzy. W praktyce wybrałbym A, bo nie trzeba wtedy wyznaczać całej macierzy odwrotnej.
 \end{itemize}
 
 
@@ -240,7 +240,7 @@ $n$ & \textbf{bez obcięcia} & \textbf{z obcięciem} & \textbf{różnica} & $n$ 
 
 \section{Zadanie 6}
 
-Wykonałem 40 iteracji w \texttt{Float64} dla siedmiu zestawów danych. Dla przypadków 2, 3, 6 i 7 narysowałem przebieg ciągu (rysunek~\ref{fig:przebieg}) i iterację graficzną (rysunek~\ref{fig:cobweb}). Przebieg przypadków 1, 4 i 5 jest prosty i widać go w tabeli.
+Wykonałem 40 iteracji w \texttt{Float64} dla siedmiu zestawów danych. Dla wszystkich przypadków narysowałem iterację graficzną (rysunek~\ref{fig:cobweb}), a dla przypadków 2, 3, 6 i 7 także przebieg ciągu (rysunek~\ref{fig:przebieg}). Przebieg przypadków 1, 4 i 5 jest prosty i widać go w tabeli.
 
 \begin{table}[H]
 \centering
@@ -270,18 +270,19 @@ Wykonałem 40 iteracji w \texttt{Float64} dla siedmiu zestawów danych. Dla przy
 
 \begin{figure}[H]
 \centering
-\includegraphics[width=.75\textwidth]{zad6_cobweb.png}
-\caption{Iteracja graficzna dla przypadków 2, 3, 6 i 7 (pierwsze 30 iteracji). Kropki to punkty stałe.}
+\includegraphics[width=\textwidth]{zad6_cobweb.png}
+\caption{Iteracja graficzna dla przypadków 1--7 (pierwsze 30 iteracji). Kropki to punkty stałe.}
 \label{fig:cobweb}
 \end{figure}
 
 \subsection*{Interpretacja wyników}
 \begin{itemize}
-    \item Dla $c = -2$ punktami stałymi są $2$ i $-1$. Oba są odpychające ($|f'(2)| = 4$, $|f'(-1)| = 2$), ale w przypadkach 1 i 2 wszystkie obliczenia są dokładne, więc ciąg trafia w punkt stały i już w nim zostaje.
-    \item W przypadku 3 odległość od $2$ wynosi początkowo $10^{-14}$ i rośnie około 4 razy w każdym kroku. Dla $n = 20$ mamy $x_n = 1.989$, dla $n = 22$ już $1.827$, a dalej ciąg zachowuje się chaotycznie w przedziale $[-2, 2]$.
-    \item Takie zachowanie wynika z samego odwzorowania, bo w \texttt{BigFloat} z tym samym $x_0$ ciąg przebiega tak samo (różnica $1.9 \cdot 10^{-7}$ dla $n = 30$ i $3.9 \cdot 10^{-4}$ dla $n = 40$). Błędy zaokrągleń też rosną, ale przez 40 iteracji nie zmieniają jeszcze przebiegu ciągu.
-    \item Dla $c = -1$ punkty stałe $(1 \pm \sqrt{5})/2$ są odpychające ($|f'| \approx 3.24$ i $1.24$), ale istnieje cykl $0 \to -1 \to 0$, który silnie przyciąga, ponieważ $f'(0) f'(-1) = 0$. Do tego cyklu dochodzą ciągi ze wszystkich przypadków od 4 do 7.
-    \item W przypadku 5 ciąg od początku leży w cyklu, a w przypadku 4 wchodzi do niego po jednym kroku. W przypadkach 6 i 7 ciąg liczony dokładnie tylko zbliża się do cyklu, natomiast w \texttt{Float64} osiąga $-1$ dokładnie (odpowiednio dla $n = 16$ i $n = 11$), ponieważ odległość od $0$ jest wtedy tak mała, że $x_n^2 - 1$ zaokrągla się do $-1$.
+    \item Ciąg ma postać $x_{n+1} = \Phi(x_n)$, gdzie $\Phi(x) = x^2 + c$ i $\Phi'(x) = 2x$. W otoczeniu punktu stałego $\alpha$ błąd $e_n = x_n - \alpha$ spełnia $e_{n+1} \approx \Phi'(\alpha) e_n$, więc dla $|\Phi'(\alpha)| > 1$ ciąg nie jest zbieżny do $\alpha$, chyba że trafi w niego dokładnie.
+    \item Dla $c = -2$ punktami stałymi są $2$ i $-1$, a $|\Phi'(2)| = 4$ i $|\Phi'(-1)| = 2$. W przypadkach 1 i 2 wszystkie obliczenia są dokładne, więc ciąg trafia w punkt stały i w nim zostaje.
+    \item W przypadku 3 $e_0 \approx -10^{-14}$ i $e_{n+1} \approx 4 e_n$, więc $|e_{20}| \approx 4^{20} \cdot 10^{-14} \approx 0.011$. Zgadza się to z wynikiem $x_{20} = 1.989$. Dla $n = 22$ mamy już $1.827$, a dalej ciąg przyjmuje nieregularne wartości z przedziału $[-2, 2]$.
+    \item Ciąg oddala się od $2$ z powodu $|\Phi'(2)| > 1$, a nie przez błędy zaokrągleń. W \texttt{BigFloat} z tym samym $x_0$ przebiega tak samo (różnica $1.9 \cdot 10^{-7}$ dla $n = 30$ i $3.9 \cdot 10^{-4}$ dla $n = 40$). Błędy zaokrągleń też rosną, ale przez 40 iteracji nie zmieniają jeszcze przebiegu ciągu.
+    \item Dla $c = -1$ punktami stałymi są $(1 \pm \sqrt{5})/2$, a $|\Phi'|$ wynosi w nich około $3.24$ i $1.24$, więc ciągi nie są do nich zbieżne. W przypadkach 4--7 ciąg przyjmuje na przemian wartości bliskie $0$ i $-1$. Są to punkty stałe funkcji $\Psi(x) = \Phi(\Phi(x)) = x^4 - 2x^2$, która daje co drugi wyraz ciągu. Ponieważ $\Psi'(0) = \Psi'(-1) = 0$, a $\Psi''(0) = -4$ i $\Psi''(-1) = 8$, iteracja $\Psi$ jest w ich otoczeniu zbieżna kwadratowo.
+    \item W przypadku 5 $x_0 = -1$, a w przypadku 4 $x_1 = 0$, więc oba ciągi od razu przyjmują dokładnie wartości $0$ i $-1$. W przypadkach 6 i 7 wyrazy ciągu w arytmetyce dokładnej są ułamkami o mianownikach będących potęgami 2, więc nigdy nie są równe $0$ ani $-1$. W \texttt{Float64} odległość od $0$ przy zbieżności kwadratowej szybko staje się tak mała, że $x_n^2 - 1$ zaokrągla się do $-1$. Dzieje się tak dla $n = 16$ i $n = 11$, a dalej ciąg przyjmuje dokładnie wartości $0$ i $-1$.
 \end{itemize}
 
 \end{document}

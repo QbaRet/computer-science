@@ -1,9 +1,8 @@
 # Autor: Jakub Retmańczyk
-# Lista 2, zadanie 6: x_{n+1} = x_n^2 + c w Float64, 40 iteracji
+# Lista 2, zadanie 6
 using Printf
 
-# iteruj(x0, c, n, T): zwraca x_0..x_n dla x_{k+1} = x_k^2 + c w arytmetyce T
-#   x0 - wartość początkowa; c - stała; n - liczba iteracji; T - typ (domyślnie Float64)
+# iteruj(x0, c, n, T): x_0..x_n w arytmetyce T
 function iteruj(x0, c, n, T = Float64)
     x = Vector{T}(undef, n + 1)
     x[1] = x0
@@ -23,12 +22,10 @@ for (i, (c, x0)) in enumerate(przyp)
     println("   n=36..40: ", join((@sprintf("%.6g", v) for v in x[37:41]), ", "))
 end
 
-# wykaz iteracji dla 3 przypadku: rozbieganie od punktu stałego 2
 x = iteruj(1.99999999999999, -2.0, 40)
 println("\nprzypadek 3, kolejne n:")
 for n in 0:2:40; @printf("n=%2d  %.10g\n", n, x[n+1]); end
 
-# przypadek 3 w BigFloat z tym samym x0: czy to, co widać, to zaokrąglenia?
 setprecision(BigFloat, 512)
 xb = iteruj(BigFloat(1.99999999999999), BigFloat(-2), 40, BigFloat)
 println("\nprzypadek 3, Float64 vs BigFloat:")
@@ -36,16 +33,13 @@ for n in (20, 30, 40)
     @printf("n=%2d  Float64 %.6f  BigFloat %.6f  różnica %.1e\n", n, x[n+1], Float64(xb[n+1]), Float64(abs(x[n+1] - xb[n+1])))
 end
 
-# przypadki 6 i 7: kiedy Float64 trafia dokładnie w cykl {0, -1}
 for x0 in (0.75, 0.25)
     n = findfirst(v -> v == 0.0 || v == -1.0, iteruj(x0, -1.0, 40)) - 1
     println("x0=", x0, ": pierwsza wartość dokładnie w {0,-1} dla n=", n)
 end
 
-# iteracja graficzna (pajęczyna) -> zad6_cobweb.png
-# Wymaga: import Pkg; Pkg.add("Plots")
 using Plots
-# cobweb(x0, c, n): zwraca ścieżkę punktów iteracji graficznej
+# cobweb(x0, c, n): punkty iteracji graficznej
 function cobweb(x0, c, n)
     xs = [x0]; ys = [0.0]; x = x0
     for _ in 1:n
@@ -56,12 +50,11 @@ function cobweb(x0, c, n)
     end
     return xs, ys
 end
-# punkty stałe x = x^2 + c, czyli x = (1 ± sqrt(1 - 4c)) / 2
+# punkty_stale(c): rozwiązania x = x^2 + c
 punkty_stale(c) = [(1 - sqrt(1 - 4c)) / 2, (1 + sqrt(1 - 4c)) / 2]
 
-wybrane = [2, 3, 6, 7]   # przypadki na rysunku; 1, 4 i 5 widać w tabeli
 plots = []
-for i in wybrane
+for i in eachindex(przyp)
     c, x0 = przyp[i]
     t = range(-2.2, 2.2, length = 400)
     p = plot(t, t .^ 2 .+ c, label = "x² + c", color = :steelblue, lw = 1.5,
@@ -75,9 +68,9 @@ for i in wybrane
     scatter!(p, ps, ps, label = "punkty stałe", color = :black, ms = 4)
     push!(plots, p)
 end
-savefig(plot(plots..., layout = (2, 2), size = (800, 800)), joinpath(@__DIR__, "zad6_cobweb.png"))
+push!(plots, plot(framestyle = :none))
+savefig(plot(plots..., layout = (2, 4), size = (1400, 720)), joinpath(@__DIR__, "zad6_cobweb.png"))
 
-# przebieg ciągu x_n w zależności od n -> zad6_przebieg.png
 ns = 0:40   # numery iteracji
 p23 = plot(ns, iteruj(2.0, -2.0, 40), label = "przypadek 2", color = :black, ls = :dash, lw = 1.5,
            title = "przypadki 2 i 3: c = -2", titlefontsize = 10, xlabel = "n", ylabel = "xₙ", ylims = (-2.2, 2.2),

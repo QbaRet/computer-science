@@ -1,9 +1,8 @@
 # Autor: Jakub Retmańczyk
-# Lista 2, zadanie 4: wielomian Wilkinsona
-# Wymaga: import Pkg; Pkg.add("Polynomials")
+# Lista 2, zadanie 4
 using Polynomials, Printf
 
-# współczynniki P od x^20 do x^0 (z listy / wielomian.txt)
+# współczynniki P od x^20 do x^0
 coef_desc = BigInt[1, -210, 20615, -1256850, 53327946, -1672280820, 40171771630,
     -756111184500, 11310276995381, -135585182899530, 1307535010540395,
     -10142299865511450, 63030812099294896, -311333643161390640,
@@ -14,10 +13,9 @@ coef_desc = BigInt[1, -210, 20615, -1256850, 53327946, -1672280820, 40171771630,
 # p(x) = (x-1)...(x-20) w postaci iloczynowej
 p_prod(x) = prod(x - k for k in 1:20)
 
-# eksperyment(c, tytul): liczy pierwiastki P i wypisuje |P(z)|, |p(z)|, |z-k|
-#   c - współczynniki (Float64) od najwyższej potęgi; tytul - opis
+# eksperyment(c, tytul): pierwiastki P o współczynnikach c (od x^20) i ich błędy
 function eksperyment(c, tytul)
-    P = Polynomial(reverse(c))   # Polynomials: rosnące potęgi
+    P = Polynomial(reverse(c))
     z = roots(P)
     z = z[sortperm(real.(z))]
     println("== ", tytul, " ==")
@@ -33,16 +31,14 @@ end
 c1 = Float64.(coef_desc)
 z1 = eksperyment(c1, "(a) współczynniki oryginalne")
 c2 = copy(c1)
-c2[2] = -210.0 - 2.0^-23        # (b) zaburzenie współczynnika przy x^19
+c2[2] = -210.0 - 2.0^-23
 eksperyment(c2, "(b) -210 -> -210-2^-23")
 
-# Kontrola w BigFloat dla (a): co wynika z samego zaokrąglenia współczynników,
-# a co z obliczeń w roots
 setprecision(BigFloat, 512)
 
-# horner(c, x): wartość wielomianu o współczynnikach c (od najwyższej potęgi) w punkcie x
+# horner(c, x): P(x) dla współczynników c (od najwyższej potęgi)
 horner(c, x) = foldl((s, a) -> s * x + a, c; init = zero(x))
-# pochodna(c, x): wartość pochodnej tego wielomianu w punkcie x
+# pochodna(c, x): P'(x)
 function pochodna(c, x)
     n = length(c) - 1
     return foldl((s, i) -> s * x + c[i] * (n - i + 1), 1:n; init = zero(x))
@@ -51,13 +47,13 @@ end
 bledy = [abs(BigInt(c1[i]) - coef_desc[i]) for i in 1:21]   # błędy zapisu współczynników
 println("\nBłędy zapisu współczynników w Float64: ", filter(>(0), bledy))
 
-c_fl = BigFloat.(c1)        # współczynniki po zaokrągleniu, dalej liczone dokładnie
+c_fl = BigFloat.(c1)  # współczynniki zaokrąglone do Float64
 c_ex = BigFloat.(coef_desc) # współczynniki dokładne
 @printf("%3s %10s %10s %12s %14s\n", "k", "|z-k|", "|r-k|", "|P(z)| dokł.", "|p'(k)|*|z-k|")
 for k in 1:20
-    r = BigFloat(k)         # r - dokładny pierwiastek wielomianu z zaokrąglonymi współczynnikami
+    r = BigFloat(k)  # pierwiastek P z zaokrąglonymi współczynnikami
     for _ in 1:100
-        r -= horner(c_fl, r) / pochodna(c_fl, r)   # metoda Newtona startująca z k
+        r -= horner(c_fl, r) / pochodna(c_fl, r)
     end
     zk = real(z1[k])
     dp = abs(prod(BigFloat(k - j) for j in 1:20 if j != k))   # |p'(k)|
