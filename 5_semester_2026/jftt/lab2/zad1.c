@@ -322,8 +322,6 @@ void yyfree ( void *  );
 	}
 #define YY_AT_BOL() (YY_CURRENT_BUFFER_LVALUE->yy_at_bol)
 
-/* Begin user sect3 */
-
 #define yywrap() (/*CONSTCOND*/1)
 #define YY_SKIP_YYWRAP
 typedef flex_uint8_t YY_CHAR;
@@ -355,8 +353,8 @@ static void yynoreturn yy_fatal_error ( const char* msg  );
 	(yy_hold_char) = *yy_cp; \
 	*yy_cp = '\0'; \
 	(yy_c_buf_p) = yy_cp;
-#define YY_NUM_RULES 7
-#define YY_END_OF_BUFFER 8
+#define YY_NUM_RULES 6
+#define YY_END_OF_BUFFER 7
 /* This struct is not used in this scanner,
    but its presence is necessary. */
 struct yy_trans_info
@@ -366,14 +364,14 @@ struct yy_trans_info
 	};
 static const flex_int16_t yy_accept[15] =
     {   0,
-        0,    0,    8,    6,    4,    5,    2,    1,    6,    4,
+        0,    0,    7,    5,    4,    3,    2,    1,    5,    4,
         3,    2,    1,    0
     } ;
 
 static const YY_CHAR yy_ec[256] =
     {   0,
         1,    1,    1,    1,    1,    1,    1,    1,    2,    3,
-        2,    2,    2,    1,    1,    1,    1,    1,    1,    1,
+        1,    1,    1,    1,    1,    1,    1,    1,    1,    1,
         1,    1,    1,    1,    1,    1,    1,    1,    1,    1,
         1,    2,    1,    1,    1,    1,    1,    1,    1,    1,
         1,    1,    1,    1,    1,    1,    1,    1,    1,    1,
@@ -446,14 +444,12 @@ int yy_flex_debug = 0;
 #define YY_RESTORE_YY_MORE_OFFSET
 char *yytext;
 #line 1 "zad1.l"
-/* Zadanie 1: normalizacja bialych znakow + liczba linii i slow */
-#line 4 "zad1.l"
-#include <stdio.h>
+#line 3 "zad1.l"
 int lines = 0, words = 0;
-int need_nl = 0;          /* ostatnia linia nie konczyla sie '\n' */
-int space = 0;            /* zalegla spacja do wypisania przed slowem */
-#line 455 "zad1.c"
-#line 456 "zad1.c"
+int space = 0;  /* czy przed następnym słowem wstawić spację */
+int open = 0;   /* czy ostatnia linia nie ma jeszcze entera */
+#line 451 "zad1.c"
+#line 452 "zad1.c"
 
 #define INITIAL 0
 
@@ -673,9 +669,9 @@ YY_DECL
 		}
 
 	{
-#line 10 "zad1.l"
+#line 7 "zad1.l"
 
-#line 678 "zad1.c"
+#line 674 "zad1.c"
 
 	while ( /*CONSTCOND*/1 )		/* loops until end-of-file is reached */
 		{
@@ -736,44 +732,44 @@ do_action:	/* This label is used only to access EOF actions. */
 case 1:
 /* rule 1 can match eol */
 YY_RULE_SETUP
-#line 11 "zad1.l"
-;                                    /* pusta linia      */
+#line 8 "zad1.l"
+;
 	YY_BREAK
 case 2:
 YY_RULE_SETUP
-#line 12 "zad1.l"
-;                                    /* poczatek wiersza */
+#line 9 "zad1.l"
+;
 	YY_BREAK
 case 3:
 /* rule 3 can match eol */
 YY_RULE_SETUP
-#line 13 "zad1.l"
-{ putchar('\n'); lines++; need_nl = space = 0; } /* koniec wiersza */
+#line 10 "zad1.l"
+{ putchar('\n'); lines++; open = 0; }
 	YY_BREAK
 case 4:
 YY_RULE_SETUP
-#line 14 "zad1.l"
-{ space = 1; }                       /* ciag -> 1 spacja */
+#line 11 "zad1.l"
+space = 1;
 	YY_BREAK
 case 5:
-/* rule 5 can match eol */
 YY_RULE_SETUP
-#line 15 "zad1.l"
-{ putchar('\n'); lines++; need_nl = space = 0; }
+#line 12 "zad1.l"
+{ if (space) putchar(' '); space = 0; ECHO; words++; open = 1; }
+	YY_BREAK
+case YY_STATE_EOF(INITIAL):
+#line 13 "zad1.l"
+{
+                    if (open) { putchar('\n'); lines++; }
+                    printf("linie: %d\nslowa: %d\n", lines, words);
+                    yyterminate();
+                }
 	YY_BREAK
 case 6:
 YY_RULE_SETUP
-#line 16 "zad1.l"
-{ if (space) putchar(' '); space = 0; ECHO; words++; need_nl = 1; }
-	YY_BREAK
-case 7:
-YY_RULE_SETUP
-#line 17 "zad1.l"
+#line 18 "zad1.l"
 ECHO;
 	YY_BREAK
-#line 774 "zad1.c"
-case YY_STATE_EOF(INITIAL):
-	yyterminate();
+#line 772 "zad1.c"
 
 	case YY_END_OF_BUFFER:
 		{
@@ -1779,13 +1775,14 @@ void yyfree (void * ptr )
 
 #define YYTABLES_NAME "yytables"
 
-#line 17 "zad1.l"
+int main (void);
 
-int main(int argc, char **argv) {
-    if (argc > 1 && !(yyin = fopen(argv[1], "r"))) { perror(argv[1]); return 1; }
-    yylex();
-    if (need_nl) { putchar('\n'); lines++; }
-    printf("linie: %d\nslowa: %d\n", lines, words);
-    return 0;
+int main ()
+{
+
+	yylex();
+
+	return 0;
 }
 
+#line 18 "zad1.l"

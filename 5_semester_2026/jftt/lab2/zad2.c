@@ -322,8 +322,6 @@ void yyfree ( void *  );
 	}
 #define YY_AT_BOL() (YY_CURRENT_BUFFER_LVALUE->yy_at_bol)
 
-/* Begin user sect3 */
-
 #define yywrap() (/*CONSTCOND*/1)
 #define YY_SKIP_YYWRAP
 typedef flex_uint8_t YY_CHAR;
@@ -452,8 +450,7 @@ int yy_flex_debug = 0;
 #define YY_RESTORE_YY_MORE_OFFSET
 char *yytext;
 #line 1 "zad2.l"
-/* Zadanie 2: usuwanie komentarzy z plikow Ady (-- do konca linii) */
-#line 456 "zad2.c"
+#line 453 "zad2.c"
 
 #define INITIAL 0
 
@@ -670,9 +667,9 @@ YY_DECL
 		}
 
 	{
-#line 3 "zad2.l"
+#line 2 "zad2.l"
 
-#line 675 "zad2.c"
+#line 672 "zad2.c"
 
 	while ( /*CONSTCOND*/1 )		/* loops until end-of-file is reached */
 		{
@@ -731,25 +728,25 @@ do_action:	/* This label is used only to access EOF actions. */
 
 case 1:
 YY_RULE_SETUP
-#line 4 "zad2.l"
-ECHO;   /* literal napisowy, "" = cudzyslow w srodku */
+#line 3 "zad2.l"
+ECHO;
 	YY_BREAK
 case 2:
 YY_RULE_SETUP
-#line 5 "zad2.l"
-ECHO;   /* literal znakowy, np. '-' lub '"'          */
+#line 4 "zad2.l"
+ECHO;
 	YY_BREAK
 case 3:
 YY_RULE_SETUP
-#line 6 "zad2.l"
-;       /* komentarz (wraz ze spacjami przed nim)    */
+#line 5 "zad2.l"
+;
 	YY_BREAK
 case 4:
 YY_RULE_SETUP
-#line 7 "zad2.l"
+#line 6 "zad2.l"
 ECHO;
 	YY_BREAK
-#line 752 "zad2.c"
+#line 749 "zad2.c"
 case YY_STATE_EOF(INITIAL):
 	yyterminate();
 
@@ -1754,11 +1751,14 @@ void yyfree (void * ptr )
 
 #define YYTABLES_NAME "yytables"
 
-#line 7 "zad2.l"
+int main (void);
 
-int main(int argc, char **argv) {
-    if (argc > 1 && !(yyin = fopen(argv[1], "r"))) { perror(argv[1]); return 1; }
-    yylex();
-    return 0;
+int main ()
+{
+
+	yylex();
+
+	return 0;
 }
 
+#line 6 "zad2.l"

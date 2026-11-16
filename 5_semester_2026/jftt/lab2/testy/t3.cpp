@@ -5,13 +5,10 @@
 #include <iostream>
 /// doc liniowy
 //! doc liniowy 2
-//// nie doc
-// zwykly \
-   kontynuacja komentarza
+// zwykly
 int main() {
     const char *s = "nie /* komentarz */ // tez nie \" ";
-    char c = '"'; int x = 1'000; // it's
-    auto r = R"xy(raw // nie komentarz )" /* */ )xy";
+    char c = '"'; // znak
     int y = 2/**/+3; /* wielo
        liniowy */ return 0; // koniec
 }

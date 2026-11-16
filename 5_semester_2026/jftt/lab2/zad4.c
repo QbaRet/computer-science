@@ -450,21 +450,16 @@ int yy_flex_debug = 0;
 #define YY_RESTORE_YY_MORE_OFFSET
 char *yytext;
 #line 1 "zad4.l"
-/* Zadanie 4: kalkulator w odwrotnej notacji polskiej */
-#line 4 "zad4.l"
-#include <stdio.h>
-#include <stdlib.h>
-#include <errno.h>
+#line 3 "zad4.l"
 #include <limits.h>
-#define MAX 1024
-long stack[MAX]; int top = 0;
-void push(long x);
+int stack[1000], top = 0;
+void number(char *text);
 void calc(char op);
-void error(const char *msg);
+void error(char *msg);
 void end_line(void);
-#line 465 "zad4.c"
+#line 460 "zad4.c"
 
-#line 467 "zad4.c"
+#line 462 "zad4.c"
 
 #define INITIAL 0
 #define ERR 1
@@ -682,9 +677,9 @@ YY_DECL
 		}
 
 	{
-#line 16 "zad4.l"
+#line 11 "zad4.l"
 
-#line 687 "zad4.c"
+#line 682 "zad4.c"
 
 	while ( /*CONSTCOND*/1 )		/* loops until end-of-file is reached */
 		{
@@ -743,53 +738,52 @@ do_action:	/* This label is used only to access EOF actions. */
 
 case 1:
 YY_RULE_SETUP
-#line 17 "zad4.l"
-{ errno = 0; long x = strtol(yytext, NULL, 10);
-                    if (errno) error("liczba poza zakresem"); else push(x); }
+#line 12 "zad4.l"
+number(yytext);
 	YY_BREAK
 case 2:
 YY_RULE_SETUP
-#line 19 "zad4.l"
+#line 13 "zad4.l"
 calc(yytext[0]);
 	YY_BREAK
 case 3:
 YY_RULE_SETUP
-#line 20 "zad4.l"
+#line 14 "zad4.l"
 ;
 	YY_BREAK
 case 4:
 /* rule 4 can match eol */
 YY_RULE_SETUP
-#line 21 "zad4.l"
+#line 15 "zad4.l"
 end_line();
 	YY_BREAK
 case 5:
 YY_RULE_SETUP
-#line 22 "zad4.l"
+#line 16 "zad4.l"
 { printf("Błąd: zły symbol \"%s\"\n", yytext); top = 0; BEGIN(ERR); }
 	YY_BREAK
 case 6:
 YY_RULE_SETUP
-#line 23 "zad4.l"
-;                      /* pomin reszte blednej linii */
+#line 17 "zad4.l"
+;
 	YY_BREAK
 case 7:
 /* rule 7 can match eol */
 YY_RULE_SETUP
-#line 24 "zad4.l"
+#line 18 "zad4.l"
 BEGIN(INITIAL);
 	YY_BREAK
 case YY_STATE_EOF(INITIAL):
 case YY_STATE_EOF(ERR):
-#line 25 "zad4.l"
-{ end_line(); yyterminate(); }  /* ostatnia linia bez entera */
+#line 19 "zad4.l"
+{ end_line(); yyterminate(); }
 	YY_BREAK
 case 8:
 YY_RULE_SETUP
-#line 26 "zad4.l"
+#line 20 "zad4.l"
 ECHO;
 	YY_BREAK
-#line 792 "zad4.c"
+#line 786 "zad4.c"
 
 	case YY_END_OF_BUFFER:
 		{
@@ -1792,49 +1786,57 @@ void yyfree (void * ptr )
 
 #define YYTABLES_NAME "yytables"
 
-#line 26 "zad4.l"
+int main (void);
 
-void error(const char *msg) {            /* blad: zadnych wynikow, pomin linie */
+int main ()
+{
+
+	yylex();
+
+	return 0;
+}
+
+#line 20 "zad4.l"
+
+int out_of_range(long long x) {
+    return x < INT_MIN || x > INT_MAX;
+}
+
+void error(char *msg) {
     printf("Błąd: %s\n", msg);
     top = 0;
     BEGIN(ERR);
 }
 
-void push(long x) {
-    if (top == MAX) error("przepełnienie stosu");
+void number(char *text) {
+    long long x = atoll(text);
+    if (out_of_range(x)) error("liczba poza zakresem");
     else stack[top++] = x;
 }
 
 void calc(char op) {
     if (top < 2) { error("za mała liczba argumentów"); return; }
-    long b = stack[--top], a = stack[--top], r = 1;
-    int ovf = 0;
+    long long b = stack[--top];
+    long long a = stack[--top];
+    if ((op == '/' || op == '%') && b == 0) { error("dzielenie przez zero"); return; }
+    if (op == '^' && b < 0) { error("ujemny wykładnik"); return; }
+
+    long long r = 1;
     switch (op) {
-      case '+': ovf = __builtin_add_overflow(a, b, &r); break;
-      case '-': ovf = __builtin_sub_overflow(a, b, &r); break;
-      case '*': ovf = __builtin_mul_overflow(a, b, &r); break;
-      case '/':
-      case '%': if (b == 0) { error("dzielenie przez zero"); return; }
-                if (a == LONG_MIN && b == -1) ovf = 1;
-                else r = (op == '/') ? a / b : a % b;
-                break;
-      case '^': if (b < 0) { error("ujemny wykładnik potęgi"); return; }
-                while (b > 0 && !ovf) {          /* szybkie potegowanie */
-                    if (b & 1) ovf = __builtin_mul_overflow(r, a, &r);
-                    b >>= 1;
-                    if (b) ovf |= __builtin_mul_overflow(a, a, &a);
-                }
-                break;
+        case '+': r = a + b; break;
+        case '-': r = a - b; break;
+        case '*': r = a * b; break;
+        case '/': r = a / b; break;
+        case '%': r = a % b; break;
+        case '^': while (b-- > 0 && !out_of_range(r)) r *= a; break;
     }
-    if (ovf) error("przekroczenie zakresu liczb");
-    else push(r);
+    if (out_of_range(r)) error("wynik poza zakresem");
+    else stack[top++] = r;
 }
 
 void end_line(void) {
-    if (top == 1)     printf("= %ld\n", stack[0]);
+    if (top == 1) printf("= %d\n", stack[0]);
     else if (top > 1) printf("Błąd: za mała liczba operatorów\n");
     top = 0;
 }
-
-int main(void) { yylex(); return 0; }
 
